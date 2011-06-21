@@ -1,6 +1,8 @@
 # coding: utf-8
 # Copyright (c) 2011 Aymeric Augustin. All rights reserved.
 
+import os
+
 from django.conf import settings
 from django.db import models
 
@@ -32,3 +34,7 @@ class Photo(models.Model):
 
     def get_absolute_url(self):
         raise NotImplementedError
+
+    @property
+    def abspath(self):
+        return os.path.join(settings.PHOTO_ROOT, self.album.dirpath, self.filename)
