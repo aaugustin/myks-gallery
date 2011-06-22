@@ -8,6 +8,7 @@ import stat
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseNotModified, Http404
 from django.utils.http import http_date
+from django.views.decorators.http import require_http_methods
 from django.views.static import was_modified_since
 
 from .models import Photo
@@ -74,18 +75,27 @@ def serve_private_media(request, path, prefix, headers=None):
     return response
 
 
+@require_http_methods(['GET', 'HEAD'])
 def show_gallery(request):
     raise NotImplementedError
 
+
+@require_http_methods(['GET', 'HEAD'])
 def show_album(request, album_id):
     raise NotImplementedError
 
+
+@require_http_methods(['GET', 'HEAD'])
 def show_photo(request, album_id, photo_id):
     raise NotImplementedError
 
+
+@require_http_methods(['GET', 'HEAD'])
 def resized_photo(request, photo_id, width, height):
     raise NotImplementedError
 
+
+@require_http_methods(['GET', 'HEAD'])
 def original_photo(request, photo_id):
     photo = Photo.objects.select_related().get(pk=int(photo_id))
     path = photo.abspath
