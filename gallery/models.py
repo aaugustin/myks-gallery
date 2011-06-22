@@ -4,6 +4,7 @@
 import os
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.db import models
 
 
@@ -17,7 +18,7 @@ class Album(models.Model):
         return self.name or self.dirpath
 
     def get_absolute_url(self):
-        raise NotImplementedError
+        return reverse('gallery-album', args=[self.pk])
 
 
 class Photo(models.Model):
@@ -33,7 +34,7 @@ class Photo(models.Model):
         return self.filename
 
     def get_absolute_url(self):
-        raise NotImplementedError
+        return reverse('gallery-photo', args=[self.album.pk, self.pk])
 
     @property
     def abspath(self):
