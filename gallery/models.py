@@ -5,7 +5,6 @@ import hashlib
 import os
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.db import models
 
 from .imgutil import make_thumbnail
@@ -22,8 +21,9 @@ class Album(models.Model):
     def __unicode__(self):
         return self.name or self.dirpath
 
+    @models.permalink
     def get_absolute_url(self):
-        return reverse('gallery-album', args=[self.pk])
+        return 'gallery-album', [self.pk]
 
 
 class Photo(models.Model):
@@ -39,8 +39,9 @@ class Photo(models.Model):
     def __unicode__(self):
         return self.filename
 
+    @models.permalink
     def get_absolute_url(self):
-        return reverse('gallery-photo', args=[self.album.pk, self.pk])
+        return 'gallery-photo', [self.album.pk, self.pk]
 
     def abspath(self):
         return os.path.join(settings.PHOTO_ROOT, self.album.dirpath, self.filename)
