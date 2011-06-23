@@ -49,10 +49,10 @@ class Photo(models.Model):
         hsh.update(str(size))
         return hsh.hexdigest() + ext
 
-    def thumbnail(self, size):
+    def thumbnail(self, preset):
         thumbpath = os.path.join(settings.PHOTO_CACHE, self.thumbname(size))
         if not os.path.exists(thumbpath):
-            make_thumbnail(self.abspath(), thumbpath, size, True)
+            make_thumbnail(self.abspath(), thumbpath, preset)
         return thumbpath
 
 

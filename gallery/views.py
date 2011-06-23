@@ -91,9 +91,9 @@ def show_photo(request, album_id, photo_id):
 
 
 @require_http_methods(['GET', 'HEAD'])
-def resized_photo(request, photo_id, width, height):
+def resized_photo(request, preset, photo_id):
     photo = Photo.objects.select_related().get(pk=int(photo_id))
-    path = photo.thumbnail((int(width), int(height)))
+    path = photo.thumbnail(preset)
     prefix = settings.PHOTO_SERVE_CACHE_PREFIX
     root, ext = os.path.splitext(photo.filename.encode('ascii', 'replace'))
     ascii_filename = '%s_%sx%s%s' % (root, width, height, ext)

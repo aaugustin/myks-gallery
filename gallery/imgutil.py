@@ -25,8 +25,10 @@ exif_rotations = (
 )
 
 
-def make_thumbnail(imagepath, thumbpath, size, crop=False):
-    image = Image.open(imagepath)
+def make_thumbnail(image_path, thumb_path, preset):
+    image = Image.open(image_path)
+    image_width, image_height = image.size
+    thumb_width, thumb_height, crop = settings.PHOTO_RESIZE_PRESETS[preset]
     # Auto-rotate JPEG files based on EXIF information
     if image.format == 'JPEG':
         try:
@@ -37,8 +39,6 @@ def make_thumbnail(imagepath, thumbpath, size, crop=False):
             pass
     # Pre-crop if requested and the aspect ratios don't match exactly
     if crop:
-        thumb_width, thumb_height = size
-        image_width, image_height = image.size
         if thumb_width * image_height > image_width * thumb_height:
             target_height = image_width * thumb_height // thumb_width
             top = (image_height - target_height) // 2
@@ -48,10 +48,10 @@ def make_thumbnail(imagepath, thumbpath, size, crop=False):
             left = (image_width - target_width) // 2
             image = image.crop((left, 0, left + target_width, image_height))
     # Save the thumbnail
-    image.thumbnail(size, Image.ANTIALIAS)
-    options = settings.PHOTO_SAVE_OPTIONS.get(image.format, {})
+    image.thumbnail((thumb_width, thumb_height), Image.ANTIALIAS)
+    options = settings.PHOTO_RESIZE_OPTIONS.get(image.format, {})
     try:
-        image.save(thumbpath, **options)
+        image.save(thumb_path, **options)
     except IOError:
-        os.unlink(thumbpath)
+        os.unlink(thumb_path)
         raise

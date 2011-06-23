@@ -8,5 +8,5 @@ urlpatterns = patterns('gallery.views',
     url(r'^([0-9]+)/$', 'show_album', name='gallery-album'),
     url(r'^([0-9]+)/([0-9]+)/$', 'show_photo', name='gallery-photo'),
     url(r'^original/([0-9]+)/$', 'original_photo'),
-    url(r'^resized/([0-9]+)/([0-9]+)/([0-9]+)/$', 'resized_photo'),
+    url(r'^(\w+)/([0-9]+)/$', 'resized_photo'),
 )
