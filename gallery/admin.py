@@ -23,4 +23,3 @@ class PhotoAdmin(admin.ModelAdmin):
     search_fields = ('album__name', 'filename')
 
 admin.site.register(Photo, PhotoAdmin)
-

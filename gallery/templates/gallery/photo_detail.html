@@ -12,4 +12,12 @@
 <img src="{% url 'gallery-photo-resized' 'standard' photo.pk %}">
 </a>
 {% endspaceless %}
+<br>
+{% if photo.get_previous_in_order %}
+<a href="{{ photo.get_previous_in_order.get_absolute_url }}">&lt;&lt;</a>
+{% endif %}
+<a href="{{ photo.album.get_absolute_url }}">^^</a>
+{% if photo.get_next_in_order %}
+<a href="{{ photo.get_next_in_order.get_absolute_url }}">&gt;&gt;</a>
+{% endif %}
 {% endblock %}

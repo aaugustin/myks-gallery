@@ -10,9 +10,8 @@ from django.db import models
 from .imgutil import make_thumbnail
 
 class Album(models.Model):
-    dirpath = models.CharField(max_length=200, unique=True,
-            verbose_name="directory path")
-    date = models.DateField(null=True, blank=True)
+    dirpath = models.CharField(max_length=200, unique=True, verbose_name="directory path")
+    date = models.DateField()
     name = models.CharField(max_length=100, blank=True)
 
     class Meta:
@@ -28,11 +27,11 @@ class Album(models.Model):
 
 class Photo(models.Model):
     album = models.ForeignKey(Album)
-    filename = models.CharField(max_length=100,
-        verbose_name="file name")
+    filename = models.CharField(max_length=100, verbose_name="file name")
     date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
+        order_with_respect_to = 'album'
         ordering = ('date', 'filename')
         unique_together = ('album', 'filename')
 
@@ -49,8 +48,8 @@ class Photo(models.Model):
     def thumbname(self, preset):
         ext = os.path.splitext(self.filename)[1]
         hsh = hashlib.sha1()
-        hsh.update(self.album.dirpath)
-        hsh.update(self.filename)
+        hsh.update(self.album.dirpath.encode('utf-8'))
+        hsh.update(self.filename.encode('utf-8'))
         hsh.update(str(settings.PHOTO_RESIZE_PRESETS[preset]))
         return hsh.hexdigest() + ext
 
@@ -59,6 +58,3 @@ class Photo(models.Model):
         if not os.path.exists(thumbpath):
             make_thumbnail(self.abspath(), thumbpath, preset)
         return thumbpath
-
-
-
