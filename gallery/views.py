@@ -92,13 +92,20 @@ def show_photo(request, album_id, photo_id):
 
 @require_http_methods(['GET', 'HEAD'])
 def resized_photo(request, photo_id, width, height):
-    raise NotImplementedError
-
+    photo = Photo.objects.select_related().get(pk=int(photo_id))
+    path = photo.thumbnail((int(width), int(height)))
+    prefix = settings.PHOTO_SERVE_CACHE_PREFIX
+    root, ext = os.path.splitext(photo.filename.encode('ascii', 'replace'))
+    ascii_filename = '%s_%sx%s%s' % (root, width, height, ext)
+    headers = {
+        'Content-Disposition': 'inline; filename=%s;' % ascii_filename,
+    }
+    return serve_private_media(request, path, prefix, headers=headers)
 
 @require_http_methods(['GET', 'HEAD'])
 def original_photo(request, photo_id):
     photo = Photo.objects.select_related().get(pk=int(photo_id))
-    path = photo.abspath
+    path = photo.abspath()
     prefix = settings.PHOTO_SERVE_PREFIX
     ascii_filename = photo.filename.encode('ascii', 'replace')
     headers = {
