@@ -8,10 +8,49 @@ import stat
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseNotModified, Http404
 from django.utils.http import http_date
-from django.views.decorators.http import require_http_methods
+from django.views.generic import DetailView, ListView
 from django.views.static import was_modified_since
 
-from .models import Photo
+from .models import Album, Photo
+
+
+class GalleryView(ListView):
+    model = Album
+    context_object_name = 'album_list'
+
+
+class AlbumView(DetailView):
+    model = Album
+    context_object_name = 'album'
+
+
+class PhotoView(DetailView):
+    model = Photo
+    context_object_name = 'photo'
+
+
+def resized_photo(request, preset, photo_id):
+    photo = Photo.objects.select_related().get(pk=int(photo_id))
+    path = photo.thumbnail(preset)
+    prefix = settings.PHOTO_SERVE_CACHE_PREFIX
+    root, ext = os.path.splitext(photo.filename.encode('ascii', 'replace'))
+    width, height, _ = settings.PHOTO_RESIZE_PRESETS[preset]
+    ascii_filename = '%s_%sx%s%s' % (root, width, height, ext)
+    headers = {
+        'Content-Disposition': 'inline; filename=%s;' % ascii_filename,
+    }
+    return serve_private_media(request, path, prefix, headers=headers)
+
+
+def original_photo(request, photo_id):
+    photo = Photo.objects.select_related().get(pk=int(photo_id))
+    path = photo.abspath()
+    prefix = settings.PHOTO_SERVE_PREFIX
+    ascii_filename = photo.filename.encode('ascii', 'replace')
+    headers = {
+        'Content-Disposition': 'attachement; filename=%s;' % ascii_filename,
+    }
+    return serve_private_media(request, path, prefix, headers=headers)
 
 
 def serve_private_media(request, path, prefix, headers=None):
@@ -73,42 +112,3 @@ def serve_private_media(request, path, prefix, headers=None):
             response[k] = v
 
     return response
-
-
-@require_http_methods(['GET', 'HEAD'])
-def show_gallery(request):
-    raise NotImplementedError
-
-
-@require_http_methods(['GET', 'HEAD'])
-def show_album(request, album_id):
-    raise NotImplementedError
-
-
-@require_http_methods(['GET', 'HEAD'])
-def show_photo(request, album_id, photo_id):
-    raise NotImplementedError
-
-
-@require_http_methods(['GET', 'HEAD'])
-def resized_photo(request, preset, photo_id):
-    photo = Photo.objects.select_related().get(pk=int(photo_id))
-    path = photo.thumbnail(preset)
-    prefix = settings.PHOTO_SERVE_CACHE_PREFIX
-    root, ext = os.path.splitext(photo.filename.encode('ascii', 'replace'))
-    ascii_filename = '%s_%sx%s%s' % (root, width, height, ext)
-    headers = {
-        'Content-Disposition': 'inline; filename=%s;' % ascii_filename,
-    }
-    return serve_private_media(request, path, prefix, headers=headers)
-
-@require_http_methods(['GET', 'HEAD'])
-def original_photo(request, photo_id):
-    photo = Photo.objects.select_related().get(pk=int(photo_id))
-    path = photo.abspath()
-    prefix = settings.PHOTO_SERVE_PREFIX
-    ascii_filename = photo.filename.encode('ascii', 'replace')
-    headers = {
-        'Content-Disposition': 'attachement; filename=%s;' % ascii_filename,
-    }
-    return serve_private_media(request, path, prefix, headers=headers)

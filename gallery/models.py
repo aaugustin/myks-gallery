@@ -16,6 +16,9 @@ class Album(models.Model):
     date = models.DateField(null=True, blank=True)
     name = models.CharField(max_length=100, blank=True)
 
+    class Meta:
+        ordering = ('-date', 'dirpath')
+
     def __unicode__(self):
         return self.name or self.dirpath
 
@@ -30,6 +33,7 @@ class Photo(models.Model):
     date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
+        ordering = ('date', 'filename')
         unique_together = ('album', 'filename')
 
     def __unicode__(self):
@@ -41,16 +45,16 @@ class Photo(models.Model):
     def abspath(self):
         return os.path.join(settings.PHOTO_ROOT, self.album.dirpath, self.filename)
 
-    def thumbname(self, size):
+    def thumbname(self, preset):
         ext = os.path.splitext(self.filename)[1]
         hsh = hashlib.sha1()
         hsh.update(self.album.dirpath)
         hsh.update(self.filename)
-        hsh.update(str(size))
+        hsh.update(str(settings.PHOTO_RESIZE_PRESETS[preset]))
         return hsh.hexdigest() + ext
 
     def thumbnail(self, preset):
-        thumbpath = os.path.join(settings.PHOTO_CACHE, self.thumbname(size))
+        thumbpath = os.path.join(settings.PHOTO_CACHE, self.thumbname(preset))
         if not os.path.exists(thumbpath):
             make_thumbnail(self.abspath(), thumbpath, preset)
         return thumbpath

@@ -27,8 +27,6 @@ exif_rotations = (
 
 def make_thumbnail(image_path, thumb_path, preset):
     image = Image.open(image_path)
-    image_width, image_height = image.size
-    thumb_width, thumb_height, crop = settings.PHOTO_RESIZE_PRESETS[preset]
     # Auto-rotate JPEG files based on EXIF information
     if image.format == 'JPEG':
         try:
@@ -38,6 +36,8 @@ def make_thumbnail(image_path, thumb_path, preset):
         except Exception, e:
             pass
     # Pre-crop if requested and the aspect ratios don't match exactly
+    image_width, image_height = image.size
+    thumb_width, thumb_height, crop = settings.PHOTO_RESIZE_PRESETS[preset]
     if crop:
         if thumb_width * image_height > image_width * thumb_height:
             target_height = image_width * thumb_height // thumb_width

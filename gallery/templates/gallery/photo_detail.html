@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+{% load url from future %}
+
+{% block title %}{{ block.super }} - {{ photo }}{% endblock %}
+
+{% block header %}{{ photo }}{% endblock %}
+
+{% block content %}
+{% spaceless %}
+<a href="{% url 'gallery-photo-original' photo.pk %}">
+<img src="{% url 'gallery-photo-resized' 'standard' photo.pk %}">
+</a>
+{% endspaceless %}
+{% endblock %}

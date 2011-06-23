@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+{% load url from future %}
+
+{% block title %}{{ block.super }} - {{ album }}{% endblock %}
+
+{% block header %}{{ album }}{% endblock %}
+
+{% block content %}
+{% spaceless %}
+{% for photo in album.photo_set.all %}
+<a href="{{ photo.get_absolute_url }}">
+<img src="{% url 'gallery-photo-resized' 'thumb' photo.pk %}">
+</a>
+{% endfor %}
+</ul>
+{% endspaceless %}
+{% endblock %}

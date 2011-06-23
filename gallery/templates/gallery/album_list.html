@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ block.super }} - Gallery{% endblock %}
+
+{% block header %}Gallery{% endblock %}
+
+{% block content %}
+{% spaceless %}
+<ul>
+{% for album in album_list %}
+<li><a href="{{ album.get_absolute_url }}">{{ album }}</a> ({{ album.date }})</li>
+{% endfor %}
+</ul>
+{% endspaceless %}
+{% endblock %}
