@@ -23,7 +23,7 @@
 
 <div class="photo_list">
 {% for photo in album.photo_set.all %}
-<a href="{{ photo.get_absolute_url }}"><img src="{% url 'gallery-photo-resized' 'thumb' photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
+<a href="{{ photo.get_absolute_url }}"><img src="{% url 'gallery-photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
 {% endfor %}
 </div>
 {% endblock %}

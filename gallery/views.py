@@ -36,8 +36,8 @@ class PhotoView(DetailView):
     context_object_name = 'photo'
 
 
-def resized_photo(request, preset, photo_id):
-    photo = Photo.objects.select_related().get(pk=int(photo_id))
+def resized_photo(request, preset, pk):
+    photo = Photo.objects.select_related().get(pk=int(pk))
     path = photo.thumbnail(preset)
     prefix = settings.PHOTO_SERVE_CACHE_PREFIX
     root, ext = os.path.splitext(photo.filename.encode('ascii', 'replace'))
@@ -49,8 +49,8 @@ def resized_photo(request, preset, photo_id):
     return serve_private_media(request, path, prefix, headers=headers)
 
 
-def original_photo(request, photo_id):
-    photo = Photo.objects.select_related().get(pk=int(photo_id))
+def original_photo(request, pk):
+    photo = Photo.objects.select_related().get(pk=int(pk))
     path = photo.abspath()
     prefix = settings.PHOTO_SERVE_PREFIX
     ascii_filename = photo.filename.encode('ascii', 'replace')

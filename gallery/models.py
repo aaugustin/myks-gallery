@@ -40,7 +40,7 @@ class Photo(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return 'gallery-photo', [self.album.pk, self.pk]
+        return 'gallery-photo', [self.pk]
 
     def abspath(self):
         return os.path.join(settings.PHOTO_ROOT, self.album.dirpath, self.filename)
