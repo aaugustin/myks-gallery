@@ -10,15 +10,21 @@ from django.db import models
 from .imgutil import make_thumbnail
 
 class Album(models.Model):
-    dirpath = models.CharField(max_length=200, unique=True, verbose_name="directory path")
+    category = models.CharField(max_length=100)
+    dirpath = models.CharField(max_length=200, verbose_name="directory path")
     date = models.DateField()
     name = models.CharField(max_length=100, blank=True)
 
     class Meta:
-        ordering = ('-date', 'dirpath')
+        ordering = ('-date', 'name', 'dirpath')
+        unique_together = ('dirpath', 'category')
 
     def __unicode__(self):
-        return self.name or self.dirpath
+        return self.dirpath
+
+    @property
+    def display_name(self):
+        return self.name or self.dirpath.replace(u'/', u' > ')
 
     @models.permalink
     def get_absolute_url(self):
@@ -39,7 +45,11 @@ class Photo(models.Model):
         unique_together = ('album', 'filename')
 
     def __unicode__(self):
-        return os.path.splitext(self.filename)[0]
+        return self.filename
+
+    @property
+    def display_name(self):
+        return self.date or os.path.splitext(self.filename)[0]
 
     @models.permalink
     def get_absolute_url(self):

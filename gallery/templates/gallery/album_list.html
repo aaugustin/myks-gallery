@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load static %}
 
 {% block extrahead %}
@@ -10,9 +11,13 @@
 {% block header %}{{ title }}{% endblock %}
 
 {% block content %}
-<ul>
-{% for album in album_list %}
-<li><a href="{{ album.get_absolute_url }}">{{ album }}</a> ({{ album.date }})</li>
-{% endfor %}
+<ul class="album_list">
+  {% for album in album_list %}
+  <li>
+    <a href="{{ album.get_absolute_url }}">{{ album.display_name }}</a>
+    <span class="album_date">{{ album.date }}</span>
+    <span class="album_category">{% trans album.category %}</span>
+  </li>
+  {% endfor %}
 </ul>
 {% endblock %}

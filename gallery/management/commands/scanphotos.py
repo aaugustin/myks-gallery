@@ -10,10 +10,12 @@ import os
 import re
 import sys
 import time
+import unicodedata
 
 from django.conf import settings
 from django.core.management import base
 from django.db import transaction
+from django.utils.timezone import get_default_timezone
 
 from ...models import Album, Photo
 
@@ -36,48 +38,56 @@ class Command(base.NoArgsCommand):
 
 
 ignores = [re.compile(pat) for pat in settings.PHOTO_IGNORES]
+
 def is_ignored(path):
     return any(pat.match(path) for pat in ignores)
 
 
 patterns = [(cat, re.compile(pat)) for cat, pat in settings.PHOTO_PATTERNS]
+
 def is_matched(path):
-    for _, pat in patterns:
-        match = pat.match(path)
+    for category, pattern in patterns:
+        match = pattern.match(path)
         if match:
-            return match.groupdict()
+            return category, match.groupdict()
+
+
+fs_encoding = sys.getfilesystemencoding()
+
+def normalize_fs_name(value):
+    """Return a normalized unicode version of a string from the filesystem."""
+    return unicodedata.normalize('NFKC', value.decode(fs_encoding))
 
 
 def iter_photo_root(verbosity=0):
+    """Yield relative path, category and regex captures for each photo."""
     for dirpath, _, filenames in os.walk(settings.PHOTO_ROOT):
+        dirpath = normalize_fs_name(dirpath)
         for filename in filenames:
+            filename = normalize_fs_name(filename)
             filepath = os.path.join(dirpath, filename)
             relpath = os.path.relpath(filepath, settings.PHOTO_ROOT)
             if is_ignored(relpath):
                 if verbosity >= 3:
                     print "-", relpath
                 continue
-            captures = is_matched(relpath)
-            if captures is not None:
+            result = is_matched(relpath)
+            if result is not None:
                 if verbosity >= 3:
                     print ">", relpath
-                yield relpath, captures
+                category, captures = result
+                yield relpath, category, captures
             else:
                 if verbosity >= 2:
                     print "?", relpath
 
 
-def scan_photo_root(verbosity=0):
-    albums = collections.defaultdict(lambda: {})
-    for path, captures in iter_photo_root(verbosity):
-        dirpath, filename = os.path.split(path)
-        dirpath = dirpath.decode(sys.getfilesystemencoding())
-        filename = filename.decode(sys.getfilesystemencoding())
-        albums[dirpath][filename] = captures
-    return albums
-
-
 def get_album_info(captures, verbosity):
+    """Return the date and name of an album.
+
+    `captures` are elements extracted from the file name of a random photo
+    in the album.
+    """
     date = None
     try:
         kwargs = dict((k, int(captures['a_' + k]))
@@ -88,19 +98,24 @@ def get_album_info(captures, verbosity):
     except ValueError, e:
         if verbosity >= 1:
             print e, kwargs
-    name = ''
-    try:
-        name = captures['a_name'].replace('/', ' > ')
-    except KeyError:
-        pass
+    name = ' '.join(v for k, v in sorted(captures.iteritems())
+                    if k.startswith('a_name') and v is not None)
+    name = name.replace(u'/', u' > ')
     return date, name
 
+
+tz = get_default_timezone()
+
 def get_photo_info(captures, verbosity):
+    """Return the datetime of a photo.
+
+    `captures` are elements extracted from the file name of the photo.
+    """
     date = None
     try:
         kwargs = dict((k, int(captures['p_' + k]))
                 for k in ('year', 'month', 'day', 'hour', 'minute', 'second'))
-        date = datetime.datetime(*kwargs)
+        date = datetime.datetime(tzinfo=tz, **kwargs)
     except KeyError:
         pass
     except ValueError, e:
@@ -109,32 +124,54 @@ def get_photo_info(captures, verbosity):
     return date
 
 
+def scan_photo_root(verbosity=0):
+    """Return a dictionary of albums, keyed by dirpath.
+
+    Each album is a dictionary of photos, keyed by filename.
+
+    The result can be passed to synchronize_albums and synchronize_photos.
+    """
+    albums = collections.defaultdict(lambda: {})
+    for path, category, captures in iter_photo_root(verbosity):
+        dirpath, filename = os.path.split(path)
+        albums[category, dirpath][filename] = captures
+    return albums
+
+
 def synchronize_albums(new_albums, verbosity=0):
-    new_dirpaths = set(new_albums.iterkeys())
-    old_dirpaths = set(a.dirpath for a in Album.objects.all())
-    for dirpath in sorted(new_dirpaths - old_dirpaths):
-        if verbosity >= 1:
-            print u"Adding album %s" % dirpath
-            random_capture = new_albums[dirpath].itervalues().next()
+    """Synchronize albums from the filesystem to the database.
+
+    `new_albums` is the result of `scan_photo_root`.
+    """
+    new_keys = set(new_albums.keys())
+    old_keys = set((a.category, a.dirpath) for a in Album.objects.all())
+    for category, dirpath in sorted(new_keys - old_keys):
+        random_capture = new_albums[category, dirpath].itervalues().next()
         date, name = get_album_info(random_capture, verbosity)
-        Album.objects.create(dirpath=dirpath, date=date, name=name)
-    for dirpath in sorted(old_dirpaths - new_dirpaths):
         if verbosity >= 1:
-            print u"Removing album %s" % dirpath
-        Album.objects.get(dirpath=dirpath).delete()
+            print u"Adding album %s (%s) as %s" % (dirpath, category, name)
+        Album.objects.create(category=category, dirpath=dirpath, date=date, name=name)
+    for category, dirpath in sorted(old_keys - new_keys):
+        if verbosity >= 1:
+            print u"Removing album %s (%s)" % (dirpath, category)
+        Album.objects.get(category=category, dirpath=dirpath).delete()
 
 
 def synchronize_photos(new_albums, verbosity=0):
-    for dirpath, filenames in new_albums.iteritems():
-        album = Album.objects.get(dirpath=dirpath)
-        new_filenames = set(filenames.iterkeys())
-        old_filenames = set(p.filename for p in album.photo_set.all())
-        for filename in sorted(new_filenames - old_filenames):
+    """Synchronize photos from the filesystem to the database.
+
+    `new_albums` is the result of `scan_photo_root`.
+    """
+    for (category, dirpath), filenames in new_albums.iteritems():
+        album = Album.objects.get(category=category, dirpath=dirpath)
+        new_keys = set(filenames.iterkeys())
+        old_keys = set(p.filename for p in album.photo_set.all())
+        for filename in sorted(new_keys - old_keys):
+            date = get_photo_info(new_albums[category, dirpath][filename], verbosity)
             if verbosity >= 2:
-                print u"Adding photo %s to album %s" % (filename, dirpath)
-                date = get_photo_info(new_albums[dirpath][filename], verbosity)
-                Photo.objects.create(album=album, filename=filename, date=date)
-        for filename in sorted(old_filenames - new_filenames):
+                print u"Adding photo %s to album %s (%s)" % (filename, dirpath, category)
+            Photo.objects.create(album=album, filename=filename, date=date)
+        for filename in sorted(old_keys - new_keys):
             if verbosity >= 2:
-                print u"Removing photo %s from album %s" % (filename, dirpath)
-                Photo.objects.get(album=album, filename=filename).delete()
+                print u"Removing photo %s from album %s (%s)" % (filename, dirpath, category)
+            Photo.objects.get(album=album, filename=filename).delete()

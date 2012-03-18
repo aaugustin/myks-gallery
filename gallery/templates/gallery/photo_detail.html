@@ -6,18 +6,18 @@
 <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/gallery.css">
 {% endblock %}
 
-{% block title %}{{ block.super }} - {{ photo.album }} - {{ photo }}{% endblock %}
+{% block title %}{{ block.super }} - {{ photo.album.display_name }} - {{ photo.display_name }}{% endblock %}
 
-{% block header %}{{ photo.album }} - {{ photo }}{% endblock %}
+{% block header %}{{ photo.album.display_name }} - {{ photo.display_name }}{% endblock %}
 
 {% block content %}
 <div class="photo_nav">
 {% with photo.get_previous_in_order as previous_photo %}{% if previous_photo %}
-<a href="{{ previous_photo.get_absolute_url }}" class="previous">&larr; {{ previous_photo }}{% if previous_photo.date %} - {{ previous_photo.date }}{% endif %}</a>
+<a href="{{ previous_photo.get_absolute_url }}" class="previous">&larr; {{ previous_photo.display_name }}</a>
 {% endif %}{% endwith %}
-<a href="{{ photo.album.get_absolute_url }}">&uarr; {{ photo.album }} &uarr;</a>
+<a href="{{ photo.album.get_absolute_url }}">&uarr; {{ photo.album.display_name }} &uarr;</a>
 {% with photo.get_next_in_order as next_photo %}{% if next_photo %}
-<a href="{{ next_photo.get_absolute_url }}" class="next">{% if next_photo.date %}{{ next_photo.date }} - {% endif %}{{ next_photo }} &rarr;</a>
+<a href="{{ next_photo.get_absolute_url }}" class="next">{{ next_photo.display_name }} &rarr;</a>
 {% endif %}{% endwith %}
 </div>
 

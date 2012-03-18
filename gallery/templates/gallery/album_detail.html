@@ -6,18 +6,24 @@
 <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/gallery.css">
 {% endblock %}
 
-{% block title %}{{ block.super }} - {{ album }}{% endblock %}
+{% block title %}{{ block.super }} - {{ album.display_name }} - {{ album.date }}{% endblock %}
 
-{% block header %}{{ album }}{% endblock %}
+{% block header %}{{ album.display_name }} - {{ album.date }}{% endblock %}
 
 {% block content %}
 <div class="photo_nav">
 {% with album.get_previous_by_date as previous_album %}{% if previous_album %}
-<a href="{{ previous_album.get_absolute_url }}" class="previous">&larr; {{ previous_album }} - {{ previous_album.date }}</a>
+<div class="previous">
+<a href="{{ previous_album.get_absolute_url }}">&larr; {{ previous_album.display_name }}</a>
+<span class="album_date">{{ previous_album.date }}</span>
+</div>
 {% endif %}{% endwith %}
 <a href="{% url 'gallery-root' %}">&uarr; {{ title }} &uarr;</a>
 {% with album.get_next_by_date as next_album %}{% if next_album %}
-<a href="{{ next_album.get_absolute_url }}" class="next">{{ next_album.date }} - {{ next_album }} &rarr;</a>
+<span class="next">
+<span class="album_date">{{ next_album.date }}</span>
+<a href="{{ next_album.get_absolute_url }}">{{ next_album.display_name }} &rarr;</a>
+</span>
 {% endif %}{% endwith %}
 </div>
 
