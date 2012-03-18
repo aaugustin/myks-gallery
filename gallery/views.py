@@ -76,7 +76,7 @@ def serve_private_media(request, path, prefix, headers=None):
     serve view. If ``DEBUG`` is ``False``, it will set a header and won't send
     the actual contents of the file.
 
-    The name of the header is defined by ``settings.MEDIA_HEADER``. Use
+    The name of the header is defined by ``settings.SENDFILE_HEADER``. Use
     ``X-Accel-Redirect`` for nginx and ``X-SendFile`` for apache.
 
     path must be an absolute path. Depending on your webserver's configuration,
@@ -104,7 +104,7 @@ def serve_private_media(request, path, prefix, headers=None):
     else:
         response = HttpResponse('', mimetype=mimetype)
         assert path.startswith(prefix)
-        response[settings.MEDIA_HEADER] = path[len(prefix):]
+        response[settings.SENDFILE_HEADER] = path[len(prefix):]
 
     # resume copy-paste from django.views.static.serve
     response["Last-Modified"] = http_date(statobj.st_mtime)
