@@ -1,5 +1,5 @@
 # coding: utf-8
-# Copyright (c) 2011 Aymeric Augustin. All rights reserved.
+# Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
 from __future__ import division
 
