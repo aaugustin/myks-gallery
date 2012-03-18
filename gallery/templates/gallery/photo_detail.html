@@ -2,22 +2,26 @@
 {% load static %}
 {% load url from future %}
 
-{% block title %}{{ block.super }} - {{ photo }}{% endblock %}
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/gallery.css">
+{% endblock %}
 
-{% block header %}{{ photo }}{% endblock %}
+{% block title %}{{ block.super }} - {{ photo.album }} - {{ photo }}{% endblock %}
+
+{% block header %}{{ photo.album }} - {{ photo }}{% endblock %}
 
 {% block content %}
-{% spaceless %}
-<a href="{% url 'gallery-photo-original' photo.pk %}">
-<img src="{% url 'gallery-photo-resized' 'standard' photo.pk %}">
-</a>
-{% endspaceless %}
-<br>
-{% if photo.get_previous_in_order %}
-<a href="{{ photo.get_previous_in_order.get_absolute_url }}">&lt;&lt;</a>
-{% endif %}
-<a href="{{ photo.album.get_absolute_url }}">^^</a>
-{% if photo.get_next_in_order %}
-<a href="{{ photo.get_next_in_order.get_absolute_url }}">&gt;&gt;</a>
-{% endif %}
+<div class="photo_nav">
+{% with photo.get_previous_in_order as previous_photo %}{% if previous_photo %}
+<a href="{{ previous_photo.get_absolute_url }}" class="previous">&larr; {{ previous_photo }}{% if previous_photo.date %} - {{ previous_photo.date }}{% endif %}</a>
+{% endif %}{% endwith %}
+<a href="{{ photo.album.get_absolute_url }}">&uarr; {{ photo.album }} &uarr;</a>
+{% with photo.get_next_in_order as next_photo %}{% if next_photo %}
+<a href="{{ next_photo.get_absolute_url }}" class="next">{% if next_photo.date %}{{ next_photo.date }} - {% endif %}{{ next_photo }} &rarr;</a>
+{% endif %}{% endwith %}
+</div>
+
+<div class="photo_detail">
+<a href="{% url 'gallery-photo-original' photo.pk %}"><img src="{% url 'gallery-photo-resized' 'standard' photo.pk %}"></a>
+</div>
 {% endblock %}

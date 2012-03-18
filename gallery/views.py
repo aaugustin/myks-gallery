@@ -14,12 +14,19 @@ from django.views.static import was_modified_since
 from .models import Album, Photo
 
 
-class GalleryView(ListView):
+class GalleryTitleMixin(object):
+    def get_context_data(self, **kwargs):
+        context = super(GalleryTitleMixin, self).get_context_data(**kwargs)
+        context['title'] = getattr(settings, 'PHOTO_TITLE', u"Gallery")
+        return context
+
+
+class GalleryView(GalleryTitleMixin, ListView):
     model = Album
     context_object_name = 'album_list'
 
 
-class AlbumView(DetailView):
+class AlbumView(GalleryTitleMixin, DetailView):
     model = Album
     context_object_name = 'album'
 

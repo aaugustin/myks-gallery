@@ -36,7 +36,7 @@ class Photo(models.Model):
         unique_together = ('album', 'filename')
 
     def __unicode__(self):
-        return self.filename
+        return os.path.splitext(self.filename)[0]
 
     @models.permalink
     def get_absolute_url(self):

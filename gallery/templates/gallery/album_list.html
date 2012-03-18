@@ -1,16 +1,18 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ block.super }} - Gallery{% endblock %}
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/gallery.css">
+{% endblock %}
 
-{% block header %}Gallery{% endblock %}
+{% block title %}{{ block.super }} - {{ title }}{% endblock %}
+
+{% block header %}{{ title }}{% endblock %}
 
 {% block content %}
-{% spaceless %}
 <ul>
 {% for album in album_list %}
 <li><a href="{{ album.get_absolute_url }}">{{ album }}</a> ({{ album.date }})</li>
 {% endfor %}
 </ul>
-{% endspaceless %}
 {% endblock %}

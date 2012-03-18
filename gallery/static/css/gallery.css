@@ -1,0 +1,36 @@
+.photo_detail {
+    text-align: center;
+}
+.photo_detail a img {
+    border: 1px solid #bbb;
+    padding: 7px;
+}
+.photo_list {
+    text-align: center;
+}
+.photo_list a {
+    display: inline-block;
+    height: 144px;
+    width: 144px;
+    margin-right: 0 4px 4px 0;
+}
+.photo_list a img {
+    border: 1px solid #bbb;
+    padding: 7px;
+}
+.photo_nav {
+    margin-bottom: 16px;
+    position: relative;
+    text-align: center;
+}
+.photo_nav a.previous, .photo_nav a.next {
+    display: block;
+    position: absolute;
+    top: 0;
+}
+.photo_nav a.previous {
+    left: 0;
+}
+.photo_nav a.next {
+    right: 0;
+}

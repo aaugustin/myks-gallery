@@ -2,24 +2,28 @@
 {% load static %}
 {% load url from future %}
 
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/gallery.css">
+{% endblock %}
+
 {% block title %}{{ block.super }} - {{ album }}{% endblock %}
 
 {% block header %}{{ album }}{% endblock %}
 
 {% block content %}
-{% spaceless %}
+<div class="photo_nav">
+{% with album.get_previous_by_date as previous_album %}{% if previous_album %}
+<a href="{{ previous_album.get_absolute_url }}" class="previous">&larr; {{ previous_album }} - {{ previous_album.date }}</a>
+{% endif %}{% endwith %}
+<a href="{% url 'gallery-root' %}">&uarr; {{ title }} &uarr;</a>
+{% with album.get_next_by_date as next_album %}{% if next_album %}
+<a href="{{ next_album.get_absolute_url }}" class="next">{{ next_album.date }} - {{ next_album }} &rarr;</a>
+{% endif %}{% endwith %}
+</div>
+
+<div class="photo_list">
 {% for photo in album.photo_set.all %}
-<a href="{{ photo.get_absolute_url }}">
-<img src="{% url 'gallery-photo-resized' 'thumb' photo.pk %}">
-</a>
+<a href="{{ photo.get_absolute_url }}"><img src="{% url 'gallery-photo-resized' 'thumb' photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
 {% endfor %}
-<br>
-{% if album.get_previous_by_date %}
-<a href="{{ album.get_previous_by_date.get_absolute_url }}">&lt;&lt;</a>
-{% endif %}
-<a href="{% url 'gallery-root' %}">^^</a>
-{% if album.get_next_by_date %}
-<a href="{{ album.get_next_by_date.get_absolute_url }}">&gt;&gt;</a>
-{% endif %}
-{% endspaceless %}
+</div>
 {% endblock %}
