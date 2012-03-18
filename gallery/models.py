@@ -33,6 +33,9 @@ class Photo(models.Model):
     class Meta:
         order_with_respect_to = 'album'
         ordering = ('date', 'filename')
+        permissions = (
+            ("view_photos", "Can see all photos"),
+        )
         unique_together = ('album', 'filename')
 
     def __unicode__(self):
