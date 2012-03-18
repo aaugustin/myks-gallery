@@ -1,9 +1,10 @@
 # coding: utf-8
-# Copyright (c) 2011 Aymeric Augustin. All rights reserved.
+# Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
 import mimetypes
 import os
 import stat
+import unicodedata
 
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseNotModified, Http404
@@ -39,28 +40,26 @@ class PhotoView(DetailView):
 def resized_photo(request, preset, pk):
     photo = Photo.objects.select_related().get(pk=int(pk))
     path = photo.thumbnail(preset)
-    prefix = settings.PHOTO_SERVE_CACHE_PREFIX
-    root, ext = os.path.splitext(photo.filename.encode('ascii', 'replace'))
+    response = serve_private_media(request, path)
+
+    root, ext = os.path.splitext(asciify(photo.filename))
     width, height, _ = settings.PHOTO_RESIZE_PRESETS[preset]
     ascii_filename = '%s_%sx%s%s' % (root, width, height, ext)
-    headers = {
-        'Content-Disposition': 'inline; filename=%s;' % ascii_filename,
-    }
-    return serve_private_media(request, path, prefix, headers=headers)
+    response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
+    return response
 
 
 def original_photo(request, pk):
     photo = Photo.objects.select_related().get(pk=int(pk))
     path = photo.abspath()
-    prefix = settings.PHOTO_SERVE_PREFIX
-    ascii_filename = photo.filename.encode('ascii', 'replace')
-    headers = {
-        'Content-Disposition': 'attachement; filename=%s;' % ascii_filename,
-    }
-    return serve_private_media(request, path, prefix, headers=headers)
+    response = serve_private_media(request, path)
+
+    ascii_filename = asciify(photo.filename)
+    response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
+    return response
 
 
-def serve_private_media(request, path, prefix, headers=None):
+def serve_private_media(request, path):
     """Serve a private media file.
 
     Here's an example of how to use this function. We want to serve the file
@@ -72,22 +71,23 @@ def serve_private_media(request, path, prefix, headers=None):
             path = Document.objects.get(pk=document_id).file.path
             return serve_private_media(request, path)
 
-    If ``DEBUG`` is ``True``, this function will behave like Django's static
-    serve view. If ``DEBUG`` is ``False``, it will set a header and won't send
-    the actual contents of the file.
+    If ``DEBUG`` is ``True``, this function behaves like Django's static serve
+    view. If ``DEBUG`` is ``False``, it sets a header and doesn't send the
+    actual contents of the file.
 
     The name of the header is defined by ``settings.SENDFILE_HEADER``. Use
-    ``X-Accel-Redirect`` for nginx and ``X-SendFile`` for apache.
+    ``'X-Accel-Redirect'`` for nginx and ``'X-SendFile'`` for Apache.
 
-    path must be an absolute path. Depending on your webserver's configuration,
-    the header should contain either a relative path or full path. Therefore,
-    prefix will be stripped from the beginning of path to create the header's
-    value. prefix should be ``settings.PHOTO_ROOT.rstrip('/')`` for nginx and
-    ``''`` for apache.
+    ``path`` must be an absolute path. Depending on your webserver's
+    configuration, the header should contain either a relative path or full
+    path. Therefore, ``settings.SENDFILE_ROOT`` will be stripped from the
+    beginning of the path to create the header's value. It must be the root of
+    the internal location under nginx. It may be XSendFilePath or empty for
+    Apache.
     """
     if not os.path.exists(path):
         # Don't reveal the file name on the filesystem.
-        raise Http404("Requested file does not exist.")
+        raise Http404("Requested file doesn't exist.")
 
     # begin copy-paste from django.views.static.serve
     statobj = os.stat(path)
@@ -103,8 +103,11 @@ def serve_private_media(request, path, prefix, headers=None):
             response = HttpResponse(f.read(), mimetype=mimetype)
     else:
         response = HttpResponse('', mimetype=mimetype)
-        assert path.startswith(prefix)
-        response[settings.SENDFILE_HEADER] = path[len(prefix):]
+        if settings.SENDFILE_ROOT:
+            if not path.startswith(settings.SENDFILE_ROOT):
+                raise ValueError("Requested file isn't under SENDFILE_ROOT.")
+            path = path[len(settings.SENDFILE_ROOT):]
+        response[settings.SENDFILE_HEADER] = path
 
     # resume copy-paste from django.views.static.serve
     response["Last-Modified"] = http_date(statobj.st_mtime)
@@ -114,8 +117,8 @@ def serve_private_media(request, path, prefix, headers=None):
         response["Content-Encoding"] = encoding
     # end copy-paste from django.views.static.serve
 
-    if headers:
-        for k, v in headers.iteritems():
-            response[k] = v
-
     return response
+
+
+def asciify(value):
+    return unicodedata.normalize('NFKD', unicode(value)).encode('ascii', 'ignore')
