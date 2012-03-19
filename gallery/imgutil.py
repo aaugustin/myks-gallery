@@ -3,6 +3,8 @@
 
 from __future__ import division
 
+import sys
+
 try:
     from PIL import Image
 except ImportError:
@@ -25,8 +27,10 @@ exif_rotations = (
 )
 
 
+fs_encoding = sys.getfilesystemencoding()
+
 def make_thumbnail(image_path, thumb_path, preset):
-    image = Image.open(image_path)
+    image = Image.open(image_path.encode(fs_encoding))
     # Auto-rotate JPEG files based on EXIF information
     if image.format == 'JPEG':
         try:
@@ -51,7 +55,7 @@ def make_thumbnail(image_path, thumb_path, preset):
     image.thumbnail((thumb_width, thumb_height), Image.ANTIALIAS)
     options = settings.PHOTO_RESIZE_OPTIONS.get(image.format, {})
     try:
-        image.save(thumb_path, **options)
+        image.save(thumb_path.encode(fs_encoding), **options)
     except IOError:
         os.unlink(thumb_path)
         raise

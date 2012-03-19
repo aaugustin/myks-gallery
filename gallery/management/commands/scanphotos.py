@@ -10,7 +10,6 @@ import os
 import re
 import sys
 import time
-import unicodedata
 
 from django.conf import settings
 from django.core.management import base
@@ -54,17 +53,12 @@ def is_matched(path):
 
 fs_encoding = sys.getfilesystemencoding()
 
-def normalize_fs_name(value):
-    """Return a normalized unicode version of a string from the filesystem."""
-    return unicodedata.normalize('NFKC', value.decode(fs_encoding))
-
-
 def iter_photo_root(verbosity=0):
     """Yield relative path, category and regex captures for each photo."""
     for dirpath, _, filenames in os.walk(settings.PHOTO_ROOT):
-        dirpath = normalize_fs_name(dirpath)
+        dirpath = dirpath.decode(fs_encoding)
         for filename in filenames:
-            filename = normalize_fs_name(filename)
+            filename = filename.decode(fs_encoding)
             filepath = os.path.join(dirpath, filename)
             relpath = os.path.relpath(filepath, settings.PHOTO_ROOT)
             if is_ignored(relpath):
