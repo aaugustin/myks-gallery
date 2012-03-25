@@ -5,9 +5,20 @@ import hashlib
 import os
 
 from django.conf import settings
+from django.contrib.auth.models import User, Group
 from django.db import models
 
 from .imgutil import make_thumbnail
+
+
+class AccessPolicy(models.Model):
+    public = models.BooleanField(verbose_name="is public")
+    groups = models.ManyToManyField(Group, blank=True, verbose_name="authorized groups")
+    users = models.ManyToManyField(User, blank=True, verbose_name="authorized users")
+
+    class Meta:
+        abstract = True
+
 
 class Album(models.Model):
     category = models.CharField(max_length=100)
@@ -29,6 +40,10 @@ class Album(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return 'gallery-album', [self.pk]
+
+
+class AlbumAccessPolicy(AccessPolicy):
+    album = models.OneToOneField(Album, related_name='access_policy')
 
 
 class Photo(models.Model):
@@ -71,3 +86,7 @@ class Photo(models.Model):
         if not os.path.exists(thumbpath):
             make_thumbnail(self.abspath(), thumbpath, preset)
         return thumbpath
+
+
+class PhotoAccessPolicy(AccessPolicy):
+    photo = models.OneToOneField(Photo, related_name='access_policy')
