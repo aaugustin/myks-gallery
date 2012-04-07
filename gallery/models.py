@@ -55,7 +55,8 @@ class Photo(models.Model):
         order_with_respect_to = 'album'
         ordering = ('date', 'filename')
         permissions = (
-            ("view_photos", "Can see all photos"),
+            ("view", "Can see all photos"),
+            ("scan", "Can scan the photos directory"),
         )
         unique_together = ('album', 'filename')
 

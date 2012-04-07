@@ -1,0 +1,24 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block object-tools-items %}
+    {% if perms.gallery.scan %}
+        <li>
+            <a href="{% url 'admin:gallery.admin.scan_photos' %}">{% trans 'Scan photos' %}</a>
+        </li>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}
+
+{% block object-tools %}
+    {% if has_add_permission %}
+        {{ block.super }}
+    {% elif perms.gallery.scan %}
+        <ul class="object-tools">
+            <li>
+                <a href="{% url 'admin:gallery.admin.scan_photos' %}">{% trans 'Scan photos' %}</a>
+            </li>
+        </ul>
+    {% endif %}
+{% endblock %}

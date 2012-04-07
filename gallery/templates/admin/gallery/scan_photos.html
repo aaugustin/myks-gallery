@@ -1,0 +1,19 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label='gallery' %}">{% trans 'Gallery' %}</a>
+&rsaquo; {% trans 'Scan' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<p>{% trans 'Click this button to re-scan your photo directory.' %}</p>
+<form action="{% url 'admin:gallery.admin.scan_photos' %}" method="POST">
+    {% csrf_token %}
+    <input type="submit" value="{% trans 'Scan photos' %}" />
+</form>
+{% endblock %}
