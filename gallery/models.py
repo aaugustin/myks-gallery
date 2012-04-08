@@ -103,6 +103,12 @@ class Photo(models.Model):
     def display_name(self):
         return self.date or os.path.splitext(self.filename)[0]
 
+    def get_effective_access_policy(self):
+        if self.access_policy:
+            return self.access_policy
+        elif self.album.access_policy and self.album.access_policy.inherit:
+            return self.album.access_policy
+
     def is_allowed_for_user(self, user):
         return Photo.objects.allowed_for_user(user).filter(pk=self.pk).exists()
 
