@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+{% load url from future %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/gallery.css">
+{% endblock %}
+
+{% block title %}{{ block.super }} - {{ title }}{% endblock %}
+
+{% block header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="photo_nav">
+{% if previous_year %}
+<div class="previous">
+<a href="{% url 'gallery-year' previous_year %}">&larr; {{ previous_year }}</a>
+</div>
+{% endif %}
+<a href="{% url 'gallery-index' %}">&uarr; {{ title }} &uarr;</a>
+{% if next_year %}
+<span class="next">
+<a href="{% url 'gallery-year' next_year %}">{{ next_year }} &rarr;</a>
+</span>
+{% endif %}
+</div>
+
+
+<h2>{{ year }}</h2>
+{% for album in album_list reversed %}
+<h3 class="album_preview">
+{{ album.display_name }}
+<span class="album_count">{% blocktrans count album.photo_set.count as num_photos %}one photo{% plural %}{{ num_photos }} photos{% endblocktrans %}</span>
+<span class="album_date">{{ album.date }}</span>
+<span class="album_category">{% trans album.category %}</span>
+</h3>
+<div class="photo_list">
+{% for photo in album.photo_set.all|slice:":5" %}
+<a href="{{ album.get_absolute_url }}"><img src="{% url 'gallery-photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
+{% endfor %}
+</div>
+{% endfor %}
+{% endblock %}

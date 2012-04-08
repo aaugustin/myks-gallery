@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+{% load url from future %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/gallery.css">
+{% endblock %}
+
+{% block title %}{{ block.super }} - {{ title }}{% endblock %}
+
+{% block header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="album_year_list">
+{% for date in date_list reversed %}
+<a href="{% url 'gallery-year' date.year %}">{{ date.year }}</a>
+{% if not forloop.last %} | {% endif %}
+{% endfor %}
+</div>
+
+{% for album in latest %}
+{% ifchanged album.date.year %}
+<h2>{{ album.date.year }}</h2>
+{% endifchanged %}
+<h3 class="album_preview">
+{{ album.display_name }}
+<span class="album_count">{% blocktrans count album.photo_set.count as num_photos %}one photo{% plural %}{{ num_photos }} photos{% endblocktrans %}</span>
+<span class="album_date">{{ album.date }}</span>
+<span class="album_category">{% trans album.category %}</span>
+</h3>
+<div class="photo_list">
+{% for photo in album.photo_set.all|slice:":5" %}
+<a href="{{ album.get_absolute_url }}"><img src="{% url 'gallery-photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
+{% endfor %}
+</div>
+{% endfor %}
+
+{% if page_obj.has_other_pages %}
+<div class="album_page_list">
+{% if page_obj.has_previous %}
+<a href="{% url 'gallery-index' %}?page={{ page_obj.previous_page_number }}">&larr;</a>
+{% endif %}
+{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+{% if page_obj.has_next %}
+<a href="{% url 'gallery-index' %}?page={{ page_obj.next_page_number }}">&rarr;</a>
+{% endif %}
+</div>
+{% endif %}
+{% endblock %}

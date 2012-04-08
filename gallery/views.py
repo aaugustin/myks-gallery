@@ -9,22 +9,38 @@ import unicodedata
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseNotModified, Http404
 from django.utils.http import http_date
-from django.views.generic import DetailView, ListView
+from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
 from django.views.static import was_modified_since
 
 from .models import Album, Photo
 
 
 class GalleryTitleMixin(object):
+
     def get_context_data(self, **kwargs):
         context = super(GalleryTitleMixin, self).get_context_data(**kwargs)
         context['title'] = getattr(settings, 'PHOTO_TITLE', u"Gallery")
         return context
 
 
-class GalleryView(GalleryTitleMixin, ListView):
+class GalleryIndexView(GalleryTitleMixin, ArchiveIndexView):
     model = Album
-    context_object_name = 'album_list'
+    date_field = 'date'
+    paginate_by = 10
+
+
+class GalleryYearView(GalleryTitleMixin, YearArchiveView):
+    model = Album
+    date_field = 'date'
+    make_object_list = True
+
+    def get_context_data(self, **kwargs):
+        year = int(self.get_year())
+        if Album.objects.filter(date__year=year - 1).exists():
+            kwargs['previous_year'] = unicode(year - 1)
+        if Album.objects.filter(date__year=year + 1).exists():
+            kwargs['next_year'] = unicode(year + 1)
+        return super(GalleryYearView, self).get_context_data(**kwargs)
 
 
 class AlbumView(GalleryTitleMixin, DetailView):

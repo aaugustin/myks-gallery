@@ -6,10 +6,11 @@ from django.contrib.auth.decorators import permission_required
 
 from . import views
 
-protect = permission_required('gallery.view_photos')
+protect = permission_required('gallery.view')
 
 urlpatterns = patterns('',
-    url(r'^$', protect(views.GalleryView.as_view()), name='gallery-root'),
+    url(r'^$', protect(views.GalleryIndexView.as_view()), name='gallery-index'),
+    url(r'^year/(?P<year>\d{4})/$', protect(views.GalleryYearView.as_view()), name='gallery-year'),
     url(r'^album/(?P<pk>\d+)/$', protect(views.AlbumView.as_view()), name='gallery-album'),
     url(r'^photo/(?P<pk>\d+)/$', protect(views.PhotoView.as_view()), name='gallery-photo'),
     url(r'^original/(?P<pk>\d+)/$', protect(views.original_photo), name='gallery-photo-original'),

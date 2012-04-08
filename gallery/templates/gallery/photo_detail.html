@@ -22,6 +22,6 @@
 </div>
 
 <div class="photo_detail">
-<a href="{% url 'gallery-photo-original' pk=photo.pk %}"><img src="{% url 'gallery-photo-resized' preset='standard' pk=photo.pk %}"></a>
+<a href="{% url 'gallery-photo-original' pk=photo.pk %}"><img src="{% url 'gallery-photo-resized' preset='standard' pk=photo.pk %}" alt="{{ photo }}"></a>
 </div>
 {% endblock %}

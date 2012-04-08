@@ -18,7 +18,7 @@
 <span class="album_date">{{ previous_album.date }}</span>
 </div>
 {% endif %}{% endwith %}
-<a href="{% url 'gallery-root' %}">&uarr; {{ title }} &uarr;</a>
+<a href="{% url 'gallery-year' album.date.year %}">&uarr; {{ album.date.year }} &uarr;</a>
 {% with album.get_next_by_date as next_album %}{% if next_album %}
 <span class="next">
 <span class="album_date">{{ next_album.date }}</span>

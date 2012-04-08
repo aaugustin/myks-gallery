@@ -1,29 +1,27 @@
 /* Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved. */
 
-.album_list {
-    list-style-type: none;
+.album_year_list, .album_page_list {
+    margin: 1em 0;
+    text-align: center;
 }
-.album_date {
-    font-size: 12px;
+
+.album_preview {
+    padding: 1em 1em 0 1em;
+}
+.album_preview .album_date:before, .album_preview .album_count:before {
+    content:" - ";
+}
+.album_preview .album_category:before {
+    content:"(";
+}
+.album_preview .album_category:after {
+    content:")";
 }
 .album_category {
     color: #999;
-    font-size: 12px;
+    font-style: italic;
 }
 
-.album_list .album_date:before {
-    content:" - ";
-}
-.album_list .album_category:before {
-    content:"(";
-}
-.album_list .album_category:after {
-    content:")";
-}
-
-.photo_list {
-    text-align: center;
-}
 .photo_list a {
     display: inline-block;
     height: 144px;
