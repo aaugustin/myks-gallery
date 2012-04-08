@@ -7,6 +7,7 @@ import os
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.db import models
+from django.db.models import Q
 
 from .imgutil import make_thumbnail
 
@@ -20,11 +21,22 @@ class AccessPolicy(models.Model):
         abstract = True
 
 
+class AlbumManager(models.Manager):
+
+    def allowed_for_user(self, user):
+        album_conditions = (Q(access_policy__public=True)
+                | Q(access_policy__users=user)
+                | Q(access_policy__groups__user=user))
+        return self.filter(album_conditions)
+
+
 class Album(models.Model):
     category = models.CharField(max_length=100)
     dirpath = models.CharField(max_length=200, verbose_name="directory path")
     date = models.DateField()
     name = models.CharField(max_length=100, blank=True)
+
+    objects = AlbumManager()
 
     class Meta:
         ordering = ('-date', 'name', 'dirpath')
@@ -33,23 +45,43 @@ class Album(models.Model):
     def __unicode__(self):
         return self.dirpath
 
-    @property
-    def display_name(self):
-        return self.name or self.dirpath.replace(u'/', u' > ')
-
     @models.permalink
     def get_absolute_url(self):
         return 'gallery-album', [self.pk]
 
+    @property
+    def display_name(self):
+        return self.name or self.dirpath.replace(u'/', u' > ')
+
+    def is_allowed_for_user(self, user):
+        return Album.objects.allowed_for_user(user).filter(pk=self.pk).exists()
+
 
 class AlbumAccessPolicy(AccessPolicy):
     album = models.OneToOneField(Album, related_name='access_policy')
+    inherit = models.BooleanField(blank=True, default=True,
+            verbose_name="photos inherit album access policy")
+
+
+class PhotoManager(models.Manager):
+
+    def allowed_for_user(self, user):
+        photo_conditions = (Q(access_policy__public=True)
+                | Q(access_policy__users=user)
+                | Q(access_policy__groups__user=user))
+        inherit = Q(album__access_policy__inherit=True)
+        album_conditions = (Q(album__access_policy__public=True)
+                | Q(album__access_policy__users=user)
+                | Q(album__access_policy__groups__user=user))
+        return self.filter(photo_conditions | (inherit & album_conditions))
 
 
 class Photo(models.Model):
     album = models.ForeignKey(Album)
     filename = models.CharField(max_length=100, verbose_name="file name")
     date = models.DateTimeField(null=True, blank=True)
+
+    objects = PhotoManager()
 
     class Meta:
         order_with_respect_to = 'album'
@@ -63,13 +95,16 @@ class Photo(models.Model):
     def __unicode__(self):
         return self.filename
 
+    @models.permalink
+    def get_absolute_url(self):
+        return 'gallery-photo', [self.pk]
+
     @property
     def display_name(self):
         return self.date or os.path.splitext(self.filename)[0]
 
-    @models.permalink
-    def get_absolute_url(self):
-        return 'gallery-photo', [self.pk]
+    def is_allowed_for_user(self, user):
+        return Photo.objects.allowed_for_user(user).filter(pk=self.pk).exists()
 
     def abspath(self):
         return os.path.join(settings.PHOTO_ROOT, self.album.dirpath, self.filename)
