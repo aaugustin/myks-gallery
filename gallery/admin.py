@@ -10,6 +10,7 @@ from django.core import management
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.template import Context, Template
 from django.utils.translation import ugettext as _
 
 from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
@@ -88,7 +89,7 @@ class PhotoAccessPolicyInline(AccessPolicyInline):
 class PhotoAdmin(ScanUrlMixin, admin.ModelAdmin):
     date_hierarchy = 'date'
     inlines = (PhotoAccessPolicyInline,)
-    list_display = ('display_name', 'date', 'public', 'groups', 'users')
+    list_display = ('display_name', 'date', 'preview', 'public', 'groups', 'users')
     ordering = ('date',)
     readonly_fields = ('filename',)
     search_fields = ('album__name', 'filename')
@@ -97,6 +98,15 @@ class PhotoAdmin(ScanUrlMixin, admin.ModelAdmin):
         return super(PhotoAdmin, self).queryset(request).select_related(
                 'access_policy__users', 'access_policy__groups',
                 'album__access_policy__users', 'album__access_policy__groups')
+
+    preview_template = Template("""{% load url from future %}"""
+"""<a href="{{ photo.get_absolute_url }}">"""
+"""<img src="{% url 'gallery-photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}">"""
+"""</a>""")
+
+    def preview(self, obj):
+        return self.preview_template.render(Context({'photo': obj}))
+    preview.allow_tags = True
 
     def public(self, obj):
         access_policy = obj.get_effective_access_policy()
