@@ -22,6 +22,12 @@
     font-style: italic;
 }
 
+.photo_list {
+    text-align: center;
+}
+.album_preview + .photo_list {
+    text-align: left;
+}
 .photo_list a {
     display: inline-block;
     height: 144px;
