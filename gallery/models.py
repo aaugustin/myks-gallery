@@ -24,10 +24,10 @@ class AccessPolicy(models.Model):
 class AlbumManager(models.Manager):
 
     def allowed_for_user(self, user):
-        album_conditions = (Q(access_policy__public=True)
+        album_cond = (Q(access_policy__public=True)
                 | Q(access_policy__users=user)
                 | Q(access_policy__groups__user=user))
-        return self.filter(album_conditions)
+        return self.filter(album_cond).distinct()
 
 
 class Album(models.Model):
@@ -66,14 +66,14 @@ class AlbumAccessPolicy(AccessPolicy):
 class PhotoManager(models.Manager):
 
     def allowed_for_user(self, user):
-        photo_conditions = (Q(access_policy__public=True)
+        photo_cond = (Q(access_policy__public=True)
                 | Q(access_policy__users=user)
                 | Q(access_policy__groups__user=user))
         inherit = Q(album__access_policy__inherit=True)
-        album_conditions = (Q(album__access_policy__public=True)
+        album_cond = (Q(album__access_policy__public=True)
                 | Q(album__access_policy__users=user)
                 | Q(album__access_policy__groups__user=user))
-        return self.filter(photo_conditions | (inherit & album_conditions))
+        return self.filter(photo_cond | (inherit & album_cond)).distinct()
 
 
 class Photo(models.Model):
