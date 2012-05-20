@@ -102,9 +102,11 @@ class PhotoAdmin(ScanUrlMixin, admin.ModelAdmin):
     search_fields = ('album__name', 'filename')
 
     def queryset(self, request):
-        return super(PhotoAdmin, self).queryset(request).select_related(
-                'access_policy__users', 'access_policy__groups',
-                'album__access_policy__users', 'album__access_policy__groups')
+        return (super(PhotoAdmin, self).queryset(request)
+                .prefetch_related('access_policy__users')
+                .prefetch_related('access_policy__groups')
+                .prefetch_related('album__access_policy__users')
+                .prefetch_related('album__access_policy__groups'))
 
     preview_template = Template("""{% load url from future %}"""
 """<a href="{{ photo.get_absolute_url }}">"""
