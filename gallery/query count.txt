@@ -1,0 +1,85 @@
+    --------------------    ----    ----    ----
+    archive view queries    anon    user    adm
+    --------------------    ----    ----    ----
+                 session    ?       X       X
+                    user            X       X
+        user permissions            X
+       group permissions            X
+
+          list not empty    X       X
+               year list    X       X       X
+    count for pagination    X       X       X
+
+        fetch user again            X
+         prefetch groups            X
+
+            fetch albums    X       X       X
+prefetch access policies    X       X
+         prefetch groups    ?       ?
+          prefetch users    ?       ?
+         prefetch photos    X       X       X
+prefetch access policies    X       X
+         prefetch groups    ?       ?
+          prefetch users    ?       ?
+    --------------------    ----    ----    ----
+
+    --------------------    ----    ----    ----
+       year view queries    anon    user    adm
+    --------------------    ----    ----    ----
+                 session    ?       X       X
+                    user            X       X
+        user permissions            X
+       group permissions            X
+
+            fetch albums    X       X       X
+prefetch access policies    X       X
+         prefetch groups    ?       ?
+          prefetch users    ?       ?
+         prefetch photos    X       X       X
+prefetch access policies    X       X
+         prefetch groups    ?       ?
+          prefetch users    ?       ?
+
+              month list    X       X       X
+
+        fetch user again            X
+         prefetch groups            X
+
+           previous year    X       X       X
+               next year    X       X       X
+    --------------------    ----    ----    ----
+
+    --------------------    ----    ----    ----
+      album view queries    anon    user    adm
+    --------------------    ----    ----    ----
+                 session    ?       X       X
+                    user            X       X
+        user permissions            X
+       group permissions            X
+
+             fetch album    X       X       X
+  prefetch access policy    X       X
+         prefetch groups    ?       ?
+          prefetch users    ?       ?
+         prefetch photos    X       X       X
+prefetch access policies    X       X
+         prefetch groups    ?       ?
+          prefetch users    ?       ?
+
+          previous album    X       X       X
+              next album    X       X       X
+    --------------------    ----    ----    ----
+
+    --------------------    ----    ----    ----
+      photo view queries    anon    user    adm
+    --------------------    ----    ----    ----
+                 session    ?       X       X
+                    user            X       X
+        user permissions            X
+       group permissions            X
+
+   fetch photo and album    X       X       X
+
+          previous photo    X       X       X
+              next photo    X       X       X
+    --------------------    ----    ----    ----
