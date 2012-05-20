@@ -68,14 +68,11 @@ class Album(models.Model):
     def get_access_policy(self):
         try:
             return self.access_policy
-        except PhotoAccessPolicy.DoesNotExist:
+        except AlbumAccessPolicy.DoesNotExist:
             pass
 
     def is_allowed_for_user(self, user):
-        try:
-            access_policy = self.access_policy
-        except AlbumAccessPolicy.DoesNotExist:
-            access_policy = None
+        access_policy = self.get_access_policy()
         return access_policy is not None and access_policy.allows(user)
 
     def is_allowed_for_user_sql(self, user):
