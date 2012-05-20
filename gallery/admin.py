@@ -55,29 +55,36 @@ class AlbumAdmin(ScanUrlMixin, admin.ModelAdmin):
     search_fields = ('name', 'dirpath')
 
     def queryset(self, request):
-        return super(AlbumAdmin, self).queryset(request).select_related(
-                'access_policy__users', 'access_policy__groups')
+        return (super(AlbumAdmin, self).queryset(request)
+                .prefetch_related('access_policy__users')
+                .prefetch_related('access_policy__groups'))
 
     def public(self, obj):
-        if obj.access_policy:
-            return obj.access_policy.public
+        access_policy = obj.get_access_policy()
+        if access_policy:
+            return access_policy.public
     public.boolean = True
 
     def groups(self, obj):
-        if obj.access_policy:
-            return u', '.join(unicode(group) for group in obj.access_policy.groups.all())
+        access_policy = obj.get_access_policy()
+        if access_policy:
+            groups = access_policy.groups.all()
+            return u', '.join(unicode(group) for group in groups)
         else:
             return '-'
 
     def users(self, obj):
-        if obj.access_policy:
-            return u', '.join(unicode(user) for user in obj.access_policy.users.all())
+        access_policy = obj.get_access_policy()
+        if access_policy:
+            users = access_policy.users.all()
+            return u', '.join(unicode(user) for user in users)
         else:
             return '-'
 
     def inherit(self, obj):
-        if obj.access_policy:
-            return obj.access_policy.inherit
+        access_policy = obj.get_access_policy()
+        if access_policy:
+            return access_policy.inherit
     inherit.boolean = True
 
 admin.site.register(Album, AlbumAdmin)
@@ -90,7 +97,7 @@ class PhotoAdmin(ScanUrlMixin, admin.ModelAdmin):
     date_hierarchy = 'date'
     inlines = (PhotoAccessPolicyInline,)
     list_display = ('display_name', 'date', 'preview', 'public', 'groups', 'users')
-    ordering = ('date',)
+    ordering = ('-date',)
     readonly_fields = ('filename',)
     search_fields = ('album__name', 'filename')
 

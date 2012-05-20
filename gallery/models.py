@@ -55,6 +55,12 @@ class Album(models.Model):
     def display_name(self):
         return self.name or self.dirpath.replace(u'/', u' > ')
 
+    def get_access_policy(self):
+        try:
+            return self.access_policy
+        except PhotoAccessPolicy.DoesNotExist:
+            pass
+
     def is_allowed_for_user(self, user):
         return Album.objects.allowed_for_user(user).filter(pk=self.pk).exists()
 
@@ -109,10 +115,17 @@ class Photo(models.Model):
         return self.date or os.path.splitext(self.filename)[0]
 
     def get_effective_access_policy(self):
-        if self.access_policy:
+        try:
             return self.access_policy
-        elif self.album.access_policy and self.album.access_policy.inherit:
-            return self.album.access_policy
+        except PhotoAccessPolicy.DoesNotExist:
+            pass
+        try:
+            album_access_policy = self.album.access_policy
+        except AlbumAccessPolicy.DoesNotExist:
+            pass
+        else:
+            if album_access_policy.inherit:
+                return album_access_policy
 
     def is_allowed_for_user(self, user):
         return Photo.objects.allowed_for_user(user).filter(pk=self.pk).exists()
