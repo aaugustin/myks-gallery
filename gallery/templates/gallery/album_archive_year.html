@@ -26,7 +26,6 @@
 {% endif %}
 </div>
 
-
 <h2>{{ year }}</h2>
 {% for album in album_list reversed %}
 <h3 class="album_preview">
@@ -36,9 +35,13 @@
 <span class="album_category">{% trans album.category %}</span>
 </h3>
 <div class="photo_list">
-{% for photo in album.photo_set.all|slice:":5" %}
+{% for photo in album.preview %}
 <a href="{{ album.get_absolute_url }}"><img src="{% url 'gallery-photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
+{% empty %}
+<p>{% trans "Sorry, you aren't authorized to view any photos in this album." %}</p>
 {% endfor %}
 </div>
+{% empty %}
+<p>{% trans "Sorry, you aren't authorized to view any albums." %}</p>
 {% endfor %}
 {% endblock %}
