@@ -20,6 +20,16 @@ class AccessPolicy(models.Model):
     class Meta:
         abstract = True
 
+    def allows(self, user):
+        if self.public:
+            return True
+        if user.is_authenticated():
+            if set(self.groups.all()) & set(user.groups.all()):
+                return True
+            if user in self.users.all():
+                return True
+        return False
+
 
 class AlbumManager(models.Manager):
 
@@ -62,6 +72,13 @@ class Album(models.Model):
             pass
 
     def is_allowed_for_user(self, user):
+        try:
+            access_policy = self.access_policy
+        except AlbumAccessPolicy.DoesNotExist:
+            access_policy = None
+        return access_policy is not None and access_policy.allows(user)
+
+    def is_allowed_for_user_sql(self, user):
         return Album.objects.allowed_for_user(user).filter(pk=self.pk).exists()
 
 
@@ -128,6 +145,10 @@ class Photo(models.Model):
                 return album_access_policy
 
     def is_allowed_for_user(self, user):
+        access_policy = self.get_effective_access_policy()
+        return access_policy is not None and access_policy.allows(user)
+
+    def is_allowed_for_user_sql(self, user):
         return Photo.objects.allowed_for_user(user).filter(pk=self.pk).exists()
 
     def abspath(self):
