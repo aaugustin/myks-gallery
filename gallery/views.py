@@ -72,6 +72,7 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
 
 
 class GalleryIndexView(GalleryTitleMixin, AlbumListWithPreviewMixin, ArchiveIndexView):
+    allow_empty = True
     paginate_by = 10
 
 
