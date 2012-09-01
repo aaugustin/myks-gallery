@@ -34,7 +34,7 @@ class AlbumListMixin(object):
 
     def can_view_all(self):
         if not hasattr(self, '_can_view_all'):
-            self._can_view_all = self.request.user.has_perm('photo.view')
+            self._can_view_all = self.request.user.has_perm('gallery.view')
         return self._can_view_all
 
     def get_queryset(self):
@@ -89,7 +89,7 @@ class PhotoView(DetailView):
     context_object_name = 'photo'
 
     def get_base_queryset(self):
-        if self.request.user.has_perm('photo.view'):
+        if self.request.user.has_perm('gallery.view'):
             return Photo.objects.all()
         else:
             return Photo.objects.allowed_for_user(self.request.user)
@@ -118,7 +118,7 @@ class PhotoView(DetailView):
 
 def _get_photo_if_allowed(request, pk):
     qs = Photo.objects
-    if not request.user.has_perm('photo.view'):
+    if not request.user.has_perm('gallery.view'):
         qs = qs.allowed_for_user(request.user)
     qs = qs.select_related('album')
     return get_object_or_404(qs, pk=pk)
