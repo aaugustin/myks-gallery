@@ -15,13 +15,13 @@
 <div class="photo_nav">
 {% if previous_year %}
 <div class="previous">
-<a href="{% url 'gallery-year' previous_year %}">&larr; {{ previous_year }}</a>
+<a href="{% url 'gallery-year' previous_year.year %}">&larr; {{ previous_year.year }}</a>
 </div>
 {% endif %}
 <a href="{% url 'gallery-index' %}">&uarr; {{ title }} &uarr;</a>
 {% if next_year %}
 <span class="next">
-<a href="{% url 'gallery-year' next_year %}">{{ next_year }} &rarr;</a>
+<a href="{% url 'gallery-year' next_year.year %}">{{ next_year.year }} &rarr;</a>
 </span>
 {% endif %}
 </div>

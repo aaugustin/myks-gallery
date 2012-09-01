@@ -78,15 +78,6 @@ class GalleryIndexView(GalleryTitleMixin, AlbumListWithPreviewMixin, ArchiveInde
 class GalleryYearView(GalleryTitleMixin, AlbumListWithPreviewMixin, YearArchiveView):
     make_object_list = True
 
-    def get_context_data(self, **kwargs):
-        context = super(GalleryYearView, self).get_context_data(**kwargs)
-        year = int(self.get_year())
-        if self.get_queryset().filter(date__year=year - 1).exists():
-            context['previous_year'] = unicode(year - 1)
-        if self.get_queryset().filter(date__year=year + 1).exists():
-            context['next_year'] = unicode(year + 1)
-        return context
-
 
 class AlbumView(GalleryTitleMixin, AlbumListMixin, DetailView):
     model = Album
