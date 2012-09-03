@@ -51,7 +51,7 @@ class Album(models.Model):
     objects = AlbumManager()
 
     class Meta:
-        ordering = ('-date', 'name', 'dirpath')
+        ordering = ('date', 'name', 'dirpath', 'category')
         unique_together = ('dirpath', 'category')
 
     def __unicode__(self):
@@ -125,7 +125,6 @@ class Photo(models.Model):
     objects = PhotoManager()
 
     class Meta:
-        order_with_respect_to = 'album'
         ordering = ('date', 'filename')
         permissions = (
             ("view", "Can see all photos"),

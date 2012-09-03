@@ -51,7 +51,8 @@ class AlbumAdmin(ScanUrlMixin, admin.ModelAdmin):
     inlines = (AlbumAccessPolicyInline,)
     list_display = ('display_name', 'date', 'category', 'public', 'groups', 'users', 'inherit')
     list_filter = ('category',)
-    ordering = ('-date',)
+    ordering = ('-date', '-name', '-dirpath', '-category')
+    readonly_fields = ('dirpath',)
     search_fields = ('name', 'dirpath')
 
     def queryset(self, request):
@@ -97,9 +98,9 @@ class PhotoAdmin(ScanUrlMixin, admin.ModelAdmin):
     date_hierarchy = 'date'
     inlines = (PhotoAccessPolicyInline,)
     list_display = ('display_name', 'date', 'preview', 'public', 'groups', 'users')
-    ordering = ('-date',)
+    ordering = ('-date', '-filename')
     readonly_fields = ('filename',)
-    search_fields = ('album__name', 'filename')
+    search_fields = ('album__name', 'album__dirpath', 'filename')
 
     def queryset(self, request):
         return (super(PhotoAdmin, self).queryset(request)
