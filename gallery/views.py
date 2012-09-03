@@ -88,6 +88,10 @@ class AlbumView(GalleryCommonMixin, AlbumListMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(AlbumView, self).get_context_data(**kwargs)
+        if self.can_view_all():
+            context['photos'] = album.photo_set.all()
+        else:
+            context['photos'] = album.photo_set.allowed_for_user(self.request.user)
         try:
             context['previous_album'] = self.object.get_previous_in_queryset(self.queryset)
         except Album.DoesNotExist:

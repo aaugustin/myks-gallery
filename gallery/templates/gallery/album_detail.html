@@ -29,7 +29,7 @@
 </div>
 
 <div class="photo_list">
-{% for photo in album.photo_set.all %}
+{% for photo in photos %}
 <a href="{{ photo.get_absolute_url }}"><img src="{% url 'gallery-photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
 {% empty %}
 <p>{% trans "Sorry, you aren't authorized to view any photos in this album." %}</p>
