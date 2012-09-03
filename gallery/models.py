@@ -78,6 +78,22 @@ class Album(models.Model):
     def is_allowed_for_user_sql(self, user):
         return Album.objects.allowed_for_user(user).filter(pk=self.pk).exists()
 
+    def get_next_allowed_for_user(self, user):
+        next_albums = Album.objects.allowed_for_user(user).filter(
+            Q(date__gt=self.date)
+            | Q(date=self.date, name__gt=self.name)
+            | Q(date=self.date, name=self.name, dirpath__gt=self.dirpath)
+            | Q(date=self.date, name=self.name, dirpath=self.dirpath, category__gt=self.category))
+        return next_albums.order_by('date', 'name', 'dirpath', 'category')[:1].get()
+
+    def get_previous_allowed_for_user(self, user):
+        previous_albums = Album.objects.allowed_for_user(user).filter(
+            Q(date__lt=self.date)
+            | Q(date=self.date, name__lt=self.name)
+            | Q(date=self.date, name=self.name, dirpath__lt=self.dirpath)
+            | Q(date=self.date, name=self.name, dirpath=self.dirpath, category__lt=self.category))
+        return previous_albums.order_by('-date', '-name', '-dirpath', '-category')[:1].get()
+
 
 class AlbumAccessPolicy(AccessPolicy):
     album = models.OneToOneField(Album, related_name='access_policy')
@@ -147,6 +163,16 @@ class Photo(models.Model):
 
     def is_allowed_for_user_sql(self, user):
         return Photo.objects.allowed_for_user(user).filter(pk=self.pk).exists()
+
+    def get_next_allowed_for_user(self, user):
+        next_photos = self.album.photo_set.allowed_for_user(user).filter(
+            Q(date__gt=self.date) | Q(date=self.date, filename__gt=self.filename))
+        return next_photos.order_by('date', 'filename')[:1].get()
+
+    def get_previous_allowed_for_user(self, user):
+        previous_photos = self.album.photo_set.allowed_for_user(user).filter(
+            Q(date__lt=self.date) | Q(date=self.date, filename__lt=self.filename))
+        return previous_photos.order_by('-date', '-filename')[:1].get()
 
     def abspath(self):
         return os.path.join(settings.PHOTO_ROOT, self.album.dirpath, self.filename)
