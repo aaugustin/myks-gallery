@@ -84,36 +84,40 @@ class AlbumView(GalleryTitleMixin, AlbumListMixin, DetailView):
     model = Album
     context_object_name = 'album'
 
+    def get_context_data(self, **kwargs):
+        user = self.request.user
+        try:
+            kwargs['previous_album'] = self.object.get_previous_allowed_for_user(user)
+        except Album.DoesNotExist:
+            pass
+        try:
+            kwargs['next_album'] = self.object.get_next_allowed_for_user(user)
+        except Album.DoesNotExist:
+            pass
+        return super(AlbumView, self).get_context_data(**kwargs)
+
 
 class PhotoView(DetailView):
     model = Photo
     context_object_name = 'photo'
 
-    def get_base_queryset(self):
-        if self.request.user.has_perm('gallery.view'):
-            return Photo.objects.all()
-        else:
-            return Photo.objects.allowed_for_user(self.request.user)
-
     def get_queryset(self):
-        return self.get_base_queryset().select_related('album')
+        if self.request.user.has_perm('gallery.view'):
+            qs = Photo.objects.all()
+        else:
+            qs = Photo.objects.allowed_for_user(self.request.user)
+        return qs.select_related('album')
 
     def get_context_data(self, **kwargs):
+        user = self.request.user
         try:
-            # HACK -- get_(next|previous)_in_order relies on _default_manager.
-            # Shadow the class-level variable with an instance-level variable
-            # to show only allowed photos.
-            self.object._default_manager = self.get_base_queryset()
-            try:
-                kwargs['previous_photo'] = self.object.get_previous_in_order()
-            except Photo.DoesNotExist:
-                pass
-            try:
-                kwargs['next_photo'] = self.object.get_next_in_order()
-            except Photo.DoesNotExist:
-                pass
-        finally:
-            del self.object._default_manager
+            kwargs['previous_photo'] = self.object.get_previous_allowed_for_user(user)
+        except Photo.DoesNotExist:
+            pass
+        try:
+            kwargs['next_photo'] = self.object.get_next_allowed_for_user(user)
+        except Photo.DoesNotExist:
+            pass
         return super(PhotoView, self).get_context_data(**kwargs)
 
 

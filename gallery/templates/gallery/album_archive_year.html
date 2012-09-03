@@ -14,15 +14,11 @@
 {% block content %}
 <div class="photo_nav">
 {% if previous_year %}
-<div class="previous">
-<a href="{% url 'gallery-year' previous_year.year %}">&larr; {{ previous_year.year }}</a>
-</div>
+<a href="{% url 'gallery-year' previous_year.year %}" class="previous">&larr; {{ previous_year.year }}</a>
 {% endif %}
 <a href="{% url 'gallery-index' %}">&uarr; {{ title }} &uarr;</a>
 {% if next_year %}
-<span class="next">
-<a href="{% url 'gallery-year' next_year.year %}">{{ next_year.year }} &rarr;</a>
-</span>
+<a href="{% url 'gallery-year' next_year.year %}" class="next">{{ next_year.year }} &rarr;</a>
 {% endif %}
 </div>
 

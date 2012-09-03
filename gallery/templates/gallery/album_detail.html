@@ -13,19 +13,19 @@
 
 {% block content %}
 <div class="photo_nav">
-{% with album.get_previous_by_date as previous_album %}{% if previous_album %}
-<div class="previous">
+{% if previous_album %}
+<span class="previous">
 <a href="{{ previous_album.get_absolute_url }}">&larr; {{ previous_album.display_name }}</a>
 <span class="album_date">{{ previous_album.date }}</span>
-</div>
-{% endif %}{% endwith %}
+</span>
+{% endif %}
 <a href="{% url 'gallery-year' album.date.year %}">&uarr; {{ album.date.year }} &uarr;</a>
-{% with album.get_next_by_date as next_album %}{% if next_album %}
+{% if next_album %}
 <span class="next">
 <span class="album_date">{{ next_album.date }}</span>
 <a href="{{ next_album.get_absolute_url }}">{{ next_album.display_name }} &rarr;</a>
 </span>
-{% endif %}{% endwith %}
+{% endif %}
 </div>
 
 <div class="photo_list">
