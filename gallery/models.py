@@ -86,7 +86,7 @@ class Album(models.Model):
             | Q(date=self.date, name=self.name, dirpath=self.dirpath, category__gt=self.category))
         return albums.order_by('date', 'name', 'dirpath', 'category')[:1].get()
 
-    def get_previous_allowed_for_user(self, user):
+    def get_previous_in_queryset(self, albums):
         albums = albums.filter(
             Q(date__lt=self.date)
             | Q(date=self.date, name__lt=self.name)

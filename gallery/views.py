@@ -89,15 +89,19 @@ class AlbumView(GalleryCommonMixin, AlbumListMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(AlbumView, self).get_context_data(**kwargs)
         if self.can_view_all():
-            context['photos'] = album.photo_set.all()
+            context['photos'] = self.object.photo_set.all()
         else:
-            context['photos'] = album.photo_set.allowed_for_user(self.request.user)
+            context['photos'] = self.object.photo_set.allowed_for_user(self.request.user)
+        if self.can_view_all():
+            qs = Album.objects.all()
+        else:
+            qs = Album.objects.allowed_for_user(self.request.user)
         try:
-            context['previous_album'] = self.object.get_previous_in_queryset(self.queryset)
+            context['previous_album'] = self.object.get_previous_in_queryset(qs)
         except Album.DoesNotExist:
             pass
         try:
-            context['next_album'] = self.object.get_next_in_queryset(self.queryset)
+            context['next_album'] = self.object.get_next_in_queryset(qs)
         except Album.DoesNotExist:
             pass
         return context
@@ -116,12 +120,16 @@ class PhotoView(GalleryCommonMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(PhotoView, self).get_context_data(**kwargs)
+        if self.can_view_all():
+            qs = Photo.objects.all()
+        else:
+            qs = Photo.objects.allowed_for_user(self.request.user)
         try:
-            context['previous_photo'] = self.object.get_previous_in_queryset(self.queryset)
+            context['previous_photo'] = self.object.get_previous_in_queryset(qs)
         except Photo.DoesNotExist:
             pass
         try:
-            context['next_photo'] = self.object.get_next_in_queryset(self.queryset)
+            context['next_photo'] = self.object.get_next_in_queryset(qs)
         except Photo.DoesNotExist:
             pass
         return context

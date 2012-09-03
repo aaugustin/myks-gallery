@@ -3,6 +3,7 @@
 
 from __future__ import division
 
+import os
 import sys
 
 try:
@@ -57,5 +58,8 @@ def make_thumbnail(image_path, thumb_path, preset):
     try:
         image.save(thumb_path.encode(fs_encoding), **options)
     except IOError:
-        os.unlink(thumb_path)
+        try:
+            os.unlink(thumb_path)
+        except OSError:
+            pass
         raise
