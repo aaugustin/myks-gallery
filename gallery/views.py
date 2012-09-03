@@ -99,7 +99,6 @@ class AlbumView(GalleryCommonMixin, AlbumListMixin, DetailView):
         return context
 
 
-
 class PhotoView(GalleryCommonMixin, DetailView):
     model = Photo
     context_object_name = 'photo'
