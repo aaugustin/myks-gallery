@@ -18,11 +18,18 @@ from django.views.static import was_modified_since
 from .models import Album, Photo
 
 
-class GalleryTitleMixin(object):
-    """Add the value of settings.PHOTO_TITLE in the context as `title`."""
+class GalleryCommonMixin(object):
+    """Provide common methods.
+
+    Also add the value of settings.PHOTO_TITLE in the context as `title`.
+    """
+    def can_view_all(self):
+        if not hasattr(self, '_can_view_all'):
+            self._can_view_all = self.request.user.has_perm('gallery.view')
+        return self._can_view_all
 
     def get_context_data(self, **kwargs):
-        context = super(GalleryTitleMixin, self).get_context_data(**kwargs)
+        context = super(GalleryCommonMixin, self).get_context_data(**kwargs)
         context['title'] = getattr(settings, 'PHOTO_TITLE', u"Gallery")
         return context
 
@@ -31,11 +38,6 @@ class AlbumListMixin(object):
     """Perform access control and database optimization for albums."""
     model = Album
     date_field = 'date'
-
-    def can_view_all(self):
-        if not hasattr(self, '_can_view_all'):
-            self._can_view_all = self.request.user.has_perm('gallery.view')
-        return self._can_view_all
 
     def get_queryset(self):
         if self.can_view_all():
@@ -71,51 +73,49 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
         return context
 
 
-class GalleryIndexView(GalleryTitleMixin, AlbumListWithPreviewMixin, ArchiveIndexView):
+class GalleryIndexView(GalleryCommonMixin, AlbumListWithPreviewMixin, ArchiveIndexView):
     allow_empty = True
     paginate_by = 10
 
 
-class GalleryYearView(GalleryTitleMixin, AlbumListWithPreviewMixin, YearArchiveView):
+class GalleryYearView(GalleryCommonMixin, AlbumListWithPreviewMixin, YearArchiveView):
     make_object_list = True
 
 
-class AlbumView(GalleryTitleMixin, AlbumListMixin, DetailView):
+class AlbumView(GalleryCommonMixin, AlbumListMixin, DetailView):
     model = Album
     context_object_name = 'album'
 
     def get_context_data(self, **kwargs):
-        user = self.request.user
         try:
-            kwargs['previous_album'] = self.object.get_previous_allowed_for_user(user)
+            kwargs['previous_album'] = self.object.get_previous_in_queryset(self.queryset)
         except Album.DoesNotExist:
             pass
         try:
-            kwargs['next_album'] = self.object.get_next_allowed_for_user(user)
+            kwargs['next_album'] = self.object.get_next_in_queryset(self.queryset)
         except Album.DoesNotExist:
             pass
         return super(AlbumView, self).get_context_data(**kwargs)
 
 
-class PhotoView(DetailView):
+class PhotoView(GalleryCommonMixin, DetailView):
     model = Photo
     context_object_name = 'photo'
 
     def get_queryset(self):
-        if self.request.user.has_perm('gallery.view'):
+        if self.can_view_all():
             qs = Photo.objects.all()
         else:
             qs = Photo.objects.allowed_for_user(self.request.user)
         return qs.select_related('album')
 
     def get_context_data(self, **kwargs):
-        user = self.request.user
         try:
-            kwargs['previous_photo'] = self.object.get_previous_allowed_for_user(user)
+            kwargs['previous_photo'] = self.object.get_previous_in_queryset(self.queryset)
         except Photo.DoesNotExist:
             pass
         try:
-            kwargs['next_photo'] = self.object.get_next_allowed_for_user(user)
+            kwargs['next_photo'] = self.object.get_next_in_queryset(self.queryset)
         except Photo.DoesNotExist:
             pass
         return super(PhotoView, self).get_context_data(**kwargs)
