@@ -19,10 +19,8 @@ from .models import Album, Photo
 
 
 class GalleryCommonMixin(object):
-    """Provide common methods.
+    """Provide a can_view_all() method. Put `title` in the context."""
 
-    Also add the value of settings.PHOTO_TITLE in the context as `title`.
-    """
     def can_view_all(self):
         if not hasattr(self, '_can_view_all'):
             self._can_view_all = self.request.user.has_perm('gallery.view')
