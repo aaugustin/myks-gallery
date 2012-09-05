@@ -121,9 +121,9 @@ class PhotoView(GalleryCommonMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(PhotoView, self).get_context_data(**kwargs)
         if self.can_view_all():
-            qs = Photo.objects.all()
+            qs = self.object.album.photo_set.all()
         else:
-            qs = Photo.objects.allowed_for_user(self.request.user)
+            qs = self.object.album.photo_set.allowed_for_user(self.request.user)
         try:
             context['previous_photo'] = self.object.get_previous_in_queryset(qs)
         except Photo.DoesNotExist:
