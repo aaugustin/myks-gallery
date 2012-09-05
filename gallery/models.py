@@ -163,16 +163,30 @@ class Photo(models.Model):
     def is_allowed_for_user_sql(self, user):
         return Photo.objects.allowed_for_user(user).filter(pk=self.pk).exists()
 
+    # In the next two functions, images whose date is None come first.
+    # This is how SQL works, but we need to special case it here.
+    # These expressions are optimized for clarity, not concision.
+
     def get_next_in_queryset(self, photos):
-        photos = photos.filter(
-            Q(date__gt=self.date)
-            | Q(date=self.date, filename__gt=self.filename))
+        if self.date is None:
+            photos = photos.filter(
+                Q(date__isnull=False)
+                | Q(date__isnull=True, filename__gt=self.filename))
+        else:
+            photos = photos.filter(
+                Q(date__gt=self.date)
+                | Q(date=self.date, filename__gt=self.filename))
         return photos.order_by('date', 'filename')[:1].get()
 
     def get_previous_in_queryset(self, photos):
-        photos = photos.filter(
-            Q(date__lt=self.date)
-            | Q(date=self.date, filename__lt=self.filename))
+        if self.date is None:
+            photos = photos.filter(
+                date__isnull=True, filename__lt=self.filename)
+        else:
+            photos = photos.filter(
+                Q (date__isnull=True)
+                | Q(date__lt=self.date)
+                | Q(date=self.date, filename__gt=self.filename))
         return photos.order_by('-date', '-filename')[:1].get()
 
     def abspath(self):
