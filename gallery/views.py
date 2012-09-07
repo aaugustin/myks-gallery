@@ -5,6 +5,7 @@ import mimetypes
 import os
 import random
 import stat
+import sys
 import unicodedata
 
 from django.conf import settings
@@ -213,7 +214,7 @@ def serve_private_media(request, path):
             if not path.startswith(settings.SENDFILE_ROOT):
                 raise ValueError("Requested file isn't under SENDFILE_ROOT.")
             path = path[len(settings.SENDFILE_ROOT):]
-        response[settings.SENDFILE_HEADER] = path
+        response[settings.SENDFILE_HEADER] = path.encode(sys.getfilesystemencoding())
 
     # resume copy-paste from django.views.static.serve
     response["Last-Modified"] = http_date(statobj.st_mtime)
