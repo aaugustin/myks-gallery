@@ -4,7 +4,7 @@
 {% load url from future %}
 
 {% block extrahead %}
-<link rel="stylesheet" type="text/css" href="{% get_static_prefix %}css/gallery.css">
+<link rel="stylesheet" type="text/css" href="{% static 'css/gallery.css' %}">
 {% endblock %}
 
 {% block title %}{{ block.super }} - {{ title }}{% endblock %}
