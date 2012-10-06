@@ -17,5 +17,5 @@ urlpatterns = patterns('',
 urlpatterns += urls.urlpatterns
 
 urlpatterns += patterns('',
-    url(r'^private(?P<path>/.+)$', views.serve_private_media, name='gallery-album'),
+    url(r'^private(?P<path>/.+)$', views.serve_private_media, name='gallery:album'),
 )

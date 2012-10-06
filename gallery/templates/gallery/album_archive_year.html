@@ -14,11 +14,11 @@
 {% block content %}
 <div class="photo_nav">
 {% if previous_year %}
-<a href="{% url 'gallery-year' previous_year.year %}" class="previous">&larr; {{ previous_year.year }}</a>
+<a href="{% url 'gallery:year' previous_year.year %}" class="previous">&larr; {{ previous_year.year }}</a>
 {% endif %}
-<a href="{% url 'gallery-index' %}">&uarr; {{ title }} &uarr;</a>
+<a href="{% url 'gallery:index' %}">&uarr; {{ title }} &uarr;</a>
 {% if next_year %}
-<a href="{% url 'gallery-year' next_year.year %}" class="next">{{ next_year.year }} &rarr;</a>
+<a href="{% url 'gallery:year' next_year.year %}" class="next">{{ next_year.year }} &rarr;</a>
 {% endif %}
 </div>
 
@@ -32,7 +32,7 @@
 </h3>
 <div class="photo_list">
 {% for photo in album.preview %}
-<a href="{{ album.get_absolute_url }}"><img src="{% url 'gallery-photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
+<a href="{{ album.get_absolute_url }}"><img src="{% url 'gallery:photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
 {% empty %}
 <p>{% trans "Sorry, you aren't authorized to view any photos in this album." %}</p>
 {% endfor %}

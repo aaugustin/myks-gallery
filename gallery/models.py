@@ -59,7 +59,7 @@ class Album(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return 'gallery-album', [self.pk]
+        return 'gallery:album', [self.pk]
 
     @property
     def display_name(self):
@@ -137,7 +137,7 @@ class Photo(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return 'gallery-photo', [self.pk]
+        return 'gallery:photo', [self.pk]
 
     @property
     def display_name(self):

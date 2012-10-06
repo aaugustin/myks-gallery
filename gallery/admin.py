@@ -111,7 +111,7 @@ class PhotoAdmin(ScanUrlMixin, admin.ModelAdmin):
 
     preview_template = Template("""{% load url from future %}"""
 """<a href="{{ photo.get_absolute_url }}">"""
-"""<img src="{% url 'gallery-photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}">"""
+"""<img src="{% url 'gallery:photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}">"""
 """</a>""")
 
     def preview(self, obj):

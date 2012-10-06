@@ -19,7 +19,7 @@
 <span class="album_date">{{ previous_album.date }}</span>
 </span>
 {% endif %}
-<a href="{% url 'gallery-year' album.date.year %}">&uarr; {{ album.date.year }} &uarr;</a>
+<a href="{% url 'gallery:year' album.date.year %}">&uarr; {{ album.date.year }} &uarr;</a>
 {% if next_album %}
 <span class="next">
 <span class="album_date">{{ next_album.date }}</span>
@@ -30,7 +30,7 @@
 
 <div class="photo_list">
 {% for photo in photos %}
-<a href="{{ photo.get_absolute_url }}"><img src="{% url 'gallery-photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
+<a href="{{ photo.get_absolute_url }}"><img src="{% url 'gallery:photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
 {% empty %}
 <p>{% trans "Sorry, you aren't authorized to view any photos in this album." %}</p>
 {% endfor %}
