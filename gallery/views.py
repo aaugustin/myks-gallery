@@ -76,6 +76,13 @@ class GalleryIndexView(GalleryCommonMixin, AlbumListWithPreviewMixin, ArchiveInd
     allow_empty = True
     paginate_by = 10
 
+    def get_queryset(self):
+        qs = super(GalleryIndexView, self).get_queryset()
+        query = self.request.GET.get('q', '')
+        if query:
+            qs = qs.filter(name__contains=query)
+        return qs
+
 
 class GalleryYearView(GalleryCommonMixin, AlbumListWithPreviewMixin, YearArchiveView):
     make_object_list = True

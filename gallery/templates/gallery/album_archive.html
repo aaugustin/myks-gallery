@@ -12,6 +12,14 @@
 {% block header %}{{ title }}{% endblock %}
 
 {% block content %}
+{# search isn't useful for random Internet users #}
+{% if user.is_authenticated %}
+<form action="{% url 'gallery:index' %}" method="GET" class="album_search">
+<input type="text" name="q" required="required" size="20">
+<input type="submit" value="{% trans "Search" %}">
+</form>
+{% endif %}
+
 <div class="album_year_list">
 {% for date in date_list reversed %}
 <a href="{% url 'gallery:year' date.year %}">{{ date.year }}</a>
