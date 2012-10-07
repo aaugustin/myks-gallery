@@ -15,16 +15,20 @@
 {# search isn't useful for random Internet users #}
 {% if user.is_authenticated %}
 <form action="{% url 'gallery:index' %}" method="GET" class="album_search">
-<input type="text" name="q" required="required" size="20">
+<input type="text" name="q" required="required" size="20" value="{{ request.GET.q }}">
 <input type="submit" value="{% trans "Search" %}">
 </form>
 {% endif %}
 
 <div class="album_year_list">
+{% if request.GET.q %}
+{% blocktrans with query=request.GET.q %}Results for <strong>{{ query }}</strong>{% endblocktrans %} | <a href="{% url 'gallery:index' %}">{% trans "See all albums" %}</a>
+{% else %}
 {% for date in date_list reversed %}
 <a href="{% url 'gallery:year' date.year %}">{{ date.year }}</a>
 {% if not forloop.last %} | {% endif %}
 {% endfor %}
+{% endif %}
 </div>
 
 {% for album in latest %}
