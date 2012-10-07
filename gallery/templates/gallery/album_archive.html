@@ -12,17 +12,19 @@
 {% block header %}{{ title }}{% endblock %}
 
 {% block content %}
+{% with request.GET.q as q %}
+
 {# search isn't useful for random Internet users #}
 {% if user.is_authenticated %}
 <form action="{% url 'gallery:index' %}" method="GET" class="album_search">
-<input type="text" name="q" required="required" size="20" value="{{ request.GET.q }}">
+<input type="text" name="q" required="required" size="20" value="{{ q }}">
 <input type="submit" value="{% trans "Search" %}">
 </form>
 {% endif %}
 
 <div class="album_year_list">
-{% if request.GET.q %}
-{% blocktrans with query=request.GET.q %}Results for <strong>{{ query }}</strong>{% endblocktrans %} | <a href="{% url 'gallery:index' %}">{% trans "See all albums" %}</a>
+{% if q %}
+{% blocktrans with query=q %}Results for <strong>{{ query }}</strong>{% endblocktrans %} | <a href="{% url 'gallery:index' %}">{% trans "See all albums" %}</a>
 {% else %}
 {% for date in date_list reversed %}
 <a href="{% url 'gallery:year' date.year %}">{{ date.year }}</a>
@@ -55,12 +57,14 @@
 {% if is_paginated %}
 <div class="album_page_list">
 {% if page_obj.has_previous %}
-<a href="{% url 'gallery:index' %}?page={{ page_obj.previous_page_number }}">&larr;</a>
+<a href="{% url 'gallery:index' %}?page={{ page_obj.previous_page_number }}{% if q %}&amp;q={{ q }}{% endif %}">&larr;</a>
 {% endif %}
 {{ page_obj.number }} / {{ paginator.num_pages }}
 {% if page_obj.has_next %}
-<a href="{% url 'gallery:index' %}?page={{ page_obj.next_page_number }}">&rarr;</a>
+<a href="{% url 'gallery:index' %}?page={{ page_obj.next_page_number }}{% if q %}&amp;q={{ q }}{% endif %}">&rarr;</a>
 {% endif %}
 </div>
 {% endif %}
+
+{% endwith %}
 {% endblock %}
