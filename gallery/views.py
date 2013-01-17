@@ -10,7 +10,8 @@ import unicodedata
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.http import Http404, HttpResponse, HttpResponseNotModified
+from django.core.urlresolvers import reverse
+from django.http import Http404, HttpResponse, HttpResponseNotModified, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.http import http_date
 from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
@@ -236,3 +237,12 @@ def serve_private_media(request, path):
 
 def asciify(value):
     return unicodedata.normalize('NFKD', unicode(value)).encode('ascii', 'ignore')
+
+
+def latest_album(request):
+    album = Album.objects.allowed_for_user(request.user).order_by('-date')[:1]
+    if album:
+        pk = album[0].pk
+        return HttpResponseRedirect(reverse('gallery:album', args=[pk]))
+    else:
+        return HttpResponseRedirect(reverse('gallery:index'))

@@ -13,4 +13,5 @@ urlpatterns = patterns('',
     url(r'^photo/(?P<pk>\d+)/$', views.PhotoView.as_view(), name='photo'),
     url(r'^original/(?P<pk>\d+)/$', views.original_photo, name='photo-original'),
     url(r'^(?P<preset>\w+)/(?P<pk>\d+)/$', views.resized_photo, name='photo-resized'),
+    url(r'^latest/$', views.latest_album, name='latest'),
 )
