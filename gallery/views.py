@@ -240,9 +240,13 @@ def asciify(value):
 
 
 def latest_album(request):
-    album = Album.objects.allowed_for_user(request.user).order_by('-date')[:1]
-    if album:
-        pk = album[0].pk
+    if request.user.has_perm('gallery.view'):
+        albums = Album.objects.all()
+    else:
+        albums = Album.objects.allowed_for_user(request.user)
+    albums = albums.order_by('-date')[:1]
+    if albums:
+        pk = albums[0].pk
         return HttpResponseRedirect(reverse('gallery:album', args=[pk]))
     else:
         return HttpResponseRedirect(reverse('gallery:index'))
