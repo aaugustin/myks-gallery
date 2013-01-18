@@ -69,7 +69,8 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
                 for photo in album.photo_set.all():
                     if photo.is_allowed_for_user(user):
                         photos.append(photo)
-            album.preview = random.sample(photos, min(len(photos), 5))
+            album.photos_count = len(photos)
+            album.preview = random.sample(photos, min(album.photos_count, 5))
         return context
 
 

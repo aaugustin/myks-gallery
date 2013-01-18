@@ -25,7 +25,7 @@
 {% for album in album_list reversed %}
 <h3 class="album_preview">
 {{ album.display_name }}
-<span class="album_count">{% blocktrans count album.photo_set.count as num_photos %}one photo{% plural %}{{ num_photos }} photos{% endblocktrans %}</span>
+<span class="album_count">{% blocktrans count album.photo_count as num_photos %}one photo{% plural %}{{ num_photos }} photos{% endblocktrans %}</span>
 <span class="album_date">{{ album.date }}</span>
 <span class="album_category">{% trans album.category %}</span>
 </h3>
