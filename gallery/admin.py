@@ -98,7 +98,9 @@ class PhotoAdmin(ScanUrlMixin, admin.ModelAdmin):
     date_hierarchy = 'date'
     inlines = (PhotoAccessPolicyInline,)
     list_display = ('display_name', 'date', 'preview', 'public', 'groups', 'users')
-    ordering = ('-date', '-filename')
+    # Since date is mandatory on albums, '-album_date' avoids showing photos
+    # without date first on some databases (PostgreSQL).
+    ordering = ('-album__date', '-date', '-filename')
     readonly_fields = ('filename',)
     search_fields = ('album__name', 'album__dirpath', 'filename')
 
