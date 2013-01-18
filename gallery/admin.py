@@ -58,8 +58,7 @@ class SetAccessPolicyMixin(object):
                     except policy_model.DoesNotExist:
                         ap = policy_model(**{model_name: obj})
                         created += 1
-                    ap.__dict__.update(**form.cleaned_data)
-                    ap.save()
+                    form_class(request.POST, instance=ap).save()
                 self.message_user(request, ugettext(u"Successfully created "
                     "%(created)d and changed %(changed)s access policies.")
                     % {'created': created, 'changed': changed})
