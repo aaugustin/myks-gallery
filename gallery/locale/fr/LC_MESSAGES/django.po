@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-17 13:13+0100\n"
+"POT-Creation-Date: 2013-01-18 21:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,20 +17,45 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 
+msgid "Users"
+msgstr "Utilisateurs"
+
+msgid "Groups"
+msgstr "Groupes"
+
+#, python-format
+msgid ""
+"Successfully created %(created)d and changed %(changed)s access policies."
+msgstr ""
+"%(created)d politiques d'accès ont été créées et %(changed)d modifiées."
+
+msgid "Set access policy"
+msgstr "Définir la politique d'accès"
+
+#, python-format
+msgid "Successfully deleted %(deleted)d access policies."
+msgstr "%(created)d politiques d'accès ont été effacées."
+
+msgid "Unset access policy"
+msgstr "Supprimer la politique d'accès"
+
 msgid "Scan photos"
 msgstr "Scanner les photos"
 
 msgid "Home"
 msgstr "Accueil"
 
-msgid "Gallery"
-msgstr "Galerie"
-
 msgid "Scan"
 msgstr "Scanner"
 
 msgid "Click this button to re-scan your photo directory."
 msgstr "Cliquez ici pour re-scanner votre répertoire de photos."
+
+msgid "This will set the access policy for:"
+msgstr "La politique d'accès sera défini pour :"
+
+msgid "This will unset the access policy for:"
+msgstr "La politique d'accès sera supprimée pour :"
 
 msgid "Search"
 msgstr "Chercher"

@@ -1,0 +1,32 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+{% load admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_label|capfirst|escape }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; {% trans 'Unset access policy' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module" style="width: 25%;">
+    <p>{% trans "This will unset the access policy for:" %}</p>
+    <ul>
+        {% for obj in queryset %}
+        <li><a href="{{ obj.get_absolute_url }}">{{ obj }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<form action="" method="POST">
+    {% csrf_token %}
+    {% for obj in queryset %}
+    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}">
+    {% endfor %}
+    <input type="hidden" name="action" value="unset_access_policy">
+    <input type="submit" name="unset_access_policy" value="{% trans 'Unset access policy' %}">
+</form>
+{% endblock %}
