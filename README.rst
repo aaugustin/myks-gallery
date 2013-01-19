@@ -4,7 +4,7 @@ mYk's gallery
 Introduction
 ============
 
-`myks-gallery`_ is an simple photo gallery with granular access control.
+`myks-gallery`_ is a simple photo gallery with granular access control.
 
 It powers my `humble photo gallery`_, allowing me to:
 
@@ -18,7 +18,7 @@ It powers my `humble photo gallery`_, allowing me to:
 Use case
 ========
 
-Instead of using a photo manager, I just create a new directory for each event
+Rather than use a photo manager, I just create a new directory for each event
 and put my photos inside. I include the date of the event in the name of the
 directory and I rename photos based on their date and time. I regularly
 synchronize my collection to a server with rsync_.
@@ -28,8 +28,8 @@ synchronize my collection to a server with rsync_.
 If you have a similar workflow, you may find myks-gallery useful.
 
 Whenever I upload new photos, I re-scan the collection with ``./manage.py
-scanphotos``, and myks-gallery detects new albums and photos. Finally I define
-users, groups and access policies in the admin.
+scanphotos``, and myks-gallery detects new albums and photos. Then I can
+define users, groups and access policies in the admin.
 
 Album access policies control the visibility of albums. Most often, you'll
 enable the "photos inherit album access policy" option. If you need more
@@ -52,12 +52,6 @@ Installation guide
 ------------------
 
 This application isn't exactly plug'n'play. There are many moving pieces.
-
-The source_ contains a sample application in the ``example`` directory. It can
-help you see how everything fits together. See below for how to run it.
-
-.. _source: https://github.com/aaugustin/myks-gallery
-
 Here's the general process for integrating myks-gallery into an existing
 website:
 
@@ -87,9 +81,13 @@ website:
 7.  Scan your photos with the "Scan photos" button in the admin or the
     ``scanphotos`` management command and define access policies.
 
+The source_ contains a sample application in the ``example`` directory. It can
+help you see how everything fits together. See below for how to run it.
+
 .. _example: https://github.com/aaugustin/myks-gallery/blob/master/example/example/templates/base.html
 .. _X-accel: http://wiki.nginx.org/X-accel
 .. _mod_xsendfile: https://tn123.org/mod_xsendfile/
+.. _source: https://github.com/aaugustin/myks-gallery
 
 Permissions
 -----------
@@ -250,7 +248,9 @@ Running the sample application
     next page. You should see the following messages:
 
         Scanning .../myks-gallery/example/photos
+
         Adding album 2013_01_01_Featured Pictures (Photos) as Featured Pictures
+
         Done (0.01s)
 
     Now go to http://localhost:8000/ and enjoy!
