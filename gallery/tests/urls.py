@@ -4,7 +4,6 @@
 from django.conf.urls import patterns, url, include
 from django.contrib import admin
 
-from .. import urls
 from .. import views
 
 
@@ -12,10 +11,6 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
-)
-
-urlpatterns += urls.urlpatterns
-
-urlpatterns += patterns('',
     url(r'^private(?P<path>/.+)$', views.serve_private_media, name='gallery:album'),
+    url(r'^', include('gallery.urls', namespace='gallery', app_name='gallery')),
 )
