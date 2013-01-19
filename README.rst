@@ -1,40 +1,35 @@
 mYk's gallery
 #############
 
-Goals
-=====
+Introduction
+============
 
-myks-gallery is an simple photo gallery with granular access control.
+`myks-gallery`_ is an simple photo gallery with granular access control.
 
-It's designed for my personal needs:
+It powers my `humble photo gallery`_, allowing me to:
 
 - access my entire photo collection privately,
 - share some albums with family or friends,
 - make some albums public.
 
-It powers my `humble photo gallery`_.
-
-It's a pluggable Django application.
-
+.. _myks-gallery: https://github.com/aaugustin/myks-gallery
 .. _humble photo gallery: http://myks.org/photos/
 
-Usage
-=====
+Use case
+========
 
-I don't use a photo manager; I just create a new directory for each event and
-put my photos inside. I include the date of the event in the name of the
-directory and I rename photos based on their EXIF date and time. I regularly
-synchronize my collection to a server with rsync_. I use myks-gallery as web
-frontend to share them and to view them when I'm not at home.
+Instead of using a photo manager, I just create a new directory for each event
+and put my photos inside. I include the date of the event in the name of the
+directory and I rename photos based on their date and time. I regularly
+synchronize my collection to a server with rsync_.
 
 .. _rsync: http://rsync.samba.org/
 
-Whenever I upload new photos, I re-scan the collection with ``./manage.py
-scanphotos``, and myks-gallery detects new albums and photos. There's a "Scan
-photos" button in the admin that has exactly the same effect. Then I define
-users, groups and access policies through the admin.
-
 If you have a similar workflow, you may find myks-gallery useful.
+
+Whenever I upload new photos, I re-scan the collection with ``./manage.py
+scanphotos``, and myks-gallery detects new albums and photos. Finally I define
+users, groups and access policies in the admin.
 
 Album access policies control the visibility of albums. Most often, you'll
 enable the "photos inherit album access policy" option. If you need more
@@ -50,13 +45,21 @@ photos with relatives. You might want to use django-sesame_.
 Setup
 =====
 
-myks-gallery requires Python 2.6 or 2.7, Django 1.5 and PIL.
+myks-gallery is a pluggable Django application. It requires Python 2.6 or 2.7,
+Django 1.5, and PIL.
 
 Installation guide
 ------------------
 
 This application isn't exactly plug'n'play. There are many moving pieces.
-Here's the general process for integrating it into a website.
+
+The source_ contains a sample application in the ``example`` directory. It can
+help you see how everything fits together. See below for how to run it.
+
+.. _source: https://github.com/aaugustin/myks-gallery
+
+Here's the general process for integrating myks-gallery into an existing
+website:
 
 1.  Download and install the package from PyPI::
 
@@ -75,7 +78,8 @@ Here's the general process for integrating it into a website.
             url(r'^gallery/', include('gallery.urls', namespace='gallery', app_name='gallery')),
         )
 
-5.  Create a suitable ``base.html`` template — see below for details.
+5.  Create a suitable ``base.html`` template. It must provide three blocks:
+    ``title``, ``extrahead``, ``content``, as shown in this `example`_.
 
 6.  Enable `X-accel`_ (nginx) or `mod_xsendfile`_ (Apache) for your photo and
     cache directories (``GALLERY_PHOTO_DIR`` and ``GALLERY_CACHE_DIR``).
@@ -83,8 +87,19 @@ Here's the general process for integrating it into a website.
 7.  Scan your photos with the "Scan photos" button in the admin or the
     ``scanphotos`` management command and define access policies.
 
+.. _example: https://github.com/aaugustin/myks-gallery/blob/master/example/example/templates/base.html
 .. _X-accel: http://wiki.nginx.org/X-accel
 .. _mod_xsendfile: https://tn123.org/mod_xsendfile/
+
+Permissions
+-----------
+
+myks-gallery defines two permissions:
+
+- "Can scan the photos directory" allows using the "Scan photos" button in the
+  admin.
+- "Can see all photos" allows seeing all albums and all photos regardless of
+  access policies.
 
 Settings
 --------
@@ -200,22 +215,45 @@ Default: ``"Gallery"``
 Title of your photo gallery. This is only used by the default templates of the
 index and year views.
 
-Templates
----------
+Running the sample application
+==============================
 
-The default templates included in this application extend a template called
-``base.html``. It is your responsibility to provide this template.
+1.  Make sure Django and PIL are installed
 
-It must provide three blocks: ``title``, ``extrahead``, ``content``. Rather
-than a long explanation, here is a short example::
+2.  Download some pictures (warning: these files are large, total = 50MB; you
+    can use photos of your own instead as long as you respect the format of
+    the directory name: ``YYYY_MM_DD_album name``)::
 
-    <!DOCTYPE html>
-    <html>
-        <head>
-            <title>{% block title %}{% endblock %}</title>
-            {% block extrahead %}{% endblock %}
-        </head>
-        <body>
-            {% block content %}{% endblock %}
-        </body>
-    </html>
+    $ mkdir cache
+    $ mkdir photos
+    $ mkdir "photos/2013_01_01_Featured Pictures"
+    $ cd "photos/2013_01_01_Featured Pictures"
+    $ wget http://upload.wikimedia.org/wikipedia/commons/5/51/2012-11-23_16-05-52-grande-cascade-tendon.jpg
+    $ wget http://upload.wikimedia.org/wikipedia/commons/5/56/Crooked_Beak_of_Heaven_Mask.jpg
+    $ wget http://upload.wikimedia.org/wikipedia/commons/a/a4/Iglesia_de_Nuestra_Se%C3%B1ora_de_La_Blanca%2C_Cardej%C3%B3n%2C_Espa%C3%B1a%2C_2012-09-01%2C_DD_02.   JPG
+    $ wget http://upload.wikimedia.org/wikipedia/commons/1/17/Iglesia_del_Esp%C3%ADritu_Santo%2C_Landshut%2C_Alemania%2C_2012-05-27%2C_DD_02.JPG
+    $ wget http://upload.wikimedia.org/wikipedia/commons/3/33/Viru_Bog%2C_Parque_Nacional_Lahemaa%2C_Estonia%2C_2012-08-12%2C_DD_60.JPG
+    $ wget http://upload.wikimedia.org/wikipedia/commons/d/d7/Castillo_Trausnitz%2C_Landshut%2C_Alemania%2C_2012-05-27%2C_DD_18.JPG
+    $ wget http://upload.wikimedia.org/wikipedia/commons/b/b7/Catedral_de_Alejandro_Nevsky%2C_Tallin%2C_Estonia%2C_2012-08-11%2C_DD_46.JPG
+    $ wget http://upload.wikimedia.org/wikipedia/commons/3/3f/Crassula_arborescens%2C_Jard%C3%ADn_Bot%C3%A1nico%2C_M%C3%BAnich%2C_Alemania_2012-04-21%2C_DD_01.JPG
+    $ wget http://upload.wikimedia.org/wikipedia/commons/8/86/Plaza_del_ayuntamiento%2C_Set%C3%BAbal%2C_Portugal%2C_2012-08-17%2C_DD_01.JPG
+    $ wget http://upload.wikimedia.org/wikipedia/commons/7/71/4_cilindros_y_museo_BMW%2C_M%C3%BAnich%2C_Alemania_2012-04-28%2C_DD_02.JPG
+    $ cd ../..
+
+3.  Run the development server::
+
+    $ ./manage.py syncdb
+    $ ./manage.py runserver
+
+4.  Go to http://localhost:8000/admin/gallery/album/ and log in. Click the
+    "Scan photos" link at the top right, and the "Scan photos" button on the
+    next page. You should see the following messages:
+
+        Scanning .../myks-gallery/example/photos
+        Adding album 2013_01_01_Featured Pictures (Photos) as Featured Pictures
+        Done (0.01s)
+
+    Now go to http://localhost:8000/ and enjoy!
+
+    Since you're logged in as an admin user, you can view albums and photos
+    even though you haven't defined any access policies yet.

@@ -3,3 +3,7 @@
 dist
 htmlcov
 MANIFEST
+
+example/photos
+example/cache
+example/db.sqlite3
