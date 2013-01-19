@@ -11,8 +11,6 @@
 {% block content %}
 <h1>{{ title }}</h1>
 
-{% with request.GET.q as q %}
-
 {# search isn't targetet at anonymous users #}
 {% if user.is_authenticated %}
 <form action="{% url 'gallery:index' %}" method="GET" class="album_search">
@@ -52,7 +50,11 @@
 </div>
 {% endspaceless %}
 {% empty %}
+{% if q %}
+<p>{% trans "Sorry, no albums match your query." %}</p>
+{% else %}
 <p>{% trans "Sorry, you aren't authorized to view any albums." %}</p>
+{% endif %}
 {% endfor %}
 
 {% if is_paginated %}
@@ -67,5 +69,4 @@
 </div>
 {% endif %}
 
-{% endwith %}
 {% endblock %}

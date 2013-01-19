@@ -82,6 +82,13 @@ class GalleryIndexView(GalleryCommonMixin, AlbumListWithPreviewMixin, ArchiveInd
             qs = qs.filter(name__contains=query)
         return qs
 
+    def get_context_data(self, **kwargs):
+        context = super(GalleryIndexView, self).get_context_data(**kwargs)
+        query = self.request.GET.get('q', '')
+        if query:
+            context['q'] = query
+        return context
+
 
 class GalleryYearView(GalleryCommonMixin, AlbumListWithPreviewMixin, YearArchiveView):
     make_object_list = True
