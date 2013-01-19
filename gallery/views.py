@@ -207,18 +207,18 @@ def serve_private_media(request, path):
 
     # begin copy-paste from django.views.static.serve
     statobj = os.stat(path)
-    mimetype, encoding = mimetypes.guess_type(path)
-    mimetype = mimetype or 'application/octet-stream'
+    content_type, encoding = mimetypes.guess_type(path)
+    content_type = content_type or 'application/octet-stream'
     if not was_modified_since(request.META.get('HTTP_IF_MODIFIED_SINCE'),
                               statobj.st_mtime, statobj.st_size):
-        return HttpResponseNotModified(mimetype=mimetype)
+        return HttpResponseNotModified(content_type=content_type)
     # pause copy-paste from django.views.static.serve
 
     if settings.DEBUG:
         with open(path, 'rb') as f:
-            response = HttpResponse(f.read(), mimetype=mimetype)
+            response = HttpResponse(f.read(), content_type=content_type)
     else:
-        response = HttpResponse('', mimetype=mimetype)
+        response = HttpResponse('', content_type=content_type)
         if settings.SENDFILE_ROOT:
             if not path.startswith(settings.SENDFILE_ROOT):
                 raise ValueError("Requested file isn't under SENDFILE_ROOT.")
