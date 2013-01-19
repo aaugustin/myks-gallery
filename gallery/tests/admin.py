@@ -13,6 +13,7 @@ from django.test.utils import override_settings
 
 from ..models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
 
+
 class AdminTests(TestCase):
 
     def setUp(self):
@@ -47,4 +48,3 @@ class AdminTests(TestCase):
                 self.client.post(reverse('admin:gallery.admin.scan_photos'))
         finally:
             shutil.rmtree(tmpdir)
-
