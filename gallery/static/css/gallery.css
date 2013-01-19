@@ -34,13 +34,14 @@
 }
 .photo_list a {
     display: inline-block;
-    margin: 0 4px 4px 0;
+    margin: 0 7px 7px 0;
 }
 .photo_list a img {
     height: 128px;
     width: 128px;
     border: 1px solid #bbb;
     padding: 7px;
+    vertical-align: middle;
 }
 
 .photo_detail {
@@ -51,6 +52,7 @@
     max-width: 768px;
     border: 1px solid #bbb;
     padding: 7px;
+    vertical-align: middle;
 }
 
 .photo_nav {

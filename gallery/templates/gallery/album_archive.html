@@ -42,6 +42,7 @@
 <span class="album_date">{{ album.date }}</span>
 <span class="album_category">{% trans album.category %}</span>
 </h3>
+{% spaceless %}
 <div class="photo_list">
 {% for photo in album.preview %}
 <a href="{{ album.get_absolute_url }}"><img src="{% url 'gallery:photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
@@ -49,6 +50,7 @@
 <p>{% trans "Sorry, you aren't authorized to view any photos in this album." %}</p>
 {% endfor %}
 </div>
+{% endspaceless %}
 {% empty %}
 <p>{% trans "Sorry, you aren't authorized to view any albums." %}</p>
 {% endfor %}
