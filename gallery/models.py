@@ -184,7 +184,7 @@ class Photo(models.Model):
                 date__isnull=True, filename__lt=self.filename)
         else:
             photos = photos.filter(
-                date__isnull(Q=True)
+                Q(date__isnull=True)
                 | Q(date__lt=self.date)
                 | Q(date=self.date, filename__gt=self.filename))
         return photos.order_by('-date', '-filename')[:1].get()
