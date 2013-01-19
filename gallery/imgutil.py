@@ -44,7 +44,7 @@ def make_thumbnail(image_path, thumb_path, preset):
             pass
     # Pre-crop if requested and the aspect ratios don't match exactly
     image_width, image_height = image.size
-    thumb_width, thumb_height, crop = settings.PHOTO_RESIZE_PRESETS[preset]
+    thumb_width, thumb_height, crop = settings.GALLERY_RESIZE_PRESETS[preset]
     if crop:
         if thumb_width * image_height > image_width * thumb_height:
             target_height = image_width * thumb_height // thumb_width
@@ -56,7 +56,7 @@ def make_thumbnail(image_path, thumb_path, preset):
             image = image.crop((left, 0, left + target_width, image_height))
     # Save the thumbnail
     image.thumbnail((thumb_width, thumb_height), Image.ANTIALIAS)
-    options = settings.PHOTO_RESIZE_OPTIONS.get(image.format, {})
+    options = getattr(settings, 'GALLERY_RESIZE_OPTIONS', {}).get(image.format, {})
     try:
         if not os.path.isdir(os.path.dirname(thumb_path)):
             os.makedirs(os.path.dirname(thumb_path))

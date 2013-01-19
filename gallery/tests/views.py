@@ -21,13 +21,13 @@ class ServePrivateMediaTests(TestCase):
 
     # See https://tn123.org/mod_xsendfile/
 
-    @override_settings(DEBUG=True, SENDFILE_HEADER='X-SendFile', SENDFILE_ROOT='')
+    @override_settings(DEBUG=True, GALLERY_SENDFILE_HEADER='X-SendFile', GALLERY_SENDFILE_ROOT='')
     def test_apache_dev(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-SendFile'), None)
         self.assertEqual(response.content, self.file_contents)
 
-    @override_settings(DEBUG=False, SENDFILE_HEADER='X-SendFile', SENDFILE_ROOT='')
+    @override_settings(DEBUG=False, GALLERY_SENDFILE_HEADER='X-SendFile', GALLERY_SENDFILE_ROOT='')
     def test_apache_prod(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-SendFile'), self.absolute_path)
@@ -35,13 +35,13 @@ class ServePrivateMediaTests(TestCase):
 
     # See http://wiki.nginx.org/XSendfile
 
-    @override_settings(DEBUG=True, SENDFILE_HEADER='X-Accel-Redirect', SENDFILE_ROOT=root_dir)
+    @override_settings(DEBUG=True, GALLERY_SENDFILE_HEADER='X-Accel-Redirect', GALLERY_SENDFILE_ROOT=root_dir)
     def test_nginx_dev(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-Accel-Redirect'), None)
         self.assertEqual(response.content, self.file_contents)
 
-    @override_settings(DEBUG=False, SENDFILE_HEADER='X-Accel-Redirect', SENDFILE_ROOT=root_dir)
+    @override_settings(DEBUG=False, GALLERY_SENDFILE_HEADER='X-Accel-Redirect', GALLERY_SENDFILE_ROOT=root_dir)
     def test_nginx_prod(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-Accel-Redirect'), self.relative_path)
@@ -54,6 +54,6 @@ class ServePrivateMediaTests(TestCase):
         response = self.client.get(self.private_url + '.does.not.exist')
         self.assertEqual(response.status_code, 404)
 
-    @override_settings(DEBUG=False, SENDFILE_HEADER='X-Accel-Redirect', SENDFILE_ROOT=root_dir + root_dir)
+    @override_settings(DEBUG=False, GALLERY_SENDFILE_HEADER='X-Accel-Redirect', GALLERY_SENDFILE_ROOT=root_dir + root_dir)
     def test_file_not_under_root(self):
         self.assertRaises(ValueError, self.client.get, self.private_url)

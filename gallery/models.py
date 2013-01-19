@@ -190,19 +190,19 @@ class Photo(models.Model):
         return photos.order_by('-date', '-filename')[:1].get()
 
     def abspath(self):
-        return os.path.join(settings.PHOTO_ROOT, self.album.dirpath, self.filename)
+        return os.path.join(settings.GALLERY_PHOTO_DIR, self.album.dirpath, self.filename)
 
     def thumbname(self, preset):
         prefix = self.album.date.strftime('%y%m')
         hsh = hashlib.sha1()
         hsh.update(self.album.dirpath.encode('utf-8'))
         hsh.update(self.filename.encode('utf-8'))
-        hsh.update(str(settings.PHOTO_RESIZE_PRESETS[preset]))
+        hsh.update(str(settings.GALLERY_RESIZE_PRESETS[preset]))
         ext = os.path.splitext(self.filename)[1].lower()
         return os.path.join(prefix, hsh.hexdigest() + ext)
 
     def thumbnail(self, preset):
-        thumbpath = os.path.join(settings.PHOTO_CACHE, self.thumbname(preset))
+        thumbpath = os.path.join(settings.GALLERY_CACHE_DIR, self.thumbname(preset))
         if not os.path.exists(thumbpath):
             make_thumbnail(self.abspath(), thumbpath, preset)
         return thumbpath

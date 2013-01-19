@@ -20,14 +20,14 @@ from ...models import Album, Photo
 
 
 class Command(base.NoArgsCommand):
-    help = 'Scan PHOTO_ROOT and update database.'
+    help = 'Scan GALLERY_PHOTO_DIR and update database.'
 
     @transaction.commit_on_success
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', '1'))
         if self.verbosity >= 1:
             t = time.time()
-            self.stdout.write(u"Scanning %s\n" % settings.PHOTO_ROOT)
+            self.stdout.write(u"Scanning %s\n" % settings.GALLERY_PHOTO_DIR)
         albums = scan_photo_root(self)
         synchronize_albums(albums, self)
         synchronize_photos(albums, self)
@@ -36,13 +36,13 @@ class Command(base.NoArgsCommand):
             self.stdout.write(u"Done (%.02fs)\n" % dt)
 
 
-ignores = [re.compile(pat) for pat in settings.PHOTO_IGNORES]
+ignores = [re.compile(i) for i in getattr(settings, 'GALLERY_IGNORES', ())]
 
 def is_ignored(path):
     return any(pat.match(path) for pat in ignores)
 
 
-patterns = [(cat, re.compile(pat)) for cat, pat in settings.PHOTO_PATTERNS]
+patterns = [(cat, re.compile(pat)) for cat, pat in settings.GALLERY_PATTERNS]
 
 def is_matched(path):
     for category, pattern in patterns:
@@ -55,12 +55,12 @@ fs_encoding = sys.getfilesystemencoding()
 
 def iter_photo_root(command):
     """Yield relative path, category and regex captures for each photo."""
-    for dirpath, _, filenames in os.walk(settings.PHOTO_ROOT):
+    for dirpath, _, filenames in os.walk(settings.GALLERY_PHOTO_DIR):
         dirpath = dirpath.decode(fs_encoding)
         for filename in filenames:
             filename = filename.decode(fs_encoding)
             filepath = os.path.join(dirpath, filename)
-            relpath = os.path.relpath(filepath, settings.PHOTO_ROOT)
+            relpath = os.path.relpath(filepath, settings.GALLERY_PHOTO_DIR)
             if is_ignored(relpath):
                 if command.verbosity >= 3:
                     command.stdout.write(u"- %s\n" % relpath)

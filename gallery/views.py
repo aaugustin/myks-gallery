@@ -28,11 +28,6 @@ class GalleryCommonMixin(object):
             self._can_view_all = self.request.user.has_perm('gallery.view')
         return self._can_view_all
 
-    def get_context_data(self, **kwargs):
-        context = super(GalleryCommonMixin, self).get_context_data(**kwargs)
-        context['title'] = getattr(settings, 'PHOTO_TITLE', u"Gallery")
-        return context
-
 
 class AlbumListMixin(object):
     """Perform access control and database optimization for albums."""
@@ -84,6 +79,11 @@ class GalleryIndexView(GalleryCommonMixin, AlbumListWithPreviewMixin, ArchiveInd
         if query:
             qs = qs.filter(name__contains=query)
         return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(GalleryIndexView, self).get_context_data(**kwargs)
+        context['title'] = getattr(settings, 'GALLERY_TITLE', u"Gallery")
+        return context
 
 
 class GalleryYearView(GalleryCommonMixin, AlbumListWithPreviewMixin, YearArchiveView):
@@ -158,7 +158,7 @@ def resized_photo(request, preset, pk):
     response = serve_private_media(request, path)
 
     root, ext = os.path.splitext(asciify(photo.filename))
-    width, height, _ = settings.PHOTO_RESIZE_PRESETS[preset]
+    width, height, _ = settings.GALLERY_RESIZE_PRESETS[preset]
     ascii_filename = '%s_%sx%s%s' % (root, width, height, ext)
     response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
     return response
@@ -191,15 +191,16 @@ def serve_private_media(request, path):
     view. If ``DEBUG`` is ``False``, it sets a header and doesn't send the
     actual contents of the file.
 
-    The name of the header is defined by ``settings.SENDFILE_HEADER``. Use
-    ``'X-Accel-Redirect'`` for nginx and ``'X-SendFile'`` for Apache.
+    The name of the header is defined by ``settings.GALLERY_SENDFILE_HEADER``.
+    Use ``'X-Accel-Redirect'`` for nginx and ``'X-SendFile'`` for Apache.
 
     ``path`` must be an absolute path. Depending on your webserver's
     configuration, the header should contain either a relative path or full
-    path. Therefore, ``settings.SENDFILE_ROOT`` will be stripped from the
-    beginning of the path to create the header's value. It must be the root of
-    the internal location under nginx. It may be XSendFilePath or empty for
-    Apache.
+    path. Therefore, ``settings.GALLERY_SENDFILE_ROOT`` will be stripped from
+    the beginning of the path to create the header's value. It must be the
+    root of the internal location under nginx. It may be XSendFilePath or
+    empty for Apache.
+
     """
     if not os.path.exists(path):
         # Don't reveal the file name on the filesystem.
@@ -219,11 +220,11 @@ def serve_private_media(request, path):
             response = HttpResponse(f.read(), content_type=content_type)
     else:
         response = HttpResponse('', content_type=content_type)
-        if settings.SENDFILE_ROOT:
-            if not path.startswith(settings.SENDFILE_ROOT):
-                raise ValueError("Requested file isn't under SENDFILE_ROOT.")
-            path = path[len(settings.SENDFILE_ROOT):]
-        response[settings.SENDFILE_HEADER] = path.encode(sys.getfilesystemencoding())
+        if settings.GALLERY_SENDFILE_ROOT:
+            if not path.startswith(settings.GALLERY_SENDFILE_ROOT):
+                raise ValueError("Requested file isn't under GALLERY_SENDFILE_ROOT.")
+            path = path[len(settings.GALLERY_SENDFILE_ROOT):]
+        response[settings.GALLERY_SENDFILE_HEADER] = path.encode(sys.getfilesystemencoding())
 
     # resume copy-paste from django.views.static.serve
     response["Last-Modified"] = http_date(statobj.st_mtime)

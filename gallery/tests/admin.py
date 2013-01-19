@@ -44,7 +44,7 @@ class AdminTests(TestCase):
         with open(os.path.join(tmpdir, 'test'), 'wb') as handle:
             handle.write('test')
         try:
-            with override_settings(PHOTO_ROOT=tmpdir):
+            with override_settings(GALLERY_PHOTO_DIR=tmpdir):
                 self.client.post(reverse('admin:gallery.admin.scan_photos'))
         finally:
             shutil.rmtree(tmpdir)
