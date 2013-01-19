@@ -66,6 +66,7 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
                         photos.append(photo)
             album.photos_count = len(photos)
             album.preview = random.sample(photos, min(album.photos_count, 5))
+        context['title'] = getattr(settings, 'GALLERY_TITLE', u"Gallery")
         return context
 
 
@@ -79,11 +80,6 @@ class GalleryIndexView(GalleryCommonMixin, AlbumListWithPreviewMixin, ArchiveInd
         if query:
             qs = qs.filter(name__contains=query)
         return qs
-
-    def get_context_data(self, **kwargs):
-        context = super(GalleryIndexView, self).get_context_data(**kwargs)
-        context['title'] = getattr(settings, 'GALLERY_TITLE', u"Gallery")
-        return context
 
 
 class GalleryYearView(GalleryCommonMixin, AlbumListWithPreviewMixin, YearArchiveView):
