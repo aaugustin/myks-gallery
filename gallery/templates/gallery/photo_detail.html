@@ -7,9 +7,8 @@
 
 {% block title %}{{ block.super }} - {{ photo.album.display_name }} - {{ photo.display_name }}{% endblock %}
 
-{% block header %}{{ photo.album.display_name }} - {{ photo.display_name }}{% endblock %}
-
 {% block content %}
+<h1>{{ photo.album.display_name }} - {{ photo.display_name }}</h1>
 <div class="photo_nav">
 {% if previous_photo %}
 <a href="{{ previous_photo.get_absolute_url }}" class="previous">&larr; {{ previous_photo.display_name }}</a>

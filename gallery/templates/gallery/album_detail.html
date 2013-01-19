@@ -8,9 +8,8 @@
 
 {% block title %}{{ block.super }} - {{ album.display_name }} - {{ album.date }}{% endblock %}
 
-{% block header %}{{ album.display_name }} - {{ album.date }}{% endblock %}
-
 {% block content %}
+<h1>{{ album.display_name }} - {{ album.date }}</h1>
 <div class="photo_nav">
 {% if previous_album %}
 <span class="previous">

@@ -8,12 +8,12 @@
 
 {% block title %}{{ block.super }} - {{ title }}{% endblock %}
 
-{% block header %}{{ title }}{% endblock %}
-
 {% block content %}
+<h1>{{ title }}</h1>
+
 {% with request.GET.q as q %}
 
-{# search isn't useful for random Internet users #}
+{# search isn't targetet at anonymous users #}
 {% if user.is_authenticated %}
 <form action="{% url 'gallery:index' %}" method="GET" class="album_search">
 <input type="text" name="q" required="required" size="20" value="{{ q }}">

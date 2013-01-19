@@ -8,9 +8,8 @@
 
 {% block title %}{{ block.super }} - {{ title }}{% endblock %}
 
-{% block header %}{{ title }}{% endblock %}
-
 {% block content %}
+<h1>{{ title }}</h1>
 <div class="photo_nav">
 {% if previous_year %}
 <a href="{% url 'gallery:year' previous_year.year %}" class="previous">&larr; {{ previous_year.year }}</a>
