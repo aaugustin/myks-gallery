@@ -4,6 +4,7 @@
 import mimetypes
 import os
 import random
+import re
 import stat
 import sys
 import unicodedata
@@ -153,7 +154,7 @@ def resized_photo(request, preset, pk):
     path = photo.thumbnail(preset)
     response = serve_private_media(request, path)
 
-    root, ext = os.path.splitext(asciify(photo.filename))
+    root, ext = os.path.splitext(sanitize(photo.filename))
     width, height, _ = settings.GALLERY_RESIZE_PRESETS[preset]
     ascii_filename = '%s_%sx%s%s' % (root, width, height, ext)
     response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
@@ -166,7 +167,7 @@ def original_photo(request, pk):
     path = photo.abspath()
     response = serve_private_media(request, path)
 
-    ascii_filename = asciify(photo.filename)
+    ascii_filename = sanitize(photo.filename)
     response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
     return response
 
@@ -233,8 +234,13 @@ def serve_private_media(request, path):
     return response
 
 
-def asciify(value):
-    return unicodedata.normalize('NFKD', unicode(value)).encode('ascii', 'ignore')
+_sanitize_re = re.compile(ur'[^0-9A-Za-z_.-]')
+
+def sanitize(value):
+    value = unicodedata.normalize('NFKD', unicode(value))
+    value = value.encode('ascii', 'ignore')
+    value = _sanitize_re.sub('', value.replace(' ', '_'))
+    return value
 
 
 def latest_album(request):
