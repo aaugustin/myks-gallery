@@ -60,7 +60,7 @@ class SetAccessPolicyMixin(object):
                         created += 1
                     form_class(request.POST, instance=ap).save()
                 self.message_user(request, ugettext(u"Successfully created "
-                    "%(created)d and changed %(changed)s access policies.")
+                    "%(created)d and changed %(changed)d access policies.")
                     % {'created': created, 'changed': changed})
                 return HttpResponseRedirect(reverse('admin:gallery_%s_changelist' % model_name))
         else:
