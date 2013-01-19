@@ -193,12 +193,13 @@ class Photo(models.Model):
         return os.path.join(settings.PHOTO_ROOT, self.album.dirpath, self.filename)
 
     def thumbname(self, preset):
-        ext = os.path.splitext(self.filename)[1]
+        prefix = self.album.date.strftime('%y%m')
         hsh = hashlib.sha1()
         hsh.update(self.album.dirpath.encode('utf-8'))
         hsh.update(self.filename.encode('utf-8'))
         hsh.update(str(settings.PHOTO_RESIZE_PRESETS[preset]))
-        return hsh.hexdigest() + ext
+        ext = os.path.splitext(self.filename)[1].lower()
+        return os.path.join(prefix, hsh.hexdigest() + ext)
 
     def thumbnail(self, preset):
         thumbpath = os.path.join(settings.PHOTO_CACHE, self.thumbname(preset))

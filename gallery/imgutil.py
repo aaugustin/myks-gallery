@@ -31,7 +31,9 @@ exif_rotations = (
 fs_encoding = sys.getfilesystemencoding()
 
 def make_thumbnail(image_path, thumb_path, preset):
-    image = Image.open(image_path.encode(fs_encoding))
+    image_path = image_path.encode(fs_encoding)
+    thumb_path = thumb_path.encode(fs_encoding)
+    image = Image.open(image_path)
     # Auto-rotate JPEG files based on EXIF information
     if image.format == 'JPEG':
         try:
@@ -56,7 +58,9 @@ def make_thumbnail(image_path, thumb_path, preset):
     image.thumbnail((thumb_width, thumb_height), Image.ANTIALIAS)
     options = settings.PHOTO_RESIZE_OPTIONS.get(image.format, {})
     try:
-        image.save(thumb_path.encode(fs_encoding), **options)
+        if not os.path.isdir(os.path.dirname(thumb_path)):
+            os.makedirs(os.path.dirname(thumb_path))
+        image.save(thumb_path, **options)
     except IOError:
         try:
             os.unlink(thumb_path)
