@@ -53,32 +53,35 @@ class AdminTests(TestCase):
     def test_set_album_access_policy(self):
         response = self.client.post(reverse('admin:gallery_album_changelist'), {
             'action': 'set_access_policy',
-            ACTION_CHECKBOX_NAME: str(self.album2.pk),
+            ACTION_CHECKBOX_NAME: [str(self.album.pk), str(self.album2.pk)],
         })
         self.assertTemplateUsed(response, 'admin/gallery/set_access_policy.html')
+        self.assertFalse(Album.objects.get(pk=self.album.pk).access_policy.inherit)
         with self.assertRaises(AlbumAccessPolicy.DoesNotExist):
             Album.objects.get(pk=self.album2.pk).access_policy
 
         response = self.client.post(reverse('admin:gallery_album_changelist'), {
             'action': 'set_access_policy',
-            ACTION_CHECKBOX_NAME: str(self.album2.pk),
+            ACTION_CHECKBOX_NAME: [str(self.album.pk), str(self.album2.pk)],
             'public': True,
+            'inherit': True,
             'set_access_policy': "Set access policy",
         })
         self.assertRedirects(response, reverse('admin:gallery_album_changelist'))
-        self.assertTrue(Album.objects.get(pk=self.album2.pk).access_policy.public)
+        self.assertTrue(Album.objects.get(pk=self.album.pk).access_policy.inherit)
+        self.assertTrue(Album.objects.get(pk=self.album2.pk).access_policy.inherit)
 
     def test_unset_album_access_policy(self):
         response = self.client.post(reverse('admin:gallery_album_changelist'), {
             'action': 'unset_access_policy',
-            ACTION_CHECKBOX_NAME: str(self.album.pk),
+            ACTION_CHECKBOX_NAME: [str(self.album.pk), str(self.album2.pk)],
         })
         self.assertTemplateUsed(response, 'admin/gallery/unset_access_policy.html')
         self.assertTrue(Album.objects.get(pk=self.album.pk).access_policy.public)
 
         response = self.client.post(reverse('admin:gallery_album_changelist'), {
             'action': 'unset_access_policy',
-            ACTION_CHECKBOX_NAME: str(self.album.pk),
+            ACTION_CHECKBOX_NAME: [str(self.album.pk), str(self.album2.pk)],
             'public': True,
             'unset_access_policy': "Unset access policy",
         })
