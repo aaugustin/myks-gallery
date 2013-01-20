@@ -6,6 +6,7 @@ import os
 import shutil
 import tempfile
 
+from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -48,3 +49,39 @@ class AdminTests(TestCase):
                 self.client.post(reverse('admin:gallery.admin.scan_photos'))
         finally:
             shutil.rmtree(tmpdir)
+
+    def test_set_album_access_policy(self):
+        response = self.client.post(reverse('admin:gallery_album_changelist'), {
+            'action': 'set_access_policy',
+            ACTION_CHECKBOX_NAME: str(self.album2.pk),
+        })
+        self.assertTemplateUsed(response, 'admin/gallery/set_access_policy.html')
+        with self.assertRaises(AlbumAccessPolicy.DoesNotExist):
+            Album.objects.get(pk=self.album2.pk).access_policy
+
+        response = self.client.post(reverse('admin:gallery_album_changelist'), {
+            'action': 'set_access_policy',
+            ACTION_CHECKBOX_NAME: str(self.album2.pk),
+            'public': True,
+            'set_access_policy': "Set access policy",
+        })
+        self.assertRedirects(response, reverse('admin:gallery_album_changelist'))
+        self.assertTrue(Album.objects.get(pk=self.album2.pk).access_policy.public)
+
+    def test_unset_album_access_policy(self):
+        response = self.client.post(reverse('admin:gallery_album_changelist'), {
+            'action': 'unset_access_policy',
+            ACTION_CHECKBOX_NAME: str(self.album.pk),
+        })
+        self.assertTemplateUsed(response, 'admin/gallery/unset_access_policy.html')
+        self.assertTrue(Album.objects.get(pk=self.album.pk).access_policy.public)
+
+        response = self.client.post(reverse('admin:gallery_album_changelist'), {
+            'action': 'unset_access_policy',
+            ACTION_CHECKBOX_NAME: str(self.album.pk),
+            'public': True,
+            'unset_access_policy': "Unset access policy",
+        })
+        self.assertRedirects(response, reverse('admin:gallery_album_changelist'))
+        with self.assertRaises(AlbumAccessPolicy.DoesNotExist):
+            Album.objects.get(pk=self.album.pk).access_policy

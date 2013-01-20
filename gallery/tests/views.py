@@ -1,14 +1,56 @@
 # coding: utf-8
 # Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
+import datetime
 import os
 
+from django.core.urlresolvers import reverse
+from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.test.utils import override_settings
 
+from ..models import Album, AlbumAccessPolicy, Photo
+
+
+class ViewsTests(TestCase):
+
+    def setUp(self):
+        self.album = Album.objects.create(category='default', dirpath='foo', date=datetime.date.today())
+        AlbumAccessPolicy.objects.create(album=self.album, public=True, inherit=True)
+        self.photo = Photo.objects.create(album=self.album, filename='bar')
+
+    def test_index_view(self):
+        response = self.client.get(reverse('gallery:index'))
+        self.assertTemplateUsed(response, 'gallery/album_archive.html')
+
+    def test_year_view(self):
+        response = self.client.get(reverse('gallery:year', args=[self.album.date.year]))
+        self.assertTemplateUsed(response, 'gallery/album_archive_year.html')
+
+    def test_album_view(self):
+        response = self.client.get(reverse('gallery:album', args=[self.album.pk]))
+        self.assertTemplateUsed(response, 'gallery/album_detail.html')
+
+    def test_photo_view(self):
+        response = self.client.get(reverse('gallery:photo', args=[self.photo.pk]))
+        self.assertTemplateUsed(response, 'gallery/photo_detail.html')
+
+    def test_latest_view(self):
+        response = self.client.get(reverse('gallery:latest'))
+        self.assertRedirects(response, reverse('gallery:album', args=[self.album.pk]))
+
+
+class ViewsWithPermissionTests(ViewsTests):
+
+    def setUp(self):
+        self.album = Album.objects.create(category='default', dirpath='foo', date=datetime.date.today())
+        self.photo = Photo.objects.create(album=self.album, filename='bar')
+        self.user = User.objects.create_user('user', 'user@gallery', 'pass')
+        self.user.user_permissions.add(Permission.objects.get(codename='view'))
+        self.client.login(username='user', password='pass')
+
 
 class ServePrivateMediaTests(TestCase):
-    urls = 'gallery.tests.urls'
 
     # Constants used by the tests
 

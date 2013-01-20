@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import os
+
 # Django settings
 
 DATABASES = {
@@ -7,19 +9,22 @@ DATABASES = {
 }
 
 INSTALLED_APPS = (
+    'gallery',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.messages',
     'django.contrib.sessions',
-    'gallery',
+    'django.contrib.staticfiles',
 )
-
-LOGGING_CONFIG = None
 
 ROOT_URLCONF = 'gallery.tests.urls'
 
 SECRET_KEY = 'Not empty for tests.'
+
+STATIC_URL = '/static/'
+
+TEMPLATE_DIRS = os.path.join(os.path.dirname(__file__), 'templates'),
 
 # Custom settings
 
