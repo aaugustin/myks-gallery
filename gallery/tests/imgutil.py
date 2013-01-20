@@ -8,7 +8,7 @@ import tempfile
 try:
     from PIL import Image
     from PIL import ImageDraw
-except ImportError:
+except ImportError:                                         # pragma: no cover
     import Image
     import ImageDraw
 

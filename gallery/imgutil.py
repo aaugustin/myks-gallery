@@ -9,7 +9,7 @@ import sys
 try:
     from PIL import Image
     from PIL import ImageFile
-except ImportError:
+except ImportError:                                         # pragma: no cover
     import Image
     import ImageFile
 
@@ -70,7 +70,7 @@ def make_thumbnail(image_path, thumb_path, preset):
         if not os.path.isdir(os.path.dirname(thumb_path)):
             os.makedirs(os.path.dirname(thumb_path))
         image.save(thumb_path, **options)
-    except IOError:
+    except IOError:                                         # pragma: no cover
         try:
             os.unlink(thumb_path)
         except OSError:
