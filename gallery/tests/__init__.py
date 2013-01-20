@@ -2,5 +2,6 @@
 # Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
 from .admin import *
+from .imgutil import *
 from .models import *
 from .views import *
