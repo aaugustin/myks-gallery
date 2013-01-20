@@ -57,5 +57,5 @@ GALLERY_RESIZE_PRESETS = {
 }
 
 GALLERY_RESIZE_OPTIONS = {
-    'JPEG': {'quality': 95},
+    'JPEG': {'quality': 95, 'optimize': True},
 }

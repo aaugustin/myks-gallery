@@ -183,7 +183,7 @@ Dictionary mapping image formats names to to dictionaries of options for PIL's
 This is a reasonable value::
 
     GALLERY_RESIZE_OPTIONS = {
-        'JPEG': {'quality': 95, 'optimize': True, 'progressive': True},
+        'JPEG': {'quality': 95, 'optimize': True},
     }
 
 .. _options:
