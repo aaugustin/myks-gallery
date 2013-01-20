@@ -163,8 +163,8 @@ class Photo(models.Model):
     def is_allowed_for_user_sql(self, user):
         return Photo.objects.allowed_for_user(user).filter(pk=self.pk).exists()
 
-    # In the next two functions, images whose date is None come first.
-    # This is how SQL works, but we need to special case it here.
+    # In the next two functions, images whose date is None may come
+    # first or last, depending on the database.
     # These expressions are optimized for clarity, not concision.
 
     def get_next_in_queryset(self, photos):
