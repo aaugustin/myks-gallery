@@ -33,11 +33,13 @@ exif_rotations = (
 fs_encoding = sys.getfilesystemencoding()
 
 def make_thumbnail(image_path, thumb_path, preset):
+    options = getattr(settings, 'GALLERY_RESIZE_OPTIONS', {})
+    presets = getattr(settings, 'GALLERY_RESIZE_PRESETS', {})
+
     image_path = image_path.encode(fs_encoding)
     thumb_path = thumb_path.encode(fs_encoding)
 
     image = Image.open(image_path)
-    options = getattr(settings, 'GALLERY_RESIZE_OPTIONS', {}).get(image.format, {})
 
     if image.format == 'JPEG':
         # Auto-rotate JPEG files based on EXIF information
@@ -53,7 +55,7 @@ def make_thumbnail(image_path, thumb_path, preset):
 
     # Pre-crop if requested and the aspect ratios don't match exactly
     image_width, image_height = image.size
-    thumb_width, thumb_height, crop = settings.GALLERY_RESIZE_PRESETS[preset]
+    thumb_width, thumb_height, crop = presets[preset]
     if crop:
         if thumb_width * image_height > image_width * thumb_height:
             target_height = image_width * thumb_height // thumb_width
@@ -69,7 +71,7 @@ def make_thumbnail(image_path, thumb_path, preset):
     try:
         if not os.path.isdir(os.path.dirname(thumb_path)):
             os.makedirs(os.path.dirname(thumb_path))
-        image.save(thumb_path, **options)
+        image.save(thumb_path, **options.get(image.format, {}))
     except IOError:                                         # pragma: no cover
         try:
             os.unlink(thumb_path)

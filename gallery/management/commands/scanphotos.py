@@ -42,7 +42,7 @@ def is_ignored(path):
     return any(pat.match(path) for pat in ignores)
 
 
-patterns = [(cat, re.compile(pat)) for cat, pat in settings.GALLERY_PATTERNS]
+patterns = [(cat, re.compile(pat)) for cat, pat in getattr(settings, 'GALLERY_PATTERNS', ())]
 
 def is_matched(path):
     for category, pattern in patterns:

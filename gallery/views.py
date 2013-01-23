@@ -180,32 +180,30 @@ def original_photo(request, pk):
 
 
 def serve_private_media(request, path):
-    """Serve a private media file.
+    """Serve a private media file with the webserver's "sendfile" if possible.
 
-    Here's an example of how to use this function. We want to serve the file
-    stored in the 'file' attribute of a 'Document' model only to users who
-    have the 'can_download' permission::
+    Here's an example of how to use this function. The 'Document' model tracks
+    files. It provides a 'get_file_path' method returning the absolute path to
+    the actual file. The following view serves file only to users having the
+    'can_download' permission::
 
         @permission_required('documents.can_download')
         def download_document(request, document_id):
-            path = Document.objects.get(pk=document_id).file.path
+            path = Document.objects.get(pk=document_id).get_file_path()
             return serve_private_media(request, path)
 
-    If ``DEBUG`` is ``True``, this function behaves like Django's static serve
-    view. If ``DEBUG`` is ``False``, it sets a header and doesn't send the
-    actual contents of the file.
-
-    The name of the header is defined by ``settings.GALLERY_SENDFILE_HEADER``.
-    Use ``'X-Accel-Redirect'`` for nginx and ``'X-SendFile'`` for Apache.
+    If ``DEBUG`` is ``False`` and ``settings.GALLERY_SENDFILE_HEADER`` is set,
+    this function sets a header and doesn't send the actual contents of the
+    file. Use ``'X-Accel-Redirect'`` for nginx and ``'X-SendFile'`` for Apache
+    with mod_xsendfile. Otherwise, this function behaves like Django's static
+    serve view.
 
     ``path`` must be an absolute path. Depending on your webserver's
-    configuration, the header should contain either a relative path or full
-    path. Therefore, ``settings.GALLERY_SENDFILE_ROOT`` will be stripped from
-    the beginning of the path to create the header's value. It must be the
-    root of the internal location under nginx. It may be XSendFilePath or
-    empty for Apache.
-
+    configuration, you might want a full path or a relative path in the
+    header's value. ``settings.GALLERY_SENDFILE_ROOT`` will be stripped from
+    the beginning of the path to create the header's value.
     """
+
     if not os.path.exists(path):
         # Don't reveal the file name on the filesystem.
         raise Http404("Requested file doesn't exist.")
@@ -219,16 +217,19 @@ def serve_private_media(request, path):
         return HttpResponseNotModified(content_type=content_type)
     # pause copy-paste from django.views.static.serve
 
-    if settings.DEBUG:
+    sendfile_header = getattr(settings, 'GALLERY_SENDFILE_HEADER', '')
+    sendfile_root = getattr(settings, 'GALLERY_SENDFILE_ROOT', '')
+
+    if settings.DEBUG or not sendfile_header:
         with open(path, 'rb') as f:
             response = HttpResponse(f.read(), content_type=content_type)
     else:
         response = HttpResponse('', content_type=content_type)
-        if settings.GALLERY_SENDFILE_ROOT:
-            if not path.startswith(settings.GALLERY_SENDFILE_ROOT):
+        if sendfile_root:
+            if not path.startswith(sendfile_root):
                 raise ValueError("Requested file isn't under GALLERY_SENDFILE_ROOT.")
-            path = path[len(settings.GALLERY_SENDFILE_ROOT):]
-        response[settings.GALLERY_SENDFILE_HEADER] = path.encode(sys.getfilesystemencoding())
+            path = path[len(sendfile_root):]
+        response[sendfile_header] = path.encode(sys.getfilesystemencoding())
 
     # resume copy-paste from django.views.static.serve
     response["Last-Modified"] = http_date(statobj.st_mtime)

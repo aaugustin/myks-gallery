@@ -76,7 +76,7 @@ website:
     ``title``, ``extrahead``, ``content``, as shown in this `example`_.
 
 6.  Enable `X-accel`_ (nginx) or `mod_xsendfile`_ (Apache) for your photo and
-    cache directories (``GALLERY_PHOTO_DIR`` and ``GALLERY_CACHE_DIR``).
+    cache directories (optional).
 
 7.  Scan your photos with the "Scan photos" button in the admin or the
     ``scanphotos`` management command and define access policies.
@@ -121,7 +121,7 @@ and writable by the application server.
 ``GALLERY_PATTERNS``
 ....................
 
-Default: not defined
+Default: ``()``
 
 Tuple of (category name, regular expression) defining how to extract album
 information — category, date, name — from the paths of photo files.
@@ -157,7 +157,7 @@ Files matching one of these expressions will be ignored when scanning photos.
 ``GALLERY_RESIZE_PRESETS``
 ..........................
 
-Default: not defined
+Default: ``{}``
 
 Dictionary mapping thumbnail presets names to ``(width, height, crop)``. If
 ``crop`` is ``True``, the photo will be cropped and the thumbnail will have
@@ -191,7 +191,7 @@ This is a reasonable value::
 ``GALLERY_SENDFILE_HEADER``
 ............................
 
-Default: not defined
+Default: ''
 
 Name of the HTTP header that triggers ``sendfile`` on your web server. Use
 ``'X-Accel-Redirect'`` for nginx and ``'X-SendFile'`` for Apache.
@@ -199,11 +199,11 @@ Name of the HTTP header that triggers ``sendfile`` on your web server. Use
 ``GALLERY_SENDFILE_ROOT``
 .........................
 
-Default: not defined
+Default: ''
 
-Part to strip at the beginning of the paths in the ``sendfile`` header. This
-must be the absolute path to the root of the internal location for nginx. It
-may be equal to the value of ``XSendFilePath`` or empty for Apache.
+Part to strip at the beginning of the paths in the ``sendfile`` header. The
+header will contain the absolute path to files, minus this prefix. This is
+generally useful for nginx and not necessary for Apache.
 
 ``GALLERY_TITLE``
 .................

@@ -31,7 +31,3 @@ TEMPLATE_DIRS = os.path.join(os.path.dirname(__file__), 'templates'),
 GALLERY_PHOTO_DIR = ''
 
 GALLERY_CACHE_DIR = ''
-
-GALLERY_PATTERNS = ()
-
-GALLERY_RESIZE_PRESETS = {}
