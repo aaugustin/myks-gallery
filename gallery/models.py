@@ -75,9 +75,6 @@ class Album(models.Model):
         access_policy = self.get_access_policy()
         return access_policy is not None and access_policy.allows(user)
 
-    def is_allowed_for_user_sql(self, user):
-        return Album.objects.allowed_for_user(user).filter(pk=self.pk).exists()
-
     def get_next_in_queryset(self, albums):
         albums = albums.filter(
             Q(date__gt=self.date)
@@ -159,9 +156,6 @@ class Photo(models.Model):
     def is_allowed_for_user(self, user):
         access_policy = self.get_effective_access_policy()
         return access_policy is not None and access_policy.allows(user)
-
-    def is_allowed_for_user_sql(self, user):
-        return Photo.objects.allowed_for_user(user).filter(pk=self.pk).exists()
 
     # In the next two functions, images whose date is None may come
     # first or last, depending on the database.
