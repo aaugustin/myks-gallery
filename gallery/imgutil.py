@@ -16,7 +16,7 @@ except ImportError:                                         # pragma: no cover
 from django.conf import settings
 
 
-exif_rotations = (
+exif_rotations = (                                          # pragma: no cover
     None,
     lambda image: image,
     lambda image: image.transpose(Image.FLIP_LEFT_RIGHT),
@@ -43,7 +43,7 @@ def make_thumbnail(image_path, thumb_path, preset):
 
     if image.format == 'JPEG':
         # Auto-rotate JPEG files based on EXIF information
-        try:
+        try:                                                # pragma: no cover
             # Use of an undocumented API — let's catch exceptions liberally
             orientation = image._getexif()[274]
             image = exif_rotations[orientation](image)

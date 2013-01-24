@@ -32,12 +32,12 @@ class ThumbnailTests(TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
 
-    def make_image(self, width, height):
-        im = Image.new('RGB', (width, height))
+    def make_image(self, width, height, format='JPEG', mode='RGB'):
+        im = Image.new(mode, (width, height))
         draw = ImageDraw.Draw(im)
         for x in range(width):
             draw.line([(x, 0), (x, height - 1)], fill="hsl(%d,100%%,50%%)" % x)
-        im.save(self.original, 'JPEG')
+        im.save(self.original, format)
 
     def test_horizontal_thumbnail(self):
         self.make_image(360, 240)
@@ -85,3 +85,14 @@ class ThumbnailTests(TestCase):
         self.make_image(360, 240)
         self.thumbnail = os.path.join(self.tmpdir, 'subdir', 'thumbnail.jpg')
         make_thumbnail(self.original, self.thumbnail, 'thumbnail')
+
+    def test_non_jpg_thumbnail(self):
+        self.original = self.original[:-3] + 'png'
+        self.thumbnail = self.thumbnail[:-3] + 'png'
+
+        self.make_image(240, 240, 'PNG')
+        make_thumbnail(self.original, self.thumbnail, 'thumbnail')
+
+        im = Image.open(self.thumbnail)
+        self.assertEqual(im.format, 'PNG')
+        self.assertEqual(im.size, (60, 60))
