@@ -62,10 +62,8 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
             if self.can_view_all():
                 photos = album.photo_set.all()
             else:
-                photos = []
-                for photo in album.photo_set.all():
-                    if photo.is_allowed_for_user(user):
-                        photos.append(photo)
+                photos = [photo for photo in album.photo_set.all()
+                                if photo.is_allowed_for_user(user)]
             album.photos_count = len(photos)
             album.preview = random.sample(photos, min(album.photos_count, 5))
         context['title'] = getattr(settings, 'GALLERY_TITLE', u"Gallery")
@@ -214,7 +212,7 @@ def serve_private_media(request, path):
     content_type, encoding = mimetypes.guess_type(path)
     content_type = content_type or 'application/octet-stream'
     if not was_modified_since(request.META.get('HTTP_IF_MODIFIED_SINCE'),
-                              statobj.st_mtime, statobj.st_size):
+                              statobj.st_mtime, statobj.st_size):   # pragma: no cover
         return HttpResponseNotModified()
     # pause copy-paste from django.views.static.serve
 
@@ -233,9 +231,9 @@ def serve_private_media(request, path):
 
     # resume copy-paste from django.views.static.serve
     response["Last-Modified"] = http_date(statobj.st_mtime)
-    if stat.S_ISREG(statobj.st_mode):
+    if stat.S_ISREG(statobj.st_mode):                       # pragma: no cover
         response["Content-Length"] = statobj.st_size
-    if encoding:
+    if encoding:                                            # pragma: no cover
         response["Content-Encoding"] = encoding
     # end copy-paste from django.views.static.serve
 

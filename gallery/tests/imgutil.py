@@ -18,19 +18,17 @@ from django.test.utils import override_settings
 from ..imgutil import make_thumbnail
 
 
-@override_settings(GALLERY_RESIZE_PRESETS={
-    'thumbnail': (60, 60, True),
-    'preview': (120, 120, False),
-})
-class ThumbnailTests(TestCase):
+class ThumbnailsMixin(object):
 
     def setUp(self):
+        super(ThumbnailsMixin, self).setUp()
         self.tmpdir = tempfile.mkdtemp()
         self.original = os.path.join(self.tmpdir, 'original.jpg')
         self.thumbnail = os.path.join(self.tmpdir, 'thumbnail.jpg')
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
+        super(ThumbnailsMixin, self).tearDown()
 
     def make_image(self, width, height, format='JPEG', mode='RGB'):
         im = Image.new(mode, (width, height))
@@ -38,6 +36,13 @@ class ThumbnailTests(TestCase):
         for x in range(width):
             draw.line([(x, 0), (x, height - 1)], fill="hsl(%d,100%%,50%%)" % x)
         im.save(self.original, format)
+
+
+@override_settings(GALLERY_RESIZE_PRESETS={
+    'thumbnail': (60, 60, True),
+    'preview': (120, 120, False),
+})
+class ThumbnailTests(ThumbnailsMixin, TestCase):
 
     def test_horizontal_thumbnail(self):
         self.make_image(360, 240)

@@ -10,17 +10,17 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from ..models import Album, AlbumAccessPolicy, Photo
+from .imgutil import ThumbnailsMixin
 
 
-class ViewsTests(TestCase):
-
-    def setUp(self):
-        self.album = Album.objects.create(category='default', dirpath='foo', date=datetime.date.today())
-        AlbumAccessPolicy.objects.create(album=self.album, public=True, inherit=True)
-        self.photo = Photo.objects.create(album=self.album, filename='bar')
+class ViewsTestsMixin(ThumbnailsMixin):
 
     def test_index_view(self):
         response = self.client.get(reverse('gallery:index'))
+        self.assertTemplateUsed(response, 'gallery/album_archive.html')
+
+    def test_search_view(self):
+        response = self.client.get(reverse('gallery:index'), {'q': 'original'})
         self.assertTemplateUsed(response, 'gallery/album_archive.html')
 
     def test_year_view(self):
@@ -35,19 +35,63 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('gallery:photo', args=[self.photo.pk]))
         self.assertTemplateUsed(response, 'gallery/photo_detail.html')
 
+    def test_photo_resized_view(self):
+        with override_settings(
+                GALLERY_PHOTO_DIR=self.tmpdir,
+                GALLERY_CACHE_DIR=self.tmpdir,
+                GALLERY_RESIZE_PRESETS={'resized': (120, 120, False)},
+                GALLERY_SENDFILE_HEADER='X-Fake-Sendfile'):
+            self.make_image(360, 240)
+            response = self.client.get(reverse('gallery:photo-resized', args=['resized', self.photo.pk]))
+            self.assertTrue(response['X-Fake-Sendfile'].startswith(self.tmpdir))
+            self.assertNotEqual(response['X-Fake-Sendfile'], os.path.join(self.tmpdir, 'original.jpg'))
+
+    def test_photo_original_view(self):
+        with override_settings(
+                GALLERY_PHOTO_DIR=self.tmpdir,
+                GALLERY_SENDFILE_HEADER='X-Fake-Sendfile'):
+            self.make_image(360, 240)
+            response = self.client.get(reverse('gallery:photo-original', args=[self.photo.pk]))
+            self.assertEqual(response['X-Fake-Sendfile'], os.path.join(self.tmpdir, 'original.jpg'))
+
     def test_latest_view(self):
         response = self.client.get(reverse('gallery:latest'))
         self.assertRedirects(response, reverse('gallery:album', args=[self.album.pk]))
+        self.album.delete()
+        response = self.client.get(reverse('gallery:latest'))
+        self.assertRedirects(response, reverse('gallery:index'))
 
 
-class ViewsWithPermissionTests(ViewsTests):
+class ViewsWithPermissionTests(ViewsTestsMixin, TestCase):
 
     def setUp(self):
-        self.album = Album.objects.create(category='default', dirpath='foo', date=datetime.date.today())
-        self.photo = Photo.objects.create(album=self.album, filename='bar')
+        super(ViewsWithPermissionTests, self).setUp()
+        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=datetime.date.today())
+        self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
         self.user = User.objects.create_user('user', 'user@gallery', 'pass')
         self.user.user_permissions.add(Permission.objects.get(codename='view'))
         self.client.login(username='user', password='pass')
+
+
+class ViewsWithPrivateAccessPolicyTests(ViewsTestsMixin, TestCase):
+
+    def setUp(self):
+        super(ViewsWithPrivateAccessPolicyTests, self).setUp()
+        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=datetime.date.today())
+        AlbumAccessPolicy.objects.create(album=self.album, public=False, inherit=True)
+        self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
+        self.user = User.objects.create_user('user', 'user@gallery', 'pass')
+        self.album.access_policy.users.add(self.user)
+        self.client.login(username='user', password='pass')
+
+
+class ViewsWithPublicAccessPolicyTests(ViewsTestsMixin, TestCase):
+
+    def setUp(self):
+        super(ViewsWithPublicAccessPolicyTests, self).setUp()
+        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=datetime.date.today())
+        AlbumAccessPolicy.objects.create(album=self.album, public=True, inherit=True),
+        self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
 
 
 class ServePrivateMediaTests(TestCase):

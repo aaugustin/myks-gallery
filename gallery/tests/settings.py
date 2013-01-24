@@ -25,9 +25,3 @@ SECRET_KEY = 'Not empty for tests.'
 STATIC_URL = '/static/'
 
 TEMPLATE_DIRS = os.path.join(os.path.dirname(__file__), 'templates'),
-
-# Custom settings
-
-GALLERY_PHOTO_DIR = ''
-
-GALLERY_CACHE_DIR = ''
