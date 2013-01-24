@@ -168,9 +168,11 @@ aspect ratio.
 The default templates assume the following values::
 
     GALLERY_RESIZE_PRESETS = {
-        'thumb': (256, 256, True),
-        'standard': (1536, 1536, False),
+        'thumb': (128, 128, True),
+        'standard': (768, 768, False),
     }
+
+You may double these sizes for better results on retina displays.
 
 ``GALLERY_RESIZE_OPTIONS``
 ..........................
@@ -180,7 +182,7 @@ Default: ``{}``
 Dictionary mapping image formats names to to dictionaries of options for PIL's
 ``save`` method. Options are described for each file format in PIL's handbook.
 
-This is a reasonable value::
+The following a reasonable value for high-quality thumbnails and previews::
 
     GALLERY_RESIZE_OPTIONS = {
         'JPEG': {'quality': 95, 'optimize': True},
