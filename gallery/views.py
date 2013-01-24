@@ -12,7 +12,8 @@ import unicodedata
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import Http404, HttpResponse, HttpResponseNotModified, HttpResponseRedirect
+from django.http import (Http404, HttpResponse, HttpResponseNotModified,
+    HttpResponseRedirect, StreamingHttpResponse)
 from django.shortcuts import get_object_or_404
 from django.utils.http import http_date
 from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
@@ -214,15 +215,14 @@ def serve_private_media(request, path):
     content_type = content_type or 'application/octet-stream'
     if not was_modified_since(request.META.get('HTTP_IF_MODIFIED_SINCE'),
                               statobj.st_mtime, statobj.st_size):
-        return HttpResponseNotModified(content_type=content_type)
+        return HttpResponseNotModified()
     # pause copy-paste from django.views.static.serve
 
     sendfile_header = getattr(settings, 'GALLERY_SENDFILE_HEADER', '')
     sendfile_root = getattr(settings, 'GALLERY_SENDFILE_ROOT', '')
 
     if settings.DEBUG or not sendfile_header:
-        with open(path, 'rb') as f:
-            response = HttpResponse(f.read(), content_type=content_type)
+        response = StreamingHttpResponse(open(path, 'rb'), content_type=content_type)
     else:
         response = HttpResponse('', content_type=content_type)
         if sendfile_root:

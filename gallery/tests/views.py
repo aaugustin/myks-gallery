@@ -81,7 +81,7 @@ class ServePrivateMediaTests(TestCase):
     def test_apache_dev(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-SendFile'), None)
-        self.assertEqual(response.content, self.file_contents)
+        self.assertEqual(''.join(response.streaming_content), self.file_contents)
 
     @override_settings(DEBUG=False, GALLERY_SENDFILE_HEADER='X-SendFile', GALLERY_SENDFILE_ROOT='')
     def test_apache_prod(self):
@@ -95,7 +95,7 @@ class ServePrivateMediaTests(TestCase):
     def test_nginx_dev(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-Accel-Redirect'), None)
-        self.assertEqual(response.content, self.file_contents)
+        self.assertEqual(''.join(response.streaming_content), self.file_contents)
 
     @override_settings(DEBUG=False, GALLERY_SENDFILE_HEADER='X-Accel-Redirect', GALLERY_SENDFILE_ROOT=root_dir)
     def test_nginx_prod(self):
