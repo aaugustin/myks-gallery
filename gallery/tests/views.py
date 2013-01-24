@@ -61,6 +61,20 @@ class ServePrivateMediaTests(TestCase):
         file_contents = handle.read()
     private_url = '/private' + absolute_path
 
+    # Without sendfile
+
+    @override_settings(DEBUG=True)
+    def test_no_sendfile_dev(self):
+        response = self.client.get(self.private_url)
+        self.assertEqual(response.get(''), None)
+        self.assertEqual(''.join(response.streaming_content), self.file_contents)
+
+    @override_settings(DEBUG=False)
+    def test_no_sendfile_prod(self):
+        response = self.client.get(self.private_url)
+        self.assertEqual(response.get(''), None)
+        self.assertEqual(''.join(response.streaming_content), self.file_contents)
+
     # See https://tn123.org/mod_xsendfile/
 
     @override_settings(DEBUG=True, GALLERY_SENDFILE_HEADER='X-SendFile', GALLERY_SENDFILE_ROOT='')
