@@ -259,3 +259,21 @@ Running the sample application
 
     Since you're logged in as an admin user, you can view albums and photos
     even though you haven't defined any access policies yet.
+
+Changelog
+=========
+
+0.2
+---
+
+* Made most settings optional for easier deployment.
+* Made "sendfile" optional and used streaming responses as a fallback.
+* Worked around a crash in libjpeg when creating large JPEG previews.
+* Added many tests.
+
+0.1
+---
+
+* Initial public release, with the history from my private repository.
+* Added documentation (README file).
+* Added a sample application.
