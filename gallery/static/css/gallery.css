@@ -1,83 +1,98 @@
 /* Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved. */
 
-.album_year_list, .album_page_list {
-    margin: 1em 0;
+/* main page navigation */
+
+.album_search {
+    text-align: right;
+    margin-bottom: 1em;
+}
+.album_year_list,
+.album_page_list {
+    font-size: 87.5%;
     text-align: center;
 }
-.album_search {
-    float: right;
-    width: 16em;
+
+/* previous | up | next navigation */
+
+.photo_nav {
+    position: relative;
+    margin-bottom: 1.5em;
+    padding: 0 35%;
+    text-align: center;
+    font-size: 87.5%;
+}
+.photo_nav .previous,
+.photo_nav .next {
+    position: absolute;
+    top: 0;
+    width: 35%;
+}
+.photo_nav .previous {
+    left: 0;
+    text-align: left;
+}
+.photo_nav .next {
+    right: 0;
+    text-align: right;
+}
+.photo_nav .up:before {
+    content: "↑ ";
+}
+.photo_nav .up:after {
+    content: " ↑";
+}
+.photo_nav .previous:before {
+    content: "← ";
+}
+.photo_nav .next:after {
+    content: " →";
 }
 
-.album_preview {
-    padding: 1em 1em 0 1em;
-}
-.album_preview .album_date:before, .album_preview .album_count:before {
-    content:" - ";
+/* titles in album lists */
+
+.album_preview .album_count:before,
+.album_preview .album_date:before {
+    content: " - ";
 }
 .album_preview .album_category:before {
-    content:"(";
+    content: "(";
 }
 .album_preview .album_category:after {
-    content:")";
+    content: ")";
 }
 .album_category {
     color: #999;
     font-style: italic;
 }
 
-.photo_list {
-    text-align: center;
-}
-.album_preview + .photo_list {
-    text-align: left;
-}
-.photo_list a {
-    display: inline-block;
-    margin: 0 7px 7px 0;
-}
-.photo_list a img {
-    height: 128px;
-    width: 128px;
-    border: 1px solid #bbb;
-    padding: 7px;
-    vertical-align: middle;
-}
+/* layout of thumbnails and previews */
 
+.photo_list,
 .photo_detail {
     text-align: center;
 }
-.photo_detail a img {
-    max-height: 768px;
-    max-width: 768px;
-    border: 1px solid #bbb;
-    padding: 7px;
+.album_preview + .photo_list {
+    overflow-x: auto;
+    text-align: left;
+    white-space: nowrap;
+}
+.photo_list img,
+.photo_detail img {
     vertical-align: middle;
 }
-
-.photo_nav {
-    height: 48px;
-    position: relative;
-    text-align: center;
+.photo_list a {
+    box-shadow: 0.15em 0.15em 0.25em 0 #999;
+    display: inline-block;
+    margin: 0 1em 1em 0;
 }
-.photo_nav .previous, .photo_nav .next {
-    display: block;
-    position: absolute;
-    top: 0;
+.photo_list a img {
+    height: 8em;
+    width: 8em;
 }
-.photo_nav .previous {
-    left: 0;
-    right: 60%;
-    text-align: left;
+.photo_detail a {
+    max-width: 48em;
 }
-.photo_nav .next {
-    left: 60%;
-    right: 0;
-    text-align: right;
-}
-.photo_nav .previous .album_date:before {
-    content:" - ";
-}
-.photo_nav .next .album_date:after {
-    content:" - ";
+.photo_detail a img {
+    max-height: 48em;
+    max-width: 100%;
 }

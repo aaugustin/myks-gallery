@@ -263,6 +263,11 @@ Running the sample application
 Changelog
 =========
 
+0.3
+---
+
+* Switched the default styles to a responsive design.
+
 0.2
 ---
 
