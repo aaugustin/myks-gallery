@@ -11,11 +11,11 @@
 <h1>{{ photo.album.display_name }} - {{ photo.display_name }}</h1>
 <div class="photo_nav">
 {% if previous_photo %}
-<a href="{{ previous_photo.get_absolute_url }}" class="previous">&larr; {{ previous_photo.display_name }}</a>
+<a href="{{ previous_photo.get_absolute_url }}" class="previous">{{ previous_photo.display_name }}</a>
 {% endif %}
-<a href="{{ photo.album.get_absolute_url }}">&uarr; {{ photo.album.display_name }} &uarr;</a>
+<a href="{{ photo.album.get_absolute_url }}" class="up">{{ photo.album.display_name }}</a>
 {% if next_photo %}
-<a href="{{ next_photo.get_absolute_url }}" class="next">{{ next_photo.display_name }} &rarr;</a>
+<a href="{{ next_photo.get_absolute_url }}" class="next">{{ next_photo.display_name }}</a>
 {% endif %}
 </div>
 
