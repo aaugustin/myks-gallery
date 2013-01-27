@@ -8,7 +8,6 @@
 }
 .album_year_list,
 .album_page_list {
-    font-size: 87.5%;
     text-align: center;
 }
 
@@ -19,7 +18,6 @@
     margin-bottom: 1.5em;
     padding: 0 35%;
     text-align: center;
-    font-size: 87.5%;
 }
 .photo_nav .previous,
 .photo_nav .next {
