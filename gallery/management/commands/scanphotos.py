@@ -6,6 +6,7 @@
 
 import collections
 import datetime
+import optparse
 import os
 import re
 import sys
@@ -21,9 +22,17 @@ from ...models import Album, Photo
 
 class Command(base.NoArgsCommand):
     help = 'Scan GALLERY_PHOTO_DIR and update database.'
+    option_list = base.NoArgsCommand.option_list + (
+        optparse.make_option('--full',
+            action='store_true',
+            dest='full',
+            default=False,
+            help='Perform a full resynchronization'),
+        )
 
     @transaction.commit_on_success
     def handle_noargs(self, **options):
+        self.full_sync = options.get('full')
         self.verbosity = int(options.get('verbosity', '1'))
         if self.verbosity >= 1:
             t = time.time()
@@ -169,3 +178,13 @@ def synchronize_photos(albums, command):
             if command.verbosity >= 2:
                 command.stdout.write(u"Removing photo %s from album %s (%s)\n" % (filename, dirpath, category))
             Photo.objects.get(album=album, filename=filename).delete()
+        if not command.full_sync:
+            return
+        for filename in sorted(old_keys & new_keys):
+            date = get_photo_info(albums[category, dirpath][filename], command)
+            photo = Photo.objects.get(album=album, filename=filename)
+            if date != photo.date:
+                if command.verbosity >= 2:
+                    command.stdout.write(u"Fixing date of photo %s from album %s (%s)\n" % (filename, dirpath, category))
+                photo.date = date
+                photo.save()
