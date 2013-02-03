@@ -267,6 +267,7 @@ Changelog
 ---
 
 * Switched the default styles to a responsive design.
+* Fixed bugs in photo dates.
 
 0.2
 ---

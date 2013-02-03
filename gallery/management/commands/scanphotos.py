@@ -14,7 +14,7 @@ import time
 from django.conf import settings
 from django.core.management import base
 from django.db import transaction
-from django.utils.timezone import get_default_timezone
+from django.utils import timezone
 
 from ...models import Album, Photo
 
@@ -121,7 +121,9 @@ def get_photo_info(captures, command):
     try:
         kwargs = dict((k, int(captures['p_' + k]))
                 for k in ('year', 'month', 'day', 'hour', 'minute', 'second'))
-        date = datetime.datetime(tzinfo=get_default_timezone(), **kwargs)
+        date = datetime.datetime(**kwargs)
+        if settings.USE_TZ:
+            date = timezone.make_aware(date, timezone.get_default_timezone())
     except KeyError:
         pass
     except ValueError, e:
