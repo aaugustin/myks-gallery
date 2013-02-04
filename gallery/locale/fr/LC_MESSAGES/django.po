@@ -52,7 +52,7 @@ msgid "Click this button to re-scan your photo directory."
 msgstr "Cliquez ici pour re-scanner votre répertoire de photos."
 
 msgid "This will set the access policy for:"
-msgstr "La politique d'accès sera défini pour :"
+msgstr "La politique d'accès sera définie pour :"
 
 msgid "This will unset the access policy for:"
 msgstr "La politique d'accès sera supprimée pour :"
