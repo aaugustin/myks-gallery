@@ -125,7 +125,7 @@ class AlbumView(GalleryCommonMixin, AlbumListMixin, DetailView):
         if self.can_view_all():
             qs = Album.objects.all()
         else:
-            qs = Album.objects.allowed_for_user(self.request.user)
+            qs = Album.objects.allowed_for_user(self.request.user, self.show_public())
         try:
             context['previous_album'] = self.object.get_previous_in_queryset(qs)
         except Album.DoesNotExist:
@@ -272,7 +272,9 @@ def latest_album(request):
     if request.user.has_perm('gallery.view'):
         albums = Album.objects.all()
     else:
-        albums = Album.objects.allowed_for_user(request.user)
+        include_public = request.session.get('show_public',
+                not request.user.is_authenticated())
+        albums = Album.objects.allowed_for_user(request.user, include_public)
     albums = albums.order_by('-date')[:1]
     if albums:
         pk = albums[0].pk
