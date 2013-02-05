@@ -84,6 +84,11 @@ class ViewsWithPrivateAccessPolicyTests(ViewsTestsMixin, TestCase):
         self.album.access_policy.users.add(self.user)
         self.client.login(username='user', password='pass')
 
+    def test_hide_private_albums(self):
+        self.client.logout()
+        response = self.client.get(reverse('gallery:index'))
+        self.assertQuerysetEqual(response.context['latest'], [])
+
 
 class ViewsWithPublicAccessPolicyTests(ViewsTestsMixin, TestCase):
 
@@ -92,6 +97,29 @@ class ViewsWithPublicAccessPolicyTests(ViewsTestsMixin, TestCase):
         self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=datetime.date.today())
         AlbumAccessPolicy.objects.create(album=self.album, public=True, inherit=True),
         self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
+
+    def test_show_and_hide_public_albums(self):
+        # Public albums are shown for anonymous users
+        response = self.client.get(reverse('gallery:index'))
+        self.assertQuerysetEqual(response.context['latest'], [self.album], transform=lambda a: a)
+
+        # By default public albums are hidden for authenticated users
+        self.user = User.objects.create_user('user', 'user@gallery', 'pass')
+        self.client.login(username='user', password='pass')
+        response = self.client.get(reverse('gallery:index'))
+        self.assertQuerysetEqual(response.context['latest'], [])
+
+        # Showing public albums is persistent
+        response = self.client.get(reverse('gallery:index') + '?show_public')
+        self.assertQuerysetEqual(response.context['latest'], [self.album], transform=lambda a: a)
+        response = self.client.get(reverse('gallery:index'))
+        self.assertQuerysetEqual(response.context['latest'], [self.album], transform=lambda a: a)
+
+        # Hiding public albums is persistent
+        response = self.client.get(reverse('gallery:index') + '?hide_public')
+        self.assertQuerysetEqual(response.context['latest'], [])
+        response = self.client.get(reverse('gallery:index'))
+        self.assertQuerysetEqual(response.context['latest'], [])
 
 
 class ServePrivateMediaTests(TestCase):

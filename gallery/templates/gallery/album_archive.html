@@ -11,9 +11,16 @@
 {% block content %}
 <h1>{{ title }}</h1>
 
-{# search isn't targetet at anonymous users #}
 {% if user.is_authenticated %}
-<form action="{% url 'gallery:index' %}" method="GET" class="album_search">
+<form action="{% url 'gallery:index' %}" method="GET" class="album_filter">
+{% if not perms.gallery.view %}
+{% if show_public %}
+<a href="?hide_public">{% trans "Hide public albums" %}</a>
+{% else %}
+<a href="?show_public">{% trans "Show public albums" %}</a>
+{% endif %}
+|
+{% endif %}
 <input type="text" name="q" required="required" size="20" value="{{ q }}">
 <input type="submit" value="{% trans "Search" %}">
 </form>

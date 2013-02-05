@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-19 22:20+0100\n"
+"POT-Creation-Date: 2013-02-05 14:56+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -56,6 +56,12 @@ msgstr "La politique d'accès sera définie pour :"
 
 msgid "This will unset the access policy for:"
 msgstr "La politique d'accès sera supprimée pour :"
+
+msgid "Hide public albums"
+msgstr "Masquer les albums publics"
+
+msgid "Show public albums"
+msgstr "Montrer les albums publics"
 
 msgid "Search"
 msgstr "Chercher"

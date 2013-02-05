@@ -266,6 +266,7 @@ Changelog
 0.3
 ---
 
+* Hid public albums by default for logged-in users.
 * Switched the default styles to a responsive design.
 * Fixed bugs in photo dates.
 

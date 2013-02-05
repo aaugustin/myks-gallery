@@ -10,6 +10,18 @@
 
 {% block content %}
 <h1>{{ title }}</h1>
+
+{% if user.is_authenticated and not perms.gallery.view %}
+<div class="album_filter">
+{% if show_public %}
+<a href="?hide_public">{% trans "Hide public albums" %}</a>
+{% else %}
+<a href="?show_public">{% trans "Show public albums" %}</a>
+{% endif %}
+</div>
+{% endif %}
+
+
 <div class="photo_nav">
 {% if previous_year %}
 <a href="{% url 'gallery:year' previous_year.year %}" class="previous">{{ previous_year.year }}</a>
