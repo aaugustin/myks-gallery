@@ -46,7 +46,7 @@ Setup
 =====
 
 myks-gallery is a pluggable Django application. It requires Python 2.6 or 2.7,
-Django 1.5, and PIL.
+Django 1.5 or 1.6, and PIL or Pillow.
 
 Installation guide
 ------------------

@@ -20,6 +20,12 @@ from django.utils import timezone
 from ...models import Album, Photo
 
 
+try:
+    transaction_decorator = transaction.atomic              # Django >= 1.6
+except AttributeError:
+    transaction_decorator = transaction.commit_on_success   # Django < 1.6
+
+
 class Command(base.NoArgsCommand):
     help = 'Scan GALLERY_PHOTO_DIR and update database.'
     option_list = base.NoArgsCommand.option_list + (
@@ -35,7 +41,7 @@ class Command(base.NoArgsCommand):
             help='Resize with given preset'),
         )
 
-    @transaction.commit_on_success
+    @transaction_decorator
     def handle_noargs(self, **options):
         self.full_sync = options['full_sync']
         self.resize_presets = options['resize_presets']
