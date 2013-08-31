@@ -269,6 +269,7 @@ Changelog
 * Hid public albums by default for logged-in users.
 * Switched the default styles to a responsive design.
 * Added an option to scanphotos to precompute thumbnails.
+* Added an option to scanphotos to resynchronize photo dates.
 * Fixed bugs in photo dates.
 
 0.2
