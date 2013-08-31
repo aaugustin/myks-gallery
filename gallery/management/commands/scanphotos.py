@@ -179,7 +179,7 @@ def synchronize_photos(albums, command):
                 command.stdout.write(u"Removing photo %s from album %s (%s)\n" % (filename, dirpath, category))
             Photo.objects.get(album=album, filename=filename).delete()
         if not command.full_sync:
-            return
+            continue
         for filename in sorted(old_keys & new_keys):
             date = get_photo_info(albums[category, dirpath][filename], command)
             photo = Photo.objects.get(album=album, filename=filename)
