@@ -25,15 +25,21 @@ class Command(base.NoArgsCommand):
     option_list = base.NoArgsCommand.option_list + (
         optparse.make_option('--full',
             action='store_true',
-            dest='full',
+            dest='full_sync',
             default=False,
             help='Perform a full resynchronization'),
+        optparse.make_option('--resize',
+            action='append',
+            dest='resize_presets',
+            default=[],
+            help='Resize with given preset'),
         )
 
     @transaction.commit_on_success
     def handle_noargs(self, **options):
-        self.full_sync = options.get('full')
-        self.verbosity = int(options.get('verbosity', '1'))
+        self.full_sync = options['full_sync']
+        self.resize_presets = options['resize_presets']
+        self.verbosity = int(options['verbosity'])
         if self.verbosity >= 1:
             t = time.time()
             self.stdout.write(u"Scanning %s\n" % settings.GALLERY_PHOTO_DIR)
@@ -173,11 +179,14 @@ def synchronize_photos(albums, command):
             date = get_photo_info(albums[category, dirpath][filename], command)
             if command.verbosity >= 2:
                 command.stdout.write(u"Adding photo %s to album %s (%s)\n" % (filename, dirpath, category))
-            Photo.objects.create(album=album, filename=filename, date=date)
+            photo = Photo.objects.create(album=album, filename=filename, date=date)
+            for preset in command.resize_presets:
+                photo.thumbnail(preset)
         for filename in sorted(old_keys - new_keys):
             if command.verbosity >= 2:
                 command.stdout.write(u"Removing photo %s from album %s (%s)\n" % (filename, dirpath, category))
-            Photo.objects.get(album=album, filename=filename).delete()
+            photo = Photo.objects.get(album=album, filename=filename)
+            photo.delete()
         if not command.full_sync:
             continue
         for filename in sorted(old_keys & new_keys):
