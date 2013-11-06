@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import distutils.core
 import os
 
@@ -22,7 +24,6 @@ distutils.core.setup(
         'gallery',
         'gallery.management',
         'gallery.management.commands',
-        'gallery.tests',
     ],
     package_data={
         'gallery': [
@@ -43,6 +44,9 @@ distutils.core.setup(
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
     ],
     platforms='all',
     license='BSD'

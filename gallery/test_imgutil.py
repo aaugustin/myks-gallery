@@ -1,6 +1,8 @@
 # coding: utf-8
 # Copyright (c) 2013 Aymeric Augustin. All rights reserved.
 
+from __future__ import unicode_literals
+
 import os
 import shutil
 import tempfile
@@ -15,7 +17,7 @@ except ImportError:                                         # pragma: no cover
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from ..imgutil import make_thumbnail
+from .imgutil import make_thumbnail
 
 
 class ThumbnailsMixin(object):

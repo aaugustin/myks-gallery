@@ -2,8 +2,6 @@ from __future__ import unicode_literals
 
 import os
 
-# Django settings
-
 DATABASES = {
     'default': {'ENGINE': 'django.db.backends.sqlite3'},
 }
@@ -18,10 +16,10 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 )
 
-ROOT_URLCONF = 'gallery.tests.urls'
+ROOT_URLCONF = 'gallery.test_urls'
 
 SECRET_KEY = 'Not empty for tests.'
 
 STATIC_URL = '/static/'
 
-TEMPLATE_DIRS = os.path.join(os.path.dirname(__file__), 'templates'),
+TEMPLATE_DIRS = os.path.join(os.path.dirname(__file__), 'test_templates'),

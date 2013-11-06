@@ -1,5 +1,5 @@
 export PYTHONPATH:=.:$(PYTHONPATH)
-export DJANGO_SETTINGS_MODULE:=gallery.tests.settings
+export DJANGO_SETTINGS_MODULE:=gallery.test_settings
 
 test:
 	django-admin.py test gallery

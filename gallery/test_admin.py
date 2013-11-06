@@ -1,6 +1,8 @@
 # coding: utf-8
 # Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
+from __future__ import unicode_literals
+
 import datetime
 import os
 import shutil
@@ -10,9 +12,8 @@ from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from django.test.utils import override_settings
 
-from ..models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
+from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
 
 
 class AdminTests(TestCase):
@@ -43,9 +44,9 @@ class AdminTests(TestCase):
         self.client.get(reverse('admin:gallery.admin.scan_photos'))
         tmpdir = tempfile.mkdtemp()
         with open(os.path.join(tmpdir, 'test'), 'wb') as handle:
-            handle.write('test')
+            handle.write(b'test')
         try:
-            with override_settings(GALLERY_PHOTO_DIR=tmpdir):
+            with self.settings(GALLERY_PHOTO_DIR=tmpdir):
                 self.client.post(reverse('admin:gallery.admin.scan_photos'))
         finally:
             shutil.rmtree(tmpdir)
@@ -80,7 +81,7 @@ class AdminTests(TestCase):
         })
         self.assertTemplateUsed(response, 'admin/gallery/set_access_policy.html')
         self.assertFormError(response, 'form', 'users',
-            u'Select a valid choice. -1 is not one of the available choices.')
+            'Select a valid choice. -1 is not one of the available choices.')
 
     def test_set_album_access_policy_no_add_permission(self):
         self.user.is_superuser = False

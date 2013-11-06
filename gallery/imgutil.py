@@ -2,6 +2,7 @@
 # Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
 from __future__ import division
+from __future__ import unicode_literals
 
 import os
 import sys
@@ -14,6 +15,7 @@ except ImportError:                                         # pragma: no cover
     import ImageFile
 
 from django.conf import settings
+from django.utils import six
 
 
 exif_rotations = (                                          # pragma: no cover
@@ -36,8 +38,9 @@ def make_thumbnail(image_path, thumb_path, preset):
     options = getattr(settings, 'GALLERY_RESIZE_OPTIONS', {})
     presets = getattr(settings, 'GALLERY_RESIZE_PRESETS', {})
 
-    image_path = image_path.encode(fs_encoding)
-    thumb_path = thumb_path.encode(fs_encoding)
+    if six.PY2:
+        image_path = image_path.encode(fs_encoding)
+        thumb_path = thumb_path.encode(fs_encoding)
 
     image = Image.open(image_path)
 

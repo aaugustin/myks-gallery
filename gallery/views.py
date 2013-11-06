@@ -1,6 +1,8 @@
 # coding: utf-8
 # Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
+from __future__ import unicode_literals
+
 import mimetypes
 import os
 import random
@@ -16,6 +18,7 @@ from django.http import (Http404, HttpResponse, HttpResponseNotModified,
     HttpResponseRedirect, StreamingHttpResponse)
 from django.shortcuts import get_object_or_404
 from django.utils.http import http_date
+from django.utils import six
 from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
 from django.views.static import was_modified_since
 
@@ -79,13 +82,13 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
             user = User.objects.prefetch_related('groups').get(pk=user.pk)
         for album in context['object_list']:
             if self.can_view_all():
-                photos = album.photo_set.all()
+                photos = list(album.photo_set.all())
             else:
                 photos = [photo for photo in album.photo_set.all()
                                 if photo.is_allowed_for_user(user)]
             album.photos_count = len(photos)
             album.preview = random.sample(photos, min(album.photos_count, 5))
-        context['title'] = getattr(settings, 'GALLERY_TITLE', u"Gallery")
+        context['title'] = getattr(settings, 'GALLERY_TITLE', "Gallery")
         return context
 
 
@@ -259,11 +262,11 @@ def serve_private_media(request, path):
     return response
 
 
-_sanitize_re = re.compile(ur'[^0-9A-Za-z_.-]')
+_sanitize_re = re.compile(r'[^0-9A-Za-z_.-]')
 
 def sanitize(value):
-    value = unicodedata.normalize('NFKD', unicode(value))
-    value = value.encode('ascii', 'ignore')
+    value = unicodedata.normalize('NFKD', six.text_type(value))
+    value = value.encode('ascii', 'ignore').decode('ascii')
     value = _sanitize_re.sub('', value.replace(' ', '_'))
     return value
 

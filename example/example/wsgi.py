@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "example.settings")
 

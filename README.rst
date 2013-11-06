@@ -45,8 +45,8 @@ photos with relatives. You might want to use django-sesame_.
 Setup
 =====
 
-myks-gallery is a pluggable Django application. It requires Python 2.6 or 2.7,
-Django 1.5 or 1.6, and PIL or Pillow.
+myks-gallery is a pluggable Django application. It requires Django >= 1.5 and
+Pillow. It works with any version of Python supported by Django.
 
 Installation guide
 ------------------
@@ -224,6 +224,7 @@ Running the sample application
     can use photos of your own instead as long as you respect the format of
     the directory name: ``YYYY_MM_DD_album name``)::
 
+    $ cd example
     $ mkdir cache
     $ mkdir photos
     $ mkdir "photos/2013_01_01_Featured Pictures"
@@ -266,6 +267,7 @@ Changelog
 0.3
 ---
 
+* Support for Python 3 and Django 1.6.
 * Hid public albums by default for logged-in users.
 * Switched the default styles to a responsive design.
 * Added an option to scanphotos to precompute thumbnails.

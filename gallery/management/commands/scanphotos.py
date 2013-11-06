@@ -4,6 +4,8 @@
 # If you have non-ascii characters in filenames, you probably need:
 # export PYTHONIOENCODING=utf-8
 
+from __future__ import unicode_literals
+
 import collections
 import datetime
 import optparse
@@ -15,6 +17,7 @@ import time
 from django.conf import settings
 from django.core.management import base
 from django.db import transaction
+from django.utils import six
 from django.utils import timezone
 
 from ...models import Album, Photo
@@ -48,13 +51,13 @@ class Command(base.NoArgsCommand):
         self.verbosity = int(options['verbosity'])
         if self.verbosity >= 1:
             t = time.time()
-            self.stdout.write(u"Scanning %s\n" % settings.GALLERY_PHOTO_DIR)
+            self.stdout.write("Scanning %s\n" % settings.GALLERY_PHOTO_DIR)
         albums = scan_photo_root(self)
         synchronize_albums(albums, self)
         synchronize_photos(albums, self)
         if self.verbosity >= 1:
             dt = time.time() - t
-            self.stdout.write(u"Done (%.02fs)\n" % dt)
+            self.stdout.write("Done (%.02fs)\n" % dt)
 
 
 ignores = [re.compile(i) for i in getattr(settings, 'GALLERY_IGNORES', ())]
@@ -76,25 +79,30 @@ fs_encoding = sys.getfilesystemencoding()
 
 def iter_photo_root(command):
     """Yield relative path, category and regex captures for each photo."""
-    for dirpath, _, filenames in os.walk(settings.GALLERY_PHOTO_DIR):
-        dirpath = dirpath.decode(fs_encoding)
+    photo_root = settings.GALLERY_PHOTO_DIR
+    if six.PY2:
+        photo_root = photo_root.encode(fs_encoding)
+    for dirpath, _, filenames in os.walk(photo_root):
+        if six.PY2:
+            dirpath = dirpath.decode(fs_encoding)
         for filename in filenames:
-            filename = filename.decode(fs_encoding)
+            if six.PY2:
+                filename = filename.decode(fs_encoding)
             filepath = os.path.join(dirpath, filename)
             relpath = os.path.relpath(filepath, settings.GALLERY_PHOTO_DIR)
             if is_ignored(relpath):
                 if command.verbosity >= 3:
-                    command.stdout.write(u"- %s\n" % relpath)
+                    command.stdout.write("- %s\n" % relpath)
                 continue
             result = is_matched(relpath)
             if result is not None:
                 if command.verbosity >= 3:
-                    command.stdout.write(u"> %s\n" % relpath)
+                    command.stdout.write("> %s\n" % relpath)
                 category, captures = result
                 yield relpath, category, captures
             else:
                 if command.verbosity >= 1:
-                    command.stderr.write(u"? %s\n" % relpath)
+                    command.stderr.write("? %s\n" % relpath)
 
 
 def scan_photo_root(command):
@@ -124,12 +132,12 @@ def get_album_info(captures, command):
         date = datetime.date(**kwargs)
     except KeyError:
         pass
-    except ValueError, e:
+    except ValueError as e:
         if command.verbosity >= 1:
-            command.stderr.write(u"%s %s\n" % (e, kwargs))
-    name = ' '.join(v for k, v in sorted(captures.iteritems())
+            command.stderr.write("%s %s\n" % (e, kwargs))
+    name = ' '.join(v for k, v in sorted(captures.items())
                     if k.startswith('a_name') and v is not None)
-    name = name.replace(u'/', u' > ')
+    name = name.replace('/', ' > ')
     return date, name
 
 
@@ -147,9 +155,9 @@ def get_photo_info(captures, command):
             date = timezone.make_aware(date, timezone.get_default_timezone())
     except KeyError:
         pass
-    except ValueError, e:
+    except ValueError as e:
         if command.verbosity >= 1:
-            command.stderr.write(u"%s %s\n" % (e, kwargs))
+            command.stderr.write("%s %s\n" % (e, kwargs))
     return date
 
 
@@ -161,14 +169,14 @@ def synchronize_albums(albums, command):
     new_keys = set(albums.keys())
     old_keys = set((a.category, a.dirpath) for a in Album.objects.all())
     for category, dirpath in sorted(new_keys - old_keys):
-        random_capture = albums[category, dirpath].itervalues().next()
+        random_capture = next(iter(albums[category, dirpath].values()))
         date, name = get_album_info(random_capture, command)
         if command.verbosity >= 1:
-            command.stdout.write(u"Adding album %s (%s) as %s\n" % (dirpath, category, name))
+            command.stdout.write("Adding album %s (%s) as %s\n" % (dirpath, category, name))
         Album.objects.create(category=category, dirpath=dirpath, date=date, name=name)
     for category, dirpath in sorted(old_keys - new_keys):
         if command.verbosity >= 1:
-            command.stdout.write(u"Removing album %s (%s)\n" % (dirpath, category))
+            command.stdout.write("Removing album %s (%s)\n" % (dirpath, category))
         Album.objects.get(category=category, dirpath=dirpath).delete()
 
 
@@ -177,20 +185,20 @@ def synchronize_photos(albums, command):
 
     `albums` is the result of `scan_photo_root`.
     """
-    for (category, dirpath), filenames in albums.iteritems():
+    for (category, dirpath), filenames in albums.items():
         album = Album.objects.get(category=category, dirpath=dirpath)
-        new_keys = set(filenames.iterkeys())
+        new_keys = set(filenames.keys())
         old_keys = set(p.filename for p in album.photo_set.all())
         for filename in sorted(new_keys - old_keys):
             date = get_photo_info(albums[category, dirpath][filename], command)
             if command.verbosity >= 2:
-                command.stdout.write(u"Adding photo %s to album %s (%s)\n" % (filename, dirpath, category))
+                command.stdout.write("Adding photo %s to album %s (%s)\n" % (filename, dirpath, category))
             photo = Photo.objects.create(album=album, filename=filename, date=date)
             for preset in command.resize_presets:
                 photo.thumbnail(preset)
         for filename in sorted(old_keys - new_keys):
             if command.verbosity >= 2:
-                command.stdout.write(u"Removing photo %s from album %s (%s)\n" % (filename, dirpath, category))
+                command.stdout.write("Removing photo %s from album %s (%s)\n" % (filename, dirpath, category))
             photo = Photo.objects.get(album=album, filename=filename)
             photo.delete()
         if not command.full_sync:
@@ -200,6 +208,6 @@ def synchronize_photos(albums, command):
             photo = Photo.objects.get(album=album, filename=filename)
             if date != photo.date:
                 if command.verbosity >= 2:
-                    command.stdout.write(u"Fixing date of photo %s from album %s (%s)\n" % (filename, dirpath, category))
+                    command.stdout.write("Fixing date of photo %s from album %s (%s)\n" % (filename, dirpath, category))
                 photo.date = date
                 photo.save()

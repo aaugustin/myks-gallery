@@ -1,6 +1,6 @@
 # Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
-import StringIO
+from __future__ import unicode_literals
 
 from django.conf.urls import patterns, url
 from django.contrib import admin
@@ -15,6 +15,7 @@ from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template import Context, Template
+from django.utils import six
 from django.utils.translation import ugettext, ugettext_lazy
 
 from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
@@ -59,7 +60,7 @@ class SetAccessPolicyMixin(object):
                         ap = policy_model(**{model_name: obj})
                         created += 1
                     form_class(request.POST, instance=ap).save()
-                self.message_user(request, ugettext(u"Successfully created "
+                self.message_user(request, ugettext("Successfully created "
                     "%(created)d and changed %(changed)d access policies.")
                     % {'created': created, 'changed': changed})
                 return HttpResponseRedirect(reverse('admin:gallery_%s_changelist' % model_name))
@@ -103,7 +104,7 @@ class SetAccessPolicyMixin(object):
                 else:
                     ap.delete()
                     deleted += 1
-            self.message_user(request, ugettext(u"Successfully deleted "
+            self.message_user(request, ugettext("Successfully deleted "
                 "%(deleted)d access policies." % {'deleted': deleted}))
             return HttpResponseRedirect(reverse('admin:gallery_%s_changelist' % model_name))
 
@@ -150,7 +151,7 @@ class AlbumAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
         access_policy = obj.get_access_policy()
         if access_policy:
             groups = access_policy.groups.all()
-            return u', '.join(unicode(group) for group in groups)
+            return ', '.join(six.text_type(group) for group in groups)
         else:
             return '-'
 
@@ -158,7 +159,7 @@ class AlbumAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
         access_policy = obj.get_access_policy()
         if access_policy:
             users = access_policy.users.all()
-            return u', '.join(unicode(user) for user in users)
+            return ', '.join(six.text_type(user) for user in users)
         else:
             return '-'
 
@@ -215,14 +216,14 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
     def groups(self, obj):
         access_policy = obj.get_effective_access_policy()
         if access_policy:
-            return u', '.join(unicode(group) for group in access_policy.groups.all())
+            return ', '.join(six.text_type(group) for group in access_policy.groups.all())
         else:
             return '-'
 
     def users(self, obj):
         access_policy = obj.get_effective_access_policy()
         if access_policy:
-            return u', '.join(unicode(user) for user in access_policy.users.all())
+            return ', '.join(six.text_type(user) for user in access_policy.users.all())
         else:
             return '-'
 
@@ -232,7 +233,7 @@ admin.site.register(Photo, PhotoAdmin)
 @permission_required('gallery.scan')
 def scan_photos(request):
     if request.method == 'POST':
-        stdout, stderr = StringIO.StringIO(), StringIO.StringIO()
+        stdout, stderr = six.StringIO(), six.StringIO()
         management.call_command('scanphotos', stdout=stdout, stderr=stderr)
         for line in stdout.getvalue().splitlines():
             messages.info(request, line)

@@ -1,6 +1,8 @@
 # coding: utf-8
 # Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
+from __future__ import unicode_literals
+
 import hashlib
 import os
 
@@ -8,6 +10,7 @@ from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.db import models
 from django.db.models import Q
+from django.utils.encoding import python_2_unicode_compatible
 
 from .imgutil import make_thumbnail
 
@@ -43,6 +46,7 @@ class AlbumManager(models.Manager):
         return self.filter(album_cond).distinct()
 
 
+@python_2_unicode_compatible
 class Album(models.Model):
     category = models.CharField(max_length=100)
     dirpath = models.CharField(max_length=200, verbose_name="directory path")
@@ -55,7 +59,7 @@ class Album(models.Model):
         ordering = ('date', 'name', 'dirpath', 'category')
         unique_together = ('dirpath', 'category')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.dirpath
 
     @models.permalink
@@ -64,7 +68,7 @@ class Album(models.Model):
 
     @property
     def display_name(self):
-        return self.name or self.dirpath.replace(u'/', u' > ')
+        return self.name or self.dirpath.replace('/', ' > ')
 
     def get_access_policy(self):
         try:
@@ -93,11 +97,14 @@ class Album(models.Model):
         return albums.order_by('-date', '-name', '-dirpath', '-category')[:1].get()
 
 
+@python_2_unicode_compatible
 class AlbumAccessPolicy(AccessPolicy):
     album = models.OneToOneField(Album, related_name='access_policy')
     inherit = models.BooleanField(blank=True, default=True,
             verbose_name="photos inherit album access policy")
 
+    def __str__(self):
+        return "Access policy for %s" % self.album
 
 class PhotoManager(models.Manager):
 
@@ -113,6 +120,7 @@ class PhotoManager(models.Manager):
         return self.filter(photo_cond | (inherit & album_cond)).distinct()
 
 
+@python_2_unicode_compatible
 class Photo(models.Model):
     album = models.ForeignKey(Album)
     filename = models.CharField(max_length=100, verbose_name="file name")
@@ -128,7 +136,7 @@ class Photo(models.Model):
         )
         unique_together = ('album', 'filename')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.filename
 
     @models.permalink
@@ -190,7 +198,7 @@ class Photo(models.Model):
         hsh = hashlib.sha1()
         hsh.update(self.album.dirpath.encode('utf-8'))
         hsh.update(self.filename.encode('utf-8'))
-        hsh.update(str(settings.GALLERY_RESIZE_PRESETS[preset]))
+        hsh.update(str(settings.GALLERY_RESIZE_PRESETS[preset]).encode('utf-8'))
         ext = os.path.splitext(self.filename)[1].lower()
         return os.path.join(prefix, hsh.hexdigest() + ext)
 
@@ -201,5 +209,9 @@ class Photo(models.Model):
         return thumbpath
 
 
+@python_2_unicode_compatible
 class PhotoAccessPolicy(AccessPolicy):
     photo = models.OneToOneField(Photo, related_name='access_policy')
+
+    def __str__(self):
+        return "Access policy for %s" % self.photo

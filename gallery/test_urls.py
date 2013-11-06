@@ -1,10 +1,12 @@
 # coding: utf-8
 # Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
+from __future__ import unicode_literals
+
 from django.conf.urls import patterns, url, include
 from django.contrib import admin
 
-from .. import views
+from . import views
 
 
 admin.autodiscover()

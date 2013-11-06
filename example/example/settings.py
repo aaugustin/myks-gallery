@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -47,7 +49,7 @@ GALLERY_PHOTO_DIR = os.path.join(ROOT_DIR, 'photos')
 GALLERY_CACHE_DIR = os.path.join(ROOT_DIR, 'cache')
 
 GALLERY_PATTERNS = (
-    ('Photos', ur'(?P<a_year>\d{4})_(?P<a_month>\d{2})_(?P<a_day>\d{2})_(?P<a_name>[^/]+)/[^/]+.(jpg|JPG)'),
+    ('Photos', r'(?P<a_year>\d{4})_(?P<a_month>\d{2})_(?P<a_day>\d{2})_(?P<a_name>[^/]+)/[^/]+.(jpg|JPG)'),
 )
 
 GALLERY_RESIZE_PRESETS = {

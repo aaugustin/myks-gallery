@@ -1,6 +1,8 @@
 # coding: utf-8
 # Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
+from __future__ import unicode_literals
+
 import datetime
 import os
 
@@ -9,7 +11,7 @@ from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from ..models import Album, AlbumAccessPolicy, Photo
+from .models import Album, AlbumAccessPolicy, Photo
 from .test_imgutil import ThumbnailsMixin
 
 
@@ -36,7 +38,7 @@ class ViewsTestsMixin(ThumbnailsMixin):
         self.assertTemplateUsed(response, 'gallery/photo_detail.html')
 
     def test_photo_resized_view(self):
-        with override_settings(
+        with self.settings(
                 GALLERY_PHOTO_DIR=self.tmpdir,
                 GALLERY_CACHE_DIR=self.tmpdir,
                 GALLERY_RESIZE_PRESETS={'resized': (120, 120, False)},
@@ -47,7 +49,7 @@ class ViewsTestsMixin(ThumbnailsMixin):
             self.assertNotEqual(response['X-Fake-Sendfile'], os.path.join(self.tmpdir, 'original.jpg'))
 
     def test_photo_original_view(self):
-        with override_settings(
+        with self.settings(
                 GALLERY_PHOTO_DIR=self.tmpdir,
                 GALLERY_SENDFILE_HEADER='X-Fake-Sendfile'):
             self.make_image(360, 240)
@@ -126,10 +128,10 @@ class ServePrivateMediaTests(TestCase):
 
     # Constants used by the tests
 
-    root_dir = os.path.dirname(os.path.dirname(__file__))
+    root_dir = os.path.dirname(__file__)
     relative_path = os.sep + os.path.join('static', 'css', 'gallery.css')
     absolute_path = root_dir + relative_path
-    with open(absolute_path) as handle:
+    with open(absolute_path, 'rb') as handle:
         file_contents = handle.read()
     private_url = '/private' + absolute_path
 
@@ -139,13 +141,13 @@ class ServePrivateMediaTests(TestCase):
     def test_no_sendfile_dev(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get(''), None)
-        self.assertEqual(''.join(response.streaming_content), self.file_contents)
+        self.assertEqual(b''.join(response.streaming_content), self.file_contents)
 
     @override_settings(DEBUG=False)
     def test_no_sendfile_prod(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get(''), None)
-        self.assertEqual(''.join(response.streaming_content), self.file_contents)
+        self.assertEqual(b''.join(response.streaming_content), self.file_contents)
 
     # See https://tn123.org/mod_xsendfile/
 
@@ -153,13 +155,13 @@ class ServePrivateMediaTests(TestCase):
     def test_apache_dev(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-SendFile'), None)
-        self.assertEqual(''.join(response.streaming_content), self.file_contents)
+        self.assertEqual(b''.join(response.streaming_content), self.file_contents)
 
     @override_settings(DEBUG=False, GALLERY_SENDFILE_HEADER='X-SendFile', GALLERY_SENDFILE_ROOT='')
     def test_apache_prod(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-SendFile'), self.absolute_path)
-        self.assertEqual(response.content, '')
+        self.assertEqual(response.content, b'')
 
     # See http://wiki.nginx.org/XSendfile
 
@@ -167,13 +169,13 @@ class ServePrivateMediaTests(TestCase):
     def test_nginx_dev(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-Accel-Redirect'), None)
-        self.assertEqual(''.join(response.streaming_content), self.file_contents)
+        self.assertEqual(b''.join(response.streaming_content), self.file_contents)
 
     @override_settings(DEBUG=False, GALLERY_SENDFILE_HEADER='X-Accel-Redirect', GALLERY_SENDFILE_ROOT=root_dir)
     def test_nginx_prod(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-Accel-Redirect'), self.relative_path)
-        self.assertEqual(response.content, '')
+        self.assertEqual(response.content, b'')
 
     # Other tests
 

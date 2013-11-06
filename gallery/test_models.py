@@ -1,12 +1,14 @@
 # coding: utf-8
 # Copyright (c) 2011-2012 Aymeric Augustin. All rights reserved.
 
+from __future__ import unicode_literals
+
 import datetime
 
 from django.contrib.auth.models import Group, User
 from django.test import TestCase
 
-from ..models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
+from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
 
 
 class AccessPolicyTests(TestCase):
