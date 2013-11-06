@@ -8,8 +8,8 @@ os.putenv('COPYFILE_DISABLE', 'true')
 
 description = 'Photo gallery with granular access control'
 
-with open(os.path.join(os.path.dirname(__file__), 'README')) as f:
-    long_description = '\n\n'.join(f.read().split('\n\n')[2:7])
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
+    long_description = '\n\n'.join(f.read().split('\n\n')[2:6])
 
 distutils.core.setup(
     name='myks-gallery',
