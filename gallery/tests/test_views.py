@@ -10,7 +10,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from ..models import Album, AlbumAccessPolicy, Photo
-from .imgutil import ThumbnailsMixin
+from .test_imgutil import ThumbnailsMixin
 
 
 class ViewsTestsMixin(ThumbnailsMixin):
