@@ -3,6 +3,7 @@
 dist
 htmlcov
 MANIFEST
+.tox
 
 example/photos
 example/cache
