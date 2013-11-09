@@ -6,9 +6,14 @@ import os
 # Avoid polluting the .tar.gz with ._* files under Mac OS X
 os.putenv('COPYFILE_DISABLE', 'true')
 
+# Prevent distutils from complaining that a standard file wasn't found
+README = os.path.join(os.path.dirname(__file__), 'README')
+if not os.path.exists(README):
+    os.symlink(README + '.rst', README)
+
 description = 'Photo gallery with granular access control'
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
+with open(README) as f:
     long_description = '\n\n'.join(f.read().split('\n\n')[2:6])
 
 distutils.core.setup(

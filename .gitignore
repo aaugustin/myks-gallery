@@ -3,6 +3,7 @@
 dist
 htmlcov
 MANIFEST
+README
 .tox
 
 example/photos
