@@ -1,5 +1,5 @@
 export PYTHONPATH:=.:$(PYTHONPATH)
-export PYTHONWARNINGS:=error
+export PYTHONWARNINGS:=error,ignore:unclosed file:ResourceWarning
 export DJANGO_SETTINGS_MODULE:=gallery.test_settings
 
 test:
