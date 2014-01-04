@@ -20,6 +20,8 @@ ROOT_URLCONF = 'gallery.test_urls'
 
 SECRET_KEY = 'Not empty for tests.'
 
+STATIC_ROOT = '.'
+
 STATIC_URL = '/static/'
 
 TEMPLATE_DIRS = os.path.join(os.path.dirname(__file__), 'test_templates'),
