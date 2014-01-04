@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+import django
 from django.conf.urls import patterns, url
 from django.contrib import admin
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
@@ -136,10 +137,16 @@ class AlbumAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
     readonly_fields = ('dirpath',)
     search_fields = ('name', 'dirpath')
 
-    def queryset(self, request):
-        return (super(AlbumAdmin, self).queryset(request)
-                .prefetch_related('access_policy__users')
-                .prefetch_related('access_policy__groups'))
+    if django.VERSION[:2] >= (1, 6):
+        def get_queryset(self, request):
+            return (super(AlbumAdmin, self).get_queryset(request)
+                    .prefetch_related('access_policy__users')
+                    .prefetch_related('access_policy__groups'))
+    else:
+        def queryset(self, request):
+            return (super(AlbumAdmin, self).queryset(request)
+                    .prefetch_related('access_policy__users')
+                    .prefetch_related('access_policy__groups'))
 
     def public(self, obj):
         access_policy = obj.get_access_policy()
@@ -191,12 +198,20 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
             url(r'^scan/$', scan_photos),
         ) + super(PhotoAdmin, self).get_urls()
 
-    def queryset(self, request):
-        return (super(PhotoAdmin, self).queryset(request)
-                .prefetch_related('access_policy__users')
-                .prefetch_related('access_policy__groups')
-                .prefetch_related('album__access_policy__users')
-                .prefetch_related('album__access_policy__groups'))
+    if django.VERSION[:2] >= (1, 6):
+        def get_queryset(self, request):
+            return (super(PhotoAdmin, self).get_queryset(request)
+                    .prefetch_related('access_policy__users')
+                    .prefetch_related('access_policy__groups')
+                    .prefetch_related('album__access_policy__users')
+                    .prefetch_related('album__access_policy__groups'))
+    else:
+        def queryset(self, request):
+            return (super(PhotoAdmin, self).queryset(request)
+                    .prefetch_related('access_policy__users')
+                    .prefetch_related('access_policy__groups')
+                    .prefetch_related('album__access_policy__users')
+                    .prefetch_related('album__access_policy__groups'))
 
     preview_template = Template("""{% load url from future %}"""
 """<a href="{{ photo.get_absolute_url }}">"""
