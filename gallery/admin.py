@@ -22,12 +22,20 @@ from django.utils.translation import ugettext, ugettext_lazy
 from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
 
 
+DJANGO_VERSION = django.VERSION[:2]
+
+
 class SetAccessPolicyMixin(object):
     actions = ['set_access_policy', 'unset_access_policy']
 
     def set_access_policy(self, request, queryset):
-        model_name = self.model._meta.module_name
         policy_model = {Album: AlbumAccessPolicy, Photo: PhotoAccessPolicy}[self.model]
+        if DJANGO_VERSION >= (1, 6):
+            model_name = self.model._meta.model_name
+            policy_model_name = policy_model._meta.model_name
+        else:
+            model_name = self.model._meta.module_name
+            policy_model_name = policy_model._meta.module_name
         form_class = modelform_factory(policy_model,
             exclude=(model_name,),
             widgets={
@@ -40,8 +48,8 @@ class SetAccessPolicyMixin(object):
             if form.is_valid():
                 queryset = queryset.select_related('access_policy')
                 # Check permissions
-                has_add_perm = request.user.has_perm('gallery.add_%s' % policy_model._meta.module_name)
-                has_change_perm = request.user.has_perm('gallery.change_%s' % policy_model._meta.module_name)
+                has_add_perm = request.user.has_perm('gallery.add_%s' % policy_model_name)
+                has_change_perm = request.user.has_perm('gallery.change_%s' % policy_model_name)
                 for obj in queryset:
                     try:
                         obj.access_policy
@@ -80,13 +88,17 @@ class SetAccessPolicyMixin(object):
     set_access_policy.short_description = ugettext_lazy("Set access policy")
 
     def unset_access_policy(self, request, queryset):
-        model_name = self.model._meta.module_name
         policy_model = {Album: AlbumAccessPolicy, Photo: PhotoAccessPolicy}[self.model]
-
+        if DJANGO_VERSION >= (1, 6):
+            model_name = self.model._meta.model_name
+            policy_model_name = policy_model._meta.model_name
+        else:
+            model_name = self.model._meta.module_name
+            policy_model_name = policy_model._meta.module_name
         if request.POST.get('unset_access_policy'):
             queryset = queryset.select_related('access_policy')
             # Check permissions
-            has_delete_perm = request.user.has_perm('gallery.delete_%s' % policy_model._meta.module_name)
+            has_delete_perm = request.user.has_perm('gallery.delete_%s' % policy_model_name)
             for obj in queryset:
                 try:
                     obj.access_policy
@@ -137,7 +149,7 @@ class AlbumAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
     readonly_fields = ('dirpath',)
     search_fields = ('name', 'dirpath')
 
-    if django.VERSION[:2] >= (1, 6):
+    if DJANGO_VERSION >= (1, 6):
         def get_queryset(self, request):
             return (super(AlbumAdmin, self).get_queryset(request)
                     .prefetch_related('access_policy__users')
@@ -198,7 +210,7 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
             url(r'^scan/$', scan_photos),
         ) + super(PhotoAdmin, self).get_urls()
 
-    if django.VERSION[:2] >= (1, 6):
+    if DJANGO_VERSION >= (1, 6):
         def get_queryset(self, request):
             return (super(PhotoAdmin, self).get_queryset(request)
                     .prefetch_related('access_policy__users')
