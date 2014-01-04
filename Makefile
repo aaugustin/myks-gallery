@@ -1,4 +1,5 @@
 export PYTHONPATH:=.:$(PYTHONPATH)
+export PYTHONWARNINGS:=error
 export DJANGO_SETTINGS_MODULE:=gallery.test_settings
 
 test:
