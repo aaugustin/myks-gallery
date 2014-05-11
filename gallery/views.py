@@ -27,6 +27,7 @@ from .models import Album, Photo
 
 class GalleryCommonMixin(object):
     """Provide can_view_all() and show_public() utility methods."""
+    allow_future = True
 
     def can_view_all(self):
         if not hasattr(self, '_can_view_all'):
