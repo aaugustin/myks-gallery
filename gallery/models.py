@@ -16,7 +16,7 @@ from .imgutil import make_thumbnail
 
 
 class AccessPolicy(models.Model):
-    public = models.BooleanField(verbose_name="is public")
+    public = models.BooleanField(verbose_name="is public", default=False)
     groups = models.ManyToManyField(Group, blank=True, verbose_name="authorized groups")
     users = models.ManyToManyField(User, blank=True, verbose_name="authorized users")
 

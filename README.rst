@@ -68,9 +68,9 @@ website:
 4.  Add the application to your URLconf with the ``gallery`` application
     namespace::
 
-        urlpatterns += patterns('',
+        urlpatterns += [
             url(r'^gallery/', include('gallery.urls', namespace='gallery', app_name='gallery')),
-        )
+        ]
 
 5.  Create a suitable ``base.html`` template. It must provide three blocks:
     ``title``, ``extrahead``, ``content``, as shown in this `example`_.

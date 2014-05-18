@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import django
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib import admin
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -206,9 +206,9 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
     search_fields = ('album__name', 'album__dirpath', 'filename')
 
     def get_urls(self):
-        return patterns('',
+        return [
             url(r'^scan/$', scan_photos),
-        ) + super(PhotoAdmin, self).get_urls()
+        ] + super(PhotoAdmin, self).get_urls()
 
     if DJANGO_VERSION >= (1, 6):
         def get_queryset(self, request):
@@ -225,7 +225,7 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
                     .prefetch_related('album__access_policy__users')
                     .prefetch_related('album__access_policy__groups'))
 
-    preview_template = Template("""{% load url from future %}"""
+    preview_template = Template(
 """<a href="{{ photo.get_absolute_url }}">"""
 """<img src="{% url 'gallery:photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}">"""
 """</a>""")
