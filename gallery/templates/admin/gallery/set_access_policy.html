@@ -16,15 +16,6 @@
 {% endblock %}
 
 {% block content %}
-<div class="module" style="float: right; margin-left: 1em;">
-    <p>{% trans "This will set the access policy for:" %}</p>
-    <div class="photo_list">
-        {% for photo in queryset %}
-        <a href="{{ photo.get_absolute_url }}"><img src="{% url 'gallery:photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
-        {% endfor %}
-    </div>
-</div>
-
 <form action="" method="POST">
     {% csrf_token %}
     {% for obj in queryset %}
@@ -41,4 +32,13 @@
     </fieldset>
     <input type="submit" name="set_access_policy" value="{% trans 'Set access policy' %}">
 </form>
+
+<div class="module">
+    <p>{% trans "This will set the access policy for:" %}</p>
+    <div class="photo_list">
+        {% for photo in photos %}
+        <a href="{{ photo.get_absolute_url }}"><img src="{% url 'gallery:photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}"></a>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

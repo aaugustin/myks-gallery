@@ -264,6 +264,11 @@ Running the sample application
 Changelog
 =========
 
+0.4
+---
+
+* Fixed preview of photos affected by batch access policy changes.
+
 0.3
 ---
 

@@ -80,6 +80,7 @@ class SetAccessPolicyMixin(object):
             'opts': self.model._meta,
             'form': form,
             'media': self.media + form.media,
+            'photos': Photo.objects.filter(album__in=queryset),
             'queryset': queryset,
             'title': ugettext("Set access policy"),
         }
@@ -124,6 +125,7 @@ class SetAccessPolicyMixin(object):
         context = {
             'action_checkbox_name': ACTION_CHECKBOX_NAME,
             'opts': self.model._meta,
+            'photos': Photo.objects.filter(album__in=queryset),
             'queryset': queryset,
             'title': ugettext("Unset access policy"),
         }
