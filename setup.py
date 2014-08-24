@@ -18,7 +18,7 @@ with open(README) as f:
 
 distutils.core.setup(
     name='myks-gallery',
-    version='0.3',
+    version='0.4',
     author='Aymeric Augustin',
     author_email='aymeric.augustin@m4x.org',
     url='https://github.com/aaugustin/myks-gallery',
