@@ -30,4 +30,8 @@
 </div>
 {% endspaceless %}
 
+<div class="album_export">
+<a href="{% url 'gallery:album-export' pk=album.pk %}">{% trans "Download album" %}</a>
+</div>
+
 {% endblock %}

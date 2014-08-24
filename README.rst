@@ -115,8 +115,8 @@ by the application server but should not be writable.
 
 Default: not defined
 
-Path to the cache directory for thumbnails. This directory must be readable
-and writable by the application server.
+Path to the cache directory for thumbnails and for album archives. This
+directory must be readable and writable by the application server.
 
 ``GALLERY_PATTERNS``
 ....................
@@ -215,6 +215,14 @@ Default: ``"Gallery"``
 Title of your photo gallery. This is only used by the default templates of the
 index and year views.
 
+``GALLERY_ARCHIVE_EXPIRY``
+..........................
+
+Default: 60
+
+Duration in days during which album archives are kept in cache.
+
+
 Running the sample application
 ==============================
 
@@ -267,6 +275,7 @@ Changelog
 0.4
 ---
 
+* Provided exports of albums as zip archives.
 * Fixed preview of photos affected by batch access policy changes.
 
 0.3

@@ -3,13 +3,17 @@
 
 from __future__ import unicode_literals
 
+import glob
+import hashlib
 import mimetypes
 import os
 import random
 import re
 import stat
 import sys
+import time
 import unicodedata
+import zipfile
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -167,6 +171,43 @@ class PhotoView(GalleryCommonMixin, DetailView):
         except Photo.DoesNotExist:
             pass
         return context
+
+
+def export_album(request, pk):
+    """Serve a zip archive containing an entire album."""
+    album = get_object_or_404(Album, pk=pk)
+    if request.user.has_perm('gallery.view'):
+        photos = album.photo_set.all()
+    else:
+        photos = album.photo_set.allowed_for_user(request.user)
+
+    hsh = hashlib.sha1()
+    for photo in photos:
+        hsh.update(photo.filename.encode('utf-8'))
+    zip_name = hsh.hexdigest() + '.zip'
+    zip_path = os.path.join(settings.GALLERY_CACHE_DIR, 'export', zip_name)
+
+    if not os.path.exists(zip_path):
+
+        zip_dir = os.path.dirname(zip_path)
+        if not os.path.isdir(zip_dir):
+            os.makedirs(zip_dir)
+
+        archive_expiry = getattr(settings, 'GALLERY_ARCHIVE_EXPIRY', 60)
+        cutoff = time.time() - archive_expiry * 86400
+        for zip_file in glob.glob(os.path.join(zip_dir, '*.zip')):
+            if os.path.getmtime(zip_file) < cutoff:
+                os.unlink(zip_file)
+
+        with zipfile.ZipFile(zip_path, 'w') as archive:
+            for photo in photos:
+                archive.write(photo.abspath(), photo.filename)
+
+    response = serve_private_media(request, zip_path)
+
+    ascii_filename = '%s_%s.zip' % (str(album.date), sanitize(album.name))
+    response['Content-Disposition'] = 'attachement; filename=%s;' % ascii_filename
+    return response
 
 
 def _get_photo_if_allowed(request, pk):

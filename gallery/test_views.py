@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import datetime
 import os
+import zipfile
 
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission, User
@@ -36,6 +37,17 @@ class ViewsTestsMixin(ThumbnailsMixin):
     def test_photo_view(self):
         response = self.client.get(reverse('gallery:photo', args=[self.photo.pk]))
         self.assertTemplateUsed(response, 'gallery/photo_detail.html')
+
+    def test_album_export_view(self):
+        with self.settings(
+                GALLERY_PHOTO_DIR=self.tmpdir,
+                GALLERY_CACHE_DIR=self.tmpdir,
+                GALLERY_SENDFILE_HEADER='X-Fake-Sendfile'):
+            self.make_image(360, 240)
+            response = self.client.get(reverse('gallery:album-export', args=[self.album.pk]))
+            self.assertTrue(response['X-Fake-Sendfile'].startswith(self.tmpdir))
+            with zipfile.ZipFile(response['X-Fake-Sendfile']) as archive:
+                self.assertEqual(archive.namelist(), ['original.jpg'])
 
     def test_photo_resized_view(self):
         with self.settings(
