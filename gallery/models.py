@@ -195,10 +195,10 @@ class Photo(models.Model):
 
     def thumbname(self, preset):
         prefix = self.album.date.strftime('%y%m')
-        hsh = hashlib.sha1()
-        hsh.update(self.album.dirpath.encode('utf-8'))
-        hsh.update(self.filename.encode('utf-8'))
-        hsh.update(str(settings.GALLERY_RESIZE_PRESETS[preset]).encode('utf-8'))
+        hsh = hashlib.md5()
+        hsh.update(str(self.album.pk).encode())
+        hsh.update(str(self.pk).encode())
+        hsh.update(str(settings.GALLERY_RESIZE_PRESETS[preset]).encode())
         ext = os.path.splitext(self.filename)[1].lower()
         return os.path.join(prefix, hsh.hexdigest() + ext)
 

@@ -181,9 +181,10 @@ def export_album(request, pk):
     else:
         photos = album.photo_set.allowed_for_user(request.user)
 
-    hsh = hashlib.sha1()
+    hsh = hashlib.md5()
+    hsh.update(str(pk).encode())
     for photo in photos:
-        hsh.update(photo.filename.encode('utf-8'))
+        hsh.update(str(photo.pk).encode())
     zip_name = hsh.hexdigest() + '.zip'
     zip_path = os.path.join(settings.GALLERY_CACHE_DIR, 'export', zip_name)
 
