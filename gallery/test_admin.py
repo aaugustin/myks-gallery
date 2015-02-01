@@ -6,7 +6,9 @@ from __future__ import unicode_literals
 import datetime
 import os
 import shutil
+import sys
 import tempfile
+import unittest
 
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.auth.models import User, Permission
@@ -193,3 +195,11 @@ class AdminTests(TestCase):
         self.assertRedirects(response, reverse('admin:gallery_album_changelist'))
         with self.assertRaises(AlbumAccessPolicy.DoesNotExist):
             Album.objects.get(pk=self.album.pk).access_policy
+
+    # See https://code.djangoproject.com/ticket/24258
+    if (3, 0) <= sys.version_info[:2] < (3, 3):
+        test_set_album_access_policy = unittest.expectedFailure(test_set_album_access_policy)
+        test_set_album_access_policy_add_permission = unittest.expectedFailure(test_set_album_access_policy_add_permission)
+        test_set_album_access_policy_change_permission = unittest.expectedFailure(test_set_album_access_policy_change_permission)
+        test_unset_album_access_policy = unittest.expectedFailure(test_unset_album_access_policy)
+        test_unset_album_access_policy_delete_permission = unittest.expectedFailure(test_unset_album_access_policy_delete_permission)
