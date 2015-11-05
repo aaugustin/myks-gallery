@@ -215,6 +215,13 @@ Default: ``"Gallery"``
 Title of your photo gallery. This is only used by the default templates of the
 index and year views.
 
+``GALLERY_PREVIEW_COUNT``
+.........................
+
+Default: ``5``
+
+Number of thumbnails shown in the preview of each album.
+
 ``GALLERY_ARCHIVE_EXPIRY``
 ..........................
 

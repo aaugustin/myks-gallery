@@ -92,7 +92,13 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
                 photos = [photo for photo in album.photo_set.all()
                                 if photo.is_allowed_for_user(user)]
             album.photos_count = len(photos)
-            album.preview = random.sample(photos, min(album.photos_count, 5))
+            preview_count = getattr(settings, 'GALLERY_PREVIEW_COUNT', 5)
+            if len(photos) > preview_count:
+                selection = sorted(random.sample(
+                    range(album.photos_count), preview_count))
+                album.preview = [photos[index] for index in selection]
+            else:
+                album.preview = list(photos)
         context['title'] = getattr(settings, 'GALLERY_TITLE', "Gallery")
         return context
 
