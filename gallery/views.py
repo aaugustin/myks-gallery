@@ -99,7 +99,7 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
 
 class GalleryIndexView(GalleryCommonMixin, AlbumListWithPreviewMixin, ArchiveIndexView):
     allow_empty = True
-    paginate_by = 10
+    paginate_by = 20
 
     def get_queryset(self):
         qs = super(GalleryIndexView, self).get_queryset()
@@ -118,6 +118,7 @@ class GalleryIndexView(GalleryCommonMixin, AlbumListWithPreviewMixin, ArchiveInd
 
 class GalleryYearView(GalleryCommonMixin, AlbumListWithPreviewMixin, YearArchiveView):
     make_object_list = True
+    paginate_by = 20
 
 
 class AlbumView(GalleryCommonMixin, AlbumListMixin, DetailView):
