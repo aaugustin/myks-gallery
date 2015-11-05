@@ -13,6 +13,7 @@ import os
 import re
 import sys
 import time
+import unicodedata
 
 from django.conf import settings
 from django.core.management import base
@@ -89,6 +90,8 @@ def iter_photo_root(command):
             if six.PY2:
                 filename = filename.decode(fs_encoding)
             filepath = os.path.join(dirpath, filename)
+            # HFS+ stores names in NFD which causes issues with some fonts.
+            filepath = unicodedata.normalize('NFKC', filepath)
             relpath = os.path.relpath(filepath, settings.GALLERY_PHOTO_DIR)
             if is_ignored(relpath):
                 if command.verbosity >= 3:
