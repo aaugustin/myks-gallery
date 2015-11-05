@@ -73,7 +73,7 @@ class AlbumListMixin(object):
             qs = qs.prefetch_related('access_policy__users')
             qs = qs.prefetch_related('photo_set__access_policy__groups')
             qs = qs.prefetch_related('photo_set__access_policy__users')
-        return qs
+        return qs.order_by('-date', '-name')
 
 
 class AlbumListWithPreviewMixin(AlbumListMixin):

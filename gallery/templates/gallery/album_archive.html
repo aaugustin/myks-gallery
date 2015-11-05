@@ -30,7 +30,7 @@
 {% if q %}
 {% blocktrans with query=q %}Results for <strong>{{ query }}</strong>{% endblocktrans %} | <a href="{% url 'gallery:index' %}">{% trans "See all albums" %}</a>
 {% else %}
-{% for date in date_list reversed %}
+{% for date in date_list %}
 <a href="{% url 'gallery:year' date.year %}">{{ date.year }}</a>
 {% if not forloop.last %} | {% endif %}
 {% endfor %}

@@ -23,17 +23,18 @@
 
 
 <div class="photo_nav">
-{% if previous_year %}
-<a href="{% url 'gallery:year' previous_year.year %}" class="previous">{{ previous_year.year }}</a>
+{# next_year has the "previous" class and vice-versa because album ordering is reversed #}
+{% if next_year %}
+<a href="{% url 'gallery:year' next_year.year %}" class="previous">{{ next_year.year }}</a>
 {% endif %}
 <a href="{% url 'gallery:index' %}" class="up">{{ title }}</a>
-{% if next_year %}
-<a href="{% url 'gallery:year' next_year.year %}" class="next">{{ next_year.year }}</a>
+{% if previous_year %}
+<a href="{% url 'gallery:year' previous_year.year %}" class="next">{{ previous_year.year }}</a>
 {% endif %}
 </div>
 
 <h2>{{ year.year }}</h2>
-{% for album in album_list reversed %}
+{% for album in album_list %}
 <h3 class="album_preview">
 {{ album.display_name }}
 <span class="album_count">{% blocktrans count album.photos_count as num_photos %}one photo{% plural %}{{ num_photos }} photos{% endblocktrans %}</span>

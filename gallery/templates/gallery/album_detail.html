@@ -11,12 +11,13 @@
 {% block content %}
 <h1>{{ album.display_name }} - {{ album.date }}</h1>
 <div class="photo_nav">
-{% if previous_album %}
-<a href="{{ previous_album.get_absolute_url }}" class="previous">{{ previous_album.display_name }}</a>
+{# next_album has the "previous" class and vice-versa because album ordering is reversed #}
+{% if next_album %}
+<a href="{{ next_album.get_absolute_url }}" class="previous">{{ next_album.display_name }}</a>
 {% endif %}
 <a href="{% url 'gallery:year' album.date.year %}" class="up">{{ album.date.year }}</a>
-{% if next_album %}
-<a href="{{ next_album.get_absolute_url }}" class="next">{{ next_album.display_name }}</a>
+{% if previous_album %}
+<a href="{{ previous_album.get_absolute_url }}" class="next">{{ previous_album.display_name }}</a>
 {% endif %}
 </div>
 
