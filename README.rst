@@ -279,6 +279,18 @@ Running the sample application
 Changelog
 =========
 
+0.5
+---
+
+*Under development*
+
+* Switched ordering of albums to always show the most recent albums first.
+* Allowed customizing the number of photos in album previews.
+* Preserved original order of photos in album previews.
+* Added pagination on album preview pages.
+* Changed the hashing schema. This invalides the cache. You should clear it.
+* Fixed collision between zip archives containing photos with the same name.
+
 0.4
 ---
 
