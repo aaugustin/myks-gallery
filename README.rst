@@ -20,22 +20,20 @@ Use case
 
 Rather than use a photo manager, I just create a new directory for each event
 and put my photos inside. I include the date of the event in the name of the
-directory and I rename photos based on their date and time. I regularly
-synchronize my collection to a server with rsync_.
-
-.. _rsync: http://rsync.samba.org/
+directory and I rename photos based on their date and time. Then I regularly
+synchronize my collection to a remote storage. I serve my gallery from there.
 
 If you have a similar workflow, you may find myks-gallery useful.
 
 Whenever I upload new photos, I re-scan the collection with ``./manage.py
-scanphotos``, and myks-gallery detects new albums and photos. Then I can
-define users, groups and access policies in the admin.
+scanphotos`` or with the button in the admin. myks-gallery detects new albums
+and photos. Then I define users, groups and access policies in the admin.
 
 Album access policies control the visibility of albums. Most often, you'll
 enable the "photos inherit album access policy" option. If you need more
 control, for instance to share only a subset of an album, you can disable this
 option and use photo access policies. You still need to define an album access
-policy, and it should be a superset of the photo access policies.
+policy and it should be a superset of the photo access policies.
 
 Obviously, requiring usernames and passwords doesn't work well for sharing
 photos with relatives. You might want to use django-sesame_.
@@ -45,8 +43,32 @@ photos with relatives. You might want to use django-sesame_.
 Setup
 =====
 
-myks-gallery is a pluggable Django application. It requires Django >= 1.7 and
+myks-gallery is a pluggable Django application. It requires Django ≥ 1.7 and
 Pillow. It works with any version of Python supported by Django.
+
+Architecture
+------------
+
+myks-gallery requires two storage areas:
+
+- The first one contains the original photos. It's a read-only reference. You
+  can upload photos there with `aws s3 sync`_, `gsutil rsync`_, rsync_, etc.
+  depending on the platform. (I don't know any such tool for Azure storage.)
+- The second one contains downscaled photos and ZIP archives of album exports.
+  It's a read-write cache. You can set up expiry policies and clear it without
+  affecting the gallery, aside from the cost of rescaling images again.
+
+myks-gallery accesses them through Django's `file storage API`_, meaning that
+you can use any storage for which a Django storage backend exists. You should
+use `django-storages-redux`_ if you're storing files in a cloud service and
+Djang's built-in ``FileSystemStorage`` if you're storing them locally on the
+filesystem, typically for local development.
+
+.. _aws s3 sync: http://docs.aws.amazon.com/cli/latest/reference/s3/sync.html
+.. _gsutil rsync: https://cloud.google.com/storage/docs/gsutil/commands/rsync
+.. _rsync: http://rsync.samba.org/
+.. _file storage API: https://docs.djangoproject.com/en/stable/ref/files/storage/
+.. _django-storages-redux: https://github.com/jschneier/django-storages
 
 Installation guide
 ------------------
@@ -75,8 +97,9 @@ website:
 5.  Create a suitable ``base.html`` template. It must provide three blocks:
     ``title``, ``extrahead``, ``content``, as shown in this `example`_.
 
-6.  Enable `X-accel`_ (nginx) or `mod_xsendfile`_ (Apache) for your photo and
-    cache directories (optional).
+6.  Optionally, if you're serving files from the local filesystem, enable
+    `X-accel`_ (nginx) or `mod_xsendfile`_ (Apache) for your photo and cache
+    directories.
 
 7.  Scan your photos with the "Scan photos" button in the admin or the
     ``scanphotos`` management command and define access policies.
@@ -102,21 +125,36 @@ myks-gallery defines two permissions:
 Settings
 --------
 
-``GALLERY_PHOTO_DIR``
-.....................
+``GALLERY_PHOTO_STORAGE``
+.........................
 
-Default: not defined
+Default: *not defined*
 
-Path to the directory containing your photos. This directory must be readable
-by the application server but should not be writable.
+Dotted Python path to the Django storage class for the original photos. It
+must be readable by the application server but should not be writable.
 
-``GALLERY_CACHE_DIR``
-.....................
+While ``GALLERY_PHOTO_STORAGE`` behaves like Django's ``DEFAULT_FILE_STORAGE``
+setting, you'll usullay point it to a factory function that initializes and
+returns a Django storage instance because you won't want to use globally
+configured values for settings such as the S3 bucket name.
 
-Default: not defined
+For compatibility for versions prior to 0.5, if ``GALLERY_PHOTO_STORAGE``
+isn't defined but ``GALLERY_PHOTO_DIR`` is, the photo storage will be set to
+``FileSystemStorage(location=GALLERY_PHOTO_DIR)``.
 
-Path to the cache directory for thumbnails and for album archives. This
-directory must be readable and writable by the application server.
+``GALLERY_CACHE_STORAGE``
+.........................
+
+Default: *not defined*
+
+Dotted Python path to the Django storage class for the thumbnails and album
+archives. It must be readable and writable by the application server.
+
+It behaves like ``GALLERY_PHOTO_STORAGE``.
+
+For compatibility for versions prior to 0.5, if ``GALLERY_CACHE_STORAGE``
+isn't defined but ``GALLERY_CACHE_DIR`` is, the photo storage will be set to
+``FileSystemStorage(location=GALLERY_CACHE_DIR)``.
 
 ``GALLERY_PATTERNS``
 ....................
@@ -126,8 +164,8 @@ Default: ``()``
 Tuple of (category name, regular expression) defining how to extract album
 information — category, date, name — from the paths of photo files.
 
-The regular expressions match paths relative to ``GALLERY_PHOTO_DIR``. They
-contain the following captures:
+The regular expressions match paths relative to the root of the photo storage.
+They contain the following captures:
 
 - ``a_name``: album name (mandatory) — to capture several bits, use
   ``a_name1``, ``a_name2``, etc.
@@ -140,10 +178,10 @@ Paris/2013-01-19_19-12-43.jpg``::
 
     GALLERY_PATTERNS = (
         ('Photos',
-            ur'(?P<a_year>\d{4})/(?P<a_month>\d{2})_(?P<a_day>\d{2})_'
-            ur'(?P<a_name>[^_/]+)/'
-            ur'(?P<p_year>\d{4})-(?P<p_month>\d{2})-(?P<p_day>\d{2})_'
-            ur'(?P<p_hour>\d{2})-(?P<p_minute>\d{2})-(?P<p_second>\d{2})\.jpg'),
+            r'(?P<a_year>\d{4})/(?P<a_month>\d{2})_(?P<a_day>\d{2})_'
+            r'(?P<a_name>[^_/]+)/'
+            r'(?P<p_year>\d{4})-(?P<p_month>\d{2})-(?P<p_day>\d{2})_'
+            r'(?P<p_hour>\d{2})-(?P<p_minute>\d{2})-(?P<p_second>\d{2})\.jpg'),
     )
 
 ``GALLERY_IGNORES``
@@ -151,7 +189,7 @@ Paris/2013-01-19_19-12-43.jpg``::
 
 Default: ``()``
 
-Tuple of regular expressions matching paths relative to ``GALLERY_PHOTO_DIR``.
+Tuple of regular expressions matching paths within ``GALLERY_PHOTO_STORAGE``.
 Files matching one of these expressions will be ignored when scanning photos.
 
 ``GALLERY_RESIZE_PRESETS``
@@ -172,15 +210,16 @@ The default templates assume the following values::
         'standard': (768, 768, False),
     }
 
-You may double these sizes for better results on retina displays.
+You may double these sizes for better results on high DPI displays.
 
 ``GALLERY_RESIZE_OPTIONS``
 ..........................
 
 Default: ``{}``
 
-Dictionary mapping image formats names to to dictionaries of options for PIL's
-``save`` method. Options are described for each file format in PIL's handbook.
+Dictionary mapping image formats names to to dictionaries of options for
+Pillow's ``save`` method. Options are described for each file format in
+Pillow's documentation.
 
 The following a reasonable value for high-quality thumbnails and previews::
 
@@ -193,7 +232,7 @@ The following a reasonable value for high-quality thumbnails and previews::
 ``GALLERY_SENDFILE_HEADER``
 ............................
 
-Default: ''
+Default: ``''``
 
 Name of the HTTP header that triggers ``sendfile`` on your web server. Use
 ``'X-Accel-Redirect'`` for nginx and ``'X-SendFile'`` for Apache.
@@ -201,7 +240,7 @@ Name of the HTTP header that triggers ``sendfile`` on your web server. Use
 ``GALLERY_SENDFILE_ROOT``
 .........................
 
-Default: ''
+Default: ``''``
 
 Part to strip at the beginning of the paths in the ``sendfile`` header. The
 header will contain the absolute path to files, minus this prefix. This is
@@ -225,7 +264,7 @@ Number of thumbnails shown in the preview of each album.
 ``GALLERY_ARCHIVE_EXPIRY``
 ..........................
 
-Default: 60
+Default: ``60``
 
 Duration in days during which album archives are kept in cache.
 
@@ -233,7 +272,7 @@ Duration in days during which album archives are kept in cache.
 Running the sample application
 ==============================
 
-1.  Make sure Django and PIL are installed
+1.  Make sure Django and Pillow are installed
 
 2.  Download some pictures (warning: these files are large, total = 50MB; you
     can use photos of your own instead as long as you respect the format of
@@ -258,20 +297,18 @@ Running the sample application
 
 3.  Run the development server::
 
-    $ ./manage.py syncdb
+    $ ./manage.py migrate
     $ ./manage.py runserver
 
 4.  Go to http://localhost:8000/admin/gallery/album/ and log in. Click the
     "Scan photos" link at the top right, and the "Scan photos" button on the
     next page. You should see the following messages:
 
-        Scanning .../myks-gallery/example/photos
+    * Scanning path/to/myks-gallery/example/photos
+    * Adding album 2013_01_01_Featured Pictures (Photos) as Featured Pictures
+    * Done (0.01s)
 
-        Adding album 2013_01_01_Featured Pictures (Photos) as Featured Pictures
-
-        Done (0.01s)
-
-    Now go to http://localhost:8000/ and enjoy!
+    Go to http://localhost:8000/ and enjoy!
 
     Since you're logged in as an admin user, you can view albums and photos
     even though you haven't defined any access policies yet.
@@ -283,6 +320,17 @@ Changelog
 ---
 
 *Under development*
+
+This version uses the Django file storage API for all operations on files,
+making it possible to use services such as Amazon S3 or Google Cloud Storage
+for storing photos and thumbnails. It introduces the ``GALLERY_PHOTO_STORAGE``
+and ``GALLERY_CACHE_STORAGE`` settings. They supersede ``GALLERY_PHOTO_DIR``
+and ``GALLERY_CACHE_DIR``.
+
+When upgrading to 0.5 or later, you should clear the cache directory.
+Previously cached thumbnails and exports won't be used by this version.
+
+It also include some smaller changes.
 
 * Switched ordering of albums to always show the most recent albums first.
 * Allowed customizing the number of photos in album previews.
