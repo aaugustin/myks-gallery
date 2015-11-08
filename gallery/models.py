@@ -13,6 +13,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from .imgutil import make_thumbnail
+from .storages import get_storage
 
 
 class AccessPolicy(models.Model):
@@ -199,9 +200,13 @@ class Photo(models.Model):
         return photos.order_by('-date', '-filename')[:1].get()
 
     def abspath(self):
+        # TODO: remove this function once all callers are refactored.
         return os.path.join(settings.GALLERY_PHOTO_DIR, self.album.dirpath, self.filename)
 
-    def thumbname(self, preset):
+    def image_name(self):
+        return os.path.join(self.album.dirpath, self.filename)
+
+    def thumb_name(self, preset):
         prefix = self.album.date.strftime('%y%m')
         hsh = hashlib.md5()
         hsh.update(str(settings.SECRET_KEY).encode())
@@ -212,10 +217,14 @@ class Photo(models.Model):
         return os.path.join(prefix, hsh.hexdigest() + ext)
 
     def thumbnail(self, preset):
-        thumbpath = os.path.join(settings.GALLERY_CACHE_DIR, self.thumbname(preset))
-        if not os.path.exists(thumbpath):
-            make_thumbnail(self.abspath(), thumbpath, preset)
-        return thumbpath
+        image_name = self.image_name()
+        thumb_name = self.thumb_name(preset)
+        photo_storage = get_storage('photo')
+        cache_storage = get_storage('cache')
+        if not cache_storage.exists(thumb_name):
+            make_thumbnail(image_name, thumb_name, preset,
+                           photo_storage, cache_storage)
+        return thumb_name
 
 
 @python_2_unicode_compatible

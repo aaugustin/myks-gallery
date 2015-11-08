@@ -26,6 +26,7 @@ from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
 from django.views.static import was_modified_since
 
 from .models import Album, Photo
+from .storages import get_storage
 
 
 class GalleryCommonMixin(object):
@@ -229,8 +230,9 @@ def _get_photo_if_allowed(request, pk):
 def resized_photo(request, preset, pk):
     """Serve a resized photo."""
     photo = _get_photo_if_allowed(request, int(pk))
-    path = photo.thumbnail(preset)
-    response = serve_private_media(request, path)
+    thumb_name = photo.thumbnail(preset)
+    thumb_path = get_storage('cache').path(thumb_name)
+    response = serve_private_media(request, thumb_path)
 
     root, ext = os.path.splitext(sanitize(photo.filename))
     width, height, _ = settings.GALLERY_RESIZE_PRESETS[preset]

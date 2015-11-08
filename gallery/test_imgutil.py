@@ -6,13 +6,10 @@ import os
 import shutil
 import tempfile
 
-try:
-    from PIL import Image
-    from PIL import ImageDraw
-except ImportError:                                         # pragma: no cover
-    import Image
-    import ImageDraw
+from PIL import Image
+from PIL import ImageDraw
 
+from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -24,8 +21,11 @@ class ThumbnailsMixin(object):
     def setUp(self):
         super(ThumbnailsMixin, self).setUp()
         self.tmpdir = tempfile.mkdtemp()
-        self.original = os.path.join(self.tmpdir, 'original.jpg')
-        self.thumbnail = os.path.join(self.tmpdir, 'thumbnail.jpg')
+        self.storage = FileSystemStorage(location=self.tmpdir)
+        self.origname = 'original.jpg'
+        self.thumname = 'thumbnail.jpg'
+        self.origpath = os.path.join(self.tmpdir, self.origname)
+        self.thumbpath = os.path.join(self.tmpdir, self.thumname)
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
@@ -36,7 +36,11 @@ class ThumbnailsMixin(object):
         draw = ImageDraw.Draw(im)
         for x in range(width):
             draw.line([(x, 0), (x, height - 1)], fill="hsl(%d,100%%,50%%)" % x)
-        im.save(self.original, format)
+        im.save(self.origpath, format)
+
+    def make_thumbnail(self, preset):
+        return make_thumbnail(self.origname, self.thumname, preset,
+                              self.storage, self.storage)
 
 
 @override_settings(GALLERY_RESIZE_PRESETS={
@@ -47,58 +51,55 @@ class ThumbnailTests(ThumbnailsMixin, TestCase):
 
     def test_horizontal_thumbnail(self):
         self.make_image(360, 240)
-        make_thumbnail(self.original, self.thumbnail, 'thumbnail')
+        self.make_thumbnail('thumbnail')
 
-        im = Image.open(self.thumbnail)
+        im = Image.open(self.thumbpath)
         self.assertEqual(im.size, (60, 60))
 
     def test_horizontal_preview(self):
         self.make_image(360, 240)
-        make_thumbnail(self.original, self.thumbnail, 'preview')
+        self.make_thumbnail('preview')
 
-        im = Image.open(self.thumbnail)
+        im = Image.open(self.thumbpath)
         self.assertEqual(im.size, (120, 80))
 
     def test_square_thumbnail(self):
         self.make_image(240, 240)
-        make_thumbnail(self.original, self.thumbnail, 'thumbnail')
+        self.make_thumbnail('thumbnail')
 
-        im = Image.open(self.thumbnail)
+        im = Image.open(self.thumbpath)
         self.assertEqual(im.size, (60, 60))
 
     def test_square_preview(self):
         self.make_image(240, 240)
-        make_thumbnail(self.original, self.thumbnail, 'preview')
+        self.make_thumbnail('preview')
 
-        im = Image.open(self.thumbnail)
+        im = Image.open(self.thumbpath)
         self.assertEqual(im.size, (120, 120))
 
     def test_vertical_thumbnail(self):
         self.make_image(240, 360)
-        make_thumbnail(self.original, self.thumbnail, 'thumbnail')
+        self.make_thumbnail('thumbnail')
 
-        im = Image.open(self.thumbnail)
+        im = Image.open(self.thumbpath)
         self.assertEqual(im.size, (60, 60))
 
     def test_vertical_preview(self):
         self.make_image(240, 360)
-        make_thumbnail(self.original, self.thumbnail, 'preview')
+        self.make_thumbnail('preview')
 
-        im = Image.open(self.thumbnail)
+        im = Image.open(self.thumbpath)
         self.assertEqual(im.size, (80, 120))
 
-    def test_create_directory(self):
-        self.make_image(360, 240)
-        self.thumbnail = os.path.join(self.tmpdir, 'subdir', 'thumbnail.jpg')
-        make_thumbnail(self.original, self.thumbnail, 'thumbnail')
-
     def test_non_jpg_thumbnail(self):
-        self.original = self.original[:-3] + 'png'
-        self.thumbnail = self.thumbnail[:-3] + 'png'
+        self.origname = self.origname[:-3] + 'png'
+        self.thumname = self.thumname[:-3] + 'png'
+        self.origpath = self.origpath[:-3] + 'png'
+        self.thumbpath = self.thumbpath[:-3] + 'png'
 
         self.make_image(240, 240, 'PNG')
-        make_thumbnail(self.original, self.thumbnail, 'thumbnail')
+        self.make_thumbnail('thumbnail')
 
-        im = Image.open(self.thumbnail)
+        im = Image.open(self.thumbpath)
         self.assertEqual(im.format, 'PNG')
         self.assertEqual(im.size, (60, 60))
