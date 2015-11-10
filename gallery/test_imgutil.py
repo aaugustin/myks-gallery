@@ -1,5 +1,4 @@
 # coding: utf-8
-# Copyright (c) 2013 Aymeric Augustin. All rights reserved.
 
 from __future__ import unicode_literals
 
