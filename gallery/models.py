@@ -195,7 +195,7 @@ class Photo(models.Model):
     def thumbname(self, preset):
         prefix = self.album.date.strftime('%y%m')
         hsh = hashlib.md5()
-        hsh.update(str(settings.SECRET_KEY))
+        hsh.update(str(settings.SECRET_KEY).encode())
         hsh.update(str(self.album.pk).encode())
         hsh.update(str(self.pk).encode())
         hsh.update(str(settings.GALLERY_RESIZE_PRESETS[preset]).encode())

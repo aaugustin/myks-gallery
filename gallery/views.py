@@ -188,7 +188,7 @@ def export_album(request, pk):
         photos = album.photo_set.allowed_for_user(request.user)
 
     hsh = hashlib.md5()
-    hsh.update(str(settings.SECRET_KEY))
+    hsh.update(str(settings.SECRET_KEY).encode())
     hsh.update(str(pk).encode())
     for photo in photos:
         hsh.update(str(photo.pk).encode())
