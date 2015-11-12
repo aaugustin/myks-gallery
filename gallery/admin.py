@@ -190,7 +190,7 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
 
     def get_urls(self):
         return [
-            url(r'^scan/$', scan_photos),
+            url(r'^scan/$', scan_photos, name='gallery_scan_photos'),
         ] + super(PhotoAdmin, self).get_urls()
 
     def get_queryset(self, request):
@@ -241,7 +241,7 @@ def scan_photos(request):
             messages.info(request, line)
         for line in stderr.getvalue().splitlines():
             messages.error(request, line)
-        return HttpResponseRedirect(reverse('admin:gallery.admin.scan_photos'))
+        return HttpResponseRedirect(reverse('admin:gallery_scan_photos'))
     context = {
         'app_label': 'gallery',
         'title': ugettext("Scan photos"),

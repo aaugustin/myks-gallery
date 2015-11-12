@@ -11,7 +11,7 @@
 
 {% block content %}
 <p>{% trans 'Click this button to re-scan your photo directory.' %}</p>
-<form action="{% url 'admin:gallery.admin.scan_photos' %}" method="POST">
+<form action="{% url 'admin:gallery_scan_photos' %}" method="POST">
     {% csrf_token %}
     <input type="submit" value="{% trans 'Scan photos' %}" />
 </form>

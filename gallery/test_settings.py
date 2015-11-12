@@ -16,6 +16,22 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['null'],
+            'propagate': False,
+        },
+    },
+}
+
+
 MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -33,4 +49,25 @@ STATIC_ROOT = '.'
 
 STATIC_URL = '/static/'
 
-TEMPLATE_DIRS = os.path.join(os.path.dirname(__file__), 'test_templates'),
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(os.path.dirname(__file__), 'test_templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+TEMPLATE_DIRS = TEMPLATES[0]['DIRS']

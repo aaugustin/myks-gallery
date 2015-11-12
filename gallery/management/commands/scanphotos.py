@@ -14,6 +14,7 @@ import sys
 import time
 import unicodedata
 
+import django
 from django.conf import settings
 from django.core.management import base
 from django.db import transaction
@@ -23,23 +24,40 @@ from django.utils import timezone
 from ...models import Album, Photo
 
 
-class Command(base.NoArgsCommand):
+class Command(base.BaseCommand):
     help = 'Scan GALLERY_PHOTO_DIR and update database.'
-    option_list = base.NoArgsCommand.option_list + (
-        optparse.make_option('--full',
-            action='store_true',
-            dest='full_sync',
-            default=False,
-            help='Perform a full resynchronization'),
-        optparse.make_option('--resize',
-            action='append',
-            dest='resize_presets',
-            default=[],
-            help='Resize with given preset'),
-        )
+
+    if django.VERSION[:2] >= (1, 8):
+
+        def add_arguments(self, parser):
+            parser.add_argument('--full',
+                action='store_true',
+                dest='full_sync',
+                default=False,
+                help='Perform a full resynchronization')
+            parser.add_argument('--resize',
+                action='append',
+                dest='resize_presets',
+                default=[],
+                help='Resize with given preset')
+
+    else:
+
+        option_list = base.BaseCommand.option_list + (
+            optparse.make_option('--full',
+                action='store_true',
+                dest='full_sync',
+                default=False,
+                help='Perform a full resynchronization'),
+            optparse.make_option('--resize',
+                action='append',
+                dest='resize_presets',
+                default=[],
+                help='Resize with given preset'),
+            )
 
     @transaction.atomic
-    def handle_noargs(self, **options):
+    def handle(self, **options):
         self.full_sync = options['full_sync']
         self.resize_presets = options['resize_presets']
         self.verbosity = int(options['verbosity'])

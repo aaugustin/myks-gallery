@@ -42,13 +42,13 @@ class AdminTests(TestCase):
         self.client.get(reverse('admin:gallery_photo_change', args=[self.photo.pk]))
 
     def test_scan_photos(self):
-        self.client.get(reverse('admin:gallery.admin.scan_photos'))
+        self.client.get(reverse('admin:gallery_scan_photos'))
         tmpdir = tempfile.mkdtemp()
         with open(os.path.join(tmpdir, 'test'), 'wb') as handle:
             handle.write(b'test')
         try:
             with self.settings(GALLERY_PHOTO_DIR=tmpdir):
-                self.client.post(reverse('admin:gallery.admin.scan_photos'))
+                self.client.post(reverse('admin:gallery_scan_photos'))
         finally:
             shutil.rmtree(tmpdir)
 
