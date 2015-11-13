@@ -37,7 +37,7 @@ def make_thumbnail(image_path, thumb_path, preset):
     options = getattr(settings, 'GALLERY_RESIZE_OPTIONS', {})
     presets = getattr(settings, 'GALLERY_RESIZE_PRESETS', {})
 
-    if six.PY2:
+    if six.PY2:                                             # pragma: no cover
         image_path = image_path.encode(fs_encoding)
         thumb_path = thumb_path.encode(fs_encoding)
 

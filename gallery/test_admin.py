@@ -196,7 +196,7 @@ class AdminTests(TestCase):
             Album.objects.get(pk=self.album.pk).access_policy
 
     # See https://code.djangoproject.com/ticket/24258
-    if (3, 0) <= sys.version_info[:2] < (3, 3):
+    if (3, 0) <= sys.version_info[:2] < (3, 3):             # pragma: no cover
         test_set_album_access_policy = unittest.expectedFailure(test_set_album_access_policy)
         test_set_album_access_policy_add_permission = unittest.expectedFailure(test_set_album_access_policy_add_permission)
         test_set_album_access_policy_change_permission = unittest.expectedFailure(test_set_album_access_policy_change_permission)

@@ -92,10 +92,10 @@ fs_encoding = sys.getfilesystemencoding()
 def iter_photo_root(command):
     """Yield relative path, category and regex captures for each photo."""
     photo_root = settings.GALLERY_PHOTO_DIR
-    if six.PY2:
+    if six.PY2:                                             # pragma: no cover
         photo_root = photo_root.encode(fs_encoding)
     for dirpath, _, filenames in os.walk(photo_root):
-        if six.PY2:
+        if six.PY2:                                         # pragma: no cover
             dirpath = dirpath.decode(fs_encoding)
         for filename in filenames:
             if six.PY2:
