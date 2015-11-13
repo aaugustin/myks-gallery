@@ -59,9 +59,9 @@ website:
 
         $ pip install myks-gallery
 
-2.  Add ``gallery`` to ``INSTALLED_APPS``::
+2.  Add ``gallery.apps.GalleryConfig`` to ``INSTALLED_APPS``::
 
-        INSTALLED_APPS += 'gallery',
+        INSTALLED_APPS += 'gallery.apps.GalleryConfig',
 
 3.  Configure the settings — see below for the list.
 
