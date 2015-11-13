@@ -23,8 +23,11 @@ def make_image(storage, name, width, height, format='JPEG', mode='RGB'):
     """
     im = Image.new(mode, (width, height))
     draw = ImageDraw.Draw(im)
-    for x in range(width):
-        draw.line([(x, 0), (x, height - 1)], fill="hsl(%d,100%%,50%%)" % x)
+    draw.rectangle([0, 0, width // 2, height // 2], '#F00')
+    draw.rectangle([width // 2, 0, width, height // 2], '#0F0')
+    draw.rectangle([0, height // 2, width // 2, height], '#00F')
+    draw.rectangle([width // 2, height // 2, width, height], '#000')
+    draw.rectangle([width // 4, height // 4, 3 * width // 4, 3 * height // 4], '#FFF')
     im_bytes_io = io.BytesIO()
     im.save(im_bytes_io, format)
     im_bytes_io.seek(0)
@@ -32,8 +35,8 @@ def make_image(storage, name, width, height, format='JPEG', mode='RGB'):
 
 
 @override_settings(GALLERY_RESIZE_PRESETS={
-    'thumbnail': (60, 60, True),
-    'preview': (120, 120, False),
+    'thumbnail': (8, 8, True),
+    'preview': (16, 16, False),
 })
 class ThumbnailTests(TestCase):
 
@@ -54,51 +57,51 @@ class ThumbnailTests(TestCase):
         return Image.open(self.storage.open(thumb_name))
 
     def test_horizontal_thumbnail(self):
-        self.make_image(360, 240)
+        self.make_image(48, 36)
         self.make_thumbnail('thumbnail')
 
         im = self.open_image()
-        self.assertEqual(im.size, (60, 60))
+        self.assertEqual(im.size, (8, 8))
 
     def test_horizontal_preview(self):
-        self.make_image(360, 240)
+        self.make_image(48, 36)
         self.make_thumbnail('preview')
 
         im = self.open_image()
-        self.assertEqual(im.size, (120, 80))
+        self.assertEqual(im.size, (16, 12))
 
     def test_square_thumbnail(self):
-        self.make_image(240, 240)
+        self.make_image(36, 36)
         self.make_thumbnail('thumbnail')
 
         im = self.open_image()
-        self.assertEqual(im.size, (60, 60))
+        self.assertEqual(im.size, (8, 8))
 
     def test_square_preview(self):
-        self.make_image(240, 240)
+        self.make_image(36, 36)
         self.make_thumbnail('preview')
 
         im = self.open_image()
-        self.assertEqual(im.size, (120, 120))
+        self.assertEqual(im.size, (16, 16))
 
     def test_vertical_thumbnail(self):
-        self.make_image(240, 360)
+        self.make_image(36, 48)
         self.make_thumbnail('thumbnail')
 
         im = self.open_image()
-        self.assertEqual(im.size, (60, 60))
+        self.assertEqual(im.size, (8, 8))
 
     def test_vertical_preview(self):
-        self.make_image(240, 360)
+        self.make_image(36, 48)
         self.make_thumbnail('preview')
 
         im = self.open_image()
-        self.assertEqual(im.size, (80, 120))
+        self.assertEqual(im.size, (12, 16))
 
     def test_non_jpg_thumbnail(self):
-        self.make_image(240, 240, 'original.png', 'PNG')
+        self.make_image(36, 36, 'original.png', 'PNG')
         self.make_thumbnail('thumbnail','original.png', 'thumbnail.png')
 
         im = self.open_image('thumbnail.png')
         self.assertEqual(im.format, 'PNG')
-        self.assertEqual(im.size, (60, 60))
+        self.assertEqual(im.size, (8, 8))
