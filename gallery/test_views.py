@@ -4,18 +4,30 @@ from __future__ import unicode_literals
 
 import datetime
 import os
+import shutil
+import tempfile
 import zipfile
 
+from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.test.utils import override_settings
 
 from .models import Album, AlbumAccessPolicy, Photo
-from .test_imgutil import ThumbnailsMixin
+from .test_imgutil import make_image
 
 
-class ViewsTestsMixin(ThumbnailsMixin):
+class ViewsTestsMixin(object):
+
+    def setUp(self):
+        super(ViewsTestsMixin, self).setUp()
+        self.tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmpdir)
+        self.storage = FileSystemStorage(location=self.tmpdir)
+
+    def make_image(self, width, height):
+        make_image(self.storage, 'original.jpg', width, height)
 
     def test_index_view(self):
         response = self.client.get(reverse('gallery:index'))
