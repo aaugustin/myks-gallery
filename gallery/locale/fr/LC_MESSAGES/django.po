@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-08-24 22:20+0200\n"
+"POT-Creation-Date: 2015-11-13 21:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,6 +44,30 @@ msgstr "Scanner les photos"
 
 msgid "Gallery"
 msgstr "Galerie"
+
+msgid "Album"
+msgstr "Album"
+
+msgid "Albums"
+msgstr "Albums"
+
+msgid "Album access policy"
+msgstr "Politique d'accès à un album"
+
+msgid "Album access policies"
+msgstr "Politiques d'accès aux albums"
+
+msgid "Photo"
+msgstr "Photo"
+
+msgid "Photos"
+msgstr "Photos"
+
+msgid "Photo access policy"
+msgstr "Politique d'accès à une photo"
+
+msgid "Photo access policies"
+msgstr "Politiques d'accès à des photos"
 
 msgid "Home"
 msgstr "Accueil"

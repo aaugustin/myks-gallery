@@ -10,6 +10,7 @@ from django.contrib.auth.models import User, Group
 from django.db import models
 from django.db.models import Q
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.translation import ugettext_lazy as _
 
 from .imgutil import make_thumbnail
 
@@ -57,6 +58,8 @@ class Album(models.Model):
     class Meta:
         ordering = ('date', 'name', 'dirpath', 'category')
         unique_together = ('dirpath', 'category')
+        verbose_name = _("Album")
+        verbose_name_plural = _("Albums")
 
     def __str__(self):
         return self.dirpath
@@ -102,6 +105,10 @@ class AlbumAccessPolicy(AccessPolicy):
     inherit = models.BooleanField(blank=True, default=True,
             verbose_name="photos inherit album access policy")
 
+    class Meta:
+        verbose_name = _("Album access policy")
+        verbose_name_plural = _("Album access policies")
+
     def __str__(self):
         return "Access policy for %s" % self.album
 
@@ -134,6 +141,8 @@ class Photo(models.Model):
             ("scan", "Can scan the photos directory"),
         )
         unique_together = ('album', 'filename')
+        verbose_name = _("Photo")
+        verbose_name_plural = _("Photos")
 
     def __str__(self):
         return self.filename
@@ -212,6 +221,10 @@ class Photo(models.Model):
 @python_2_unicode_compatible
 class PhotoAccessPolicy(AccessPolicy):
     photo = models.OneToOneField(Photo, related_name='access_policy')
+
+    class Meta:
+        verbose_name = _("Photo access policy")
+        verbose_name_plural = _("Photo access policies")
 
     def __str__(self):
         return "Access policy for %s" % self.photo
