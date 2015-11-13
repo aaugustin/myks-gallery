@@ -4,8 +4,6 @@ from __future__ import unicode_literals
 
 import io
 import os
-import shutil
-import tempfile
 
 from PIL import Image
 from PIL import ImageDraw
@@ -15,6 +13,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from .imgutil import make_thumbnail
+from .test_storages import MemoryStorage
 
 
 def make_image(storage, name, width, height, format='JPEG', mode='RGB'):
@@ -40,9 +39,7 @@ class ThumbnailTests(TestCase):
 
     def setUp(self):
         super(ThumbnailTests, self).setUp()
-        self.tmpdir = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, self.tmpdir)
-        self.storage = FileSystemStorage(location=self.tmpdir)
+        self.storage = MemoryStorage()
 
     def make_image(self, width, height,
                    image_name='original.jpg', format='JPEG', mode='RGB'):
@@ -54,7 +51,7 @@ class ThumbnailTests(TestCase):
                        self.storage, self.storage)
 
     def open_image(self, thumb_name='thumbnail.jpg'):
-        return Image.open(os.path.join(self.tmpdir, thumb_name))
+        return Image.open(self.storage.open(thumb_name))
 
     def test_horizontal_thumbnail(self):
         self.make_image(360, 240)
