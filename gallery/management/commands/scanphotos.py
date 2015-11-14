@@ -10,7 +10,6 @@ import datetime
 import optparse
 import os
 import re
-import sys
 import time
 import unicodedata
 
@@ -18,10 +17,10 @@ import django
 from django.conf import settings
 from django.core.management import base
 from django.db import transaction
-from django.utils import six
 from django.utils import timezone
 
 from ...models import Album, Photo
+from ...storages import get_storage
 
 
 class Command(base.BaseCommand):
@@ -65,7 +64,7 @@ class Command(base.BaseCommand):
         t = time.time()
 
         self.write_out("Scanning photos...", verbosity=1)
-        albums = scan_photo_root(self)
+        albums = scan_photo_storage(self)
 
         self.write_out("Synchronizing albums...", verbosity=1)
         synchronize_albums(albums, self)
@@ -100,33 +99,43 @@ def is_matched(path):
             return category, match.groupdict()
 
 
-fs_encoding = sys.getfilesystemencoding()
+def walk_photo_storage(storage, path=''):
+    """
+    Yield (directory path, file names) 2-uples for the photo storage.
 
-def iter_photo_root(command):
-    """Yield relative path, category and regex captures for each photo."""
-    photo_root = settings.GALLERY_PHOTO_DIR
-    if six.PY2:                                             # pragma: no cover
-        photo_root = photo_root.encode(fs_encoding)
-    for dirpath, _, filenames in os.walk(photo_root):
-        if six.PY2:                                         # pragma: no cover
-            dirpath = dirpath.decode(fs_encoding)
+    This function directories that do not contain any files.
+
+    """
+    directories, files = storage.listdir(path)
+    if files:
+        yield path, files
+    for directory in directories:
+        dir_path = os.path.join(path, directory)
+        for result in walk_photo_storage(storage, dir_path):
+            yield result
+
+
+def iter_photo_storage(command):
+    """
+    Yield (relative path, category, regex captures) for each photo.
+
+    """
+    photo_storage = get_storage('photo')
+    for dirpath, filenames in walk_photo_storage(photo_storage):
         for filename in filenames:
-            if six.PY2:
-                filename = filename.decode(fs_encoding)
             filepath = os.path.join(dirpath, filename)
             # HFS+ stores names in NFD which causes issues with some fonts.
             filepath = unicodedata.normalize('NFKC', filepath)
-            relpath = os.path.relpath(filepath, settings.GALLERY_PHOTO_DIR)
-            if is_ignored(relpath):
-                command.write_out("- %s" % relpath, verbosity=3)
+            if is_ignored(filepath):
+                command.write_out("- %s" % filepath, verbosity=3)
                 continue
-            result = is_matched(relpath)
+            result = is_matched(filepath)
             if result is not None:
-                command.write_out("> %s" % relpath, verbosity=3)
+                command.write_out("> %s" % filepath, verbosity=3)
                 category, captures = result
-                yield relpath, category, captures
+                yield filepath, category, captures
             else:
-                command.write_err("? %s" % relpath, verbosity=1)
+                command.write_err("? %s" % filepath, verbosity=1)
 
 
 def scan_photo_storage(command):
@@ -140,7 +149,7 @@ def scan_photo_storage(command):
 
     """
     albums = collections.defaultdict(lambda: {})
-    for path, category, captures in iter_photo_root(command):
+    for path, category, captures in iter_photo_storage(command):
         dirpath, filename = os.path.split(path)
         albums[category, dirpath][filename] = captures
     return albums
