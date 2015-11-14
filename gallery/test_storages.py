@@ -54,6 +54,24 @@ class MemoryStorage(Storage):
         return len(self.files[name])
 
 
+class LocalStorage(MemoryStorage):
+    """
+    Emulates a storage class that stores files on disk.
+
+    """
+    def path(self, name):
+        return '/path/to/' + name
+
+
+class RemoteStorage(MemoryStorage):
+    """
+    Emulates a storage class that stores files in memory.
+
+    """
+    def url(self, name):
+        return '/url/of/' + name
+
+
 class StoragesTest(TestCase):
 
     @override_settings(GALLERY_FOO_STORAGE='gallery.test_storages.MemoryStorage')

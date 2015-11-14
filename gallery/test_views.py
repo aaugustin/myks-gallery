@@ -15,6 +15,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from .models import Album, AlbumAccessPolicy, Photo
+from .storages import get_storage
 from .test_imgutil import make_image
 
 
@@ -26,8 +27,8 @@ class ViewsTestsMixin(object):
         self.addCleanup(shutil.rmtree, self.tmpdir)
         self.storage = FileSystemStorage(location=self.tmpdir)
 
-    def make_image(self, width, height):
-        make_image(self.storage, 'original.jpg', width, height)
+    def make_image(self):
+        make_image(get_storage('photo'), self.photo.image_name(), 48, 36)
 
     def test_index_view(self):
         response = self.client.get(reverse('gallery:index'))
@@ -54,30 +55,48 @@ class ViewsTestsMixin(object):
                 GALLERY_PHOTO_DIR=self.tmpdir,
                 GALLERY_CACHE_DIR=self.tmpdir,
                 GALLERY_SENDFILE_HEADER='X-Fake-Sendfile'):
-            self.make_image(360, 240)
+            self.make_image()
             response = self.client.get(reverse('gallery:album-export', args=[self.album.pk]))
             self.assertTrue(response['X-Fake-Sendfile'].startswith(self.tmpdir))
             with zipfile.ZipFile(response['X-Fake-Sendfile']) as archive:
                 self.assertEqual(archive.namelist(), ['original.jpg'])
 
-    def test_photo_resized_view(self):
+    def test_photo_resized_view_local(self):
         with self.settings(
                 GALLERY_PHOTO_DIR=self.tmpdir,
                 GALLERY_CACHE_DIR=self.tmpdir,
                 GALLERY_RESIZE_PRESETS={'resized': (120, 120, False)},
                 GALLERY_SENDFILE_HEADER='X-Fake-Sendfile'):
-            self.make_image(360, 240)
+            self.make_image()
             response = self.client.get(reverse('gallery:photo-resized', args=['resized', self.photo.pk]))
             self.assertTrue(response['X-Fake-Sendfile'].startswith(self.tmpdir))
             self.assertNotEqual(response['X-Fake-Sendfile'], os.path.join(self.tmpdir, 'original.jpg'))
 
-    def test_photo_original_view(self):
+    def test_photo_resized_view_remote(self):
+        with self.settings(
+                GALLERY_CACHE_STORAGE='gallery.test_storages.RemoteStorage',
+                GALLERY_PHOTO_STORAGE='gallery.test_storages.RemoteStorage',
+                GALLERY_RESIZE_PRESETS={'resized': (120, 120, False)}):
+            self.make_image()
+            response = self.client.get(reverse('gallery:photo-resized', args=['resized', self.photo.pk]))
+            self.assertRedirects(response, '/url/of/' + self.photo.thumb_name('resized'),
+                                 fetch_redirect_response=False)
+
+    def test_photo_original_view_local(self):
         with self.settings(
                 GALLERY_PHOTO_DIR=self.tmpdir,
                 GALLERY_SENDFILE_HEADER='X-Fake-Sendfile'):
-            self.make_image(360, 240)
+            self.make_image()
             response = self.client.get(reverse('gallery:photo-original', args=[self.photo.pk]))
             self.assertEqual(response['X-Fake-Sendfile'], os.path.join(self.tmpdir, 'original.jpg'))
+
+    def test_photo_original_view_remote(self):
+        with self.settings(
+                GALLERY_PHOTO_STORAGE='gallery.test_storages.RemoteStorage'):
+            self.make_image()
+            response = self.client.get(reverse('gallery:photo-original', args=[self.photo.pk]))
+            self.assertRedirects(response, '/url/of/' + self.photo.image_name(),
+                                 fetch_redirect_response=False)
 
     def test_latest_view(self):
         response = self.client.get(reverse('gallery:latest'))

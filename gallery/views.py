@@ -230,26 +230,41 @@ def _get_photo_if_allowed(request, pk):
 def resized_photo(request, preset, pk):
     """Serve a resized photo."""
     photo = _get_photo_if_allowed(request, int(pk))
+    thumb_storage = get_storage('cache')
     thumb_name = photo.thumbnail(preset)
-    thumb_path = get_storage('cache').path(thumb_name)
-    response = serve_private_media(request, thumb_path)
-
-    root, ext = os.path.splitext(sanitize(photo.filename))
-    width, height, _ = settings.GALLERY_RESIZE_PRESETS[preset]
-    ascii_filename = '%s_%sx%s%s' % (root, width, height, ext)
-    response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
-    return response
+    try:
+        thumb_path = thumb_storage.path(thumb_name)
+    except NotImplementedError:
+        # Remote storage. Let the storage generate an URL.
+        thumb_url = thumb_storage.url(thumb_name)
+        return HttpResponseRedirect(thumb_url)
+    else:
+        # Local storage. Serve the file directly.
+        response = serve_private_media(request, thumb_path)
+        root, ext = os.path.splitext(sanitize(photo.filename))
+        width, height, _ = settings.GALLERY_RESIZE_PRESETS[preset]
+        ascii_filename = '%s_%sx%s%s' % (root, width, height, ext)
+        response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
+        return response
 
 
 def original_photo(request, pk):
     """Serve an original photo."""
     photo = _get_photo_if_allowed(request, int(pk))
-    path = photo.abspath()
-    response = serve_private_media(request, path)
-
-    ascii_filename = sanitize(photo.filename)
-    response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
-    return response
+    photo_storage = get_storage('photo')
+    image_name = photo.image_name()
+    try:
+        image_path = photo_storage.path(image_name)
+    except NotImplementedError:
+        # Remote storage. Let the storage generate an URL.
+        image_url = photo_storage.url(image_name)
+        return HttpResponseRedirect(image_url)
+    else:
+        # Local storage. Serve the file directly.
+        response = serve_private_media(request, image_path)
+        ascii_filename = sanitize(photo.filename)
+        response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
+        return response
 
 
 def serve_private_media(request, path):
