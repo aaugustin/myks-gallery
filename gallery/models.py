@@ -104,7 +104,7 @@ class Album(models.Model):
 class AlbumAccessPolicy(AccessPolicy):
     album = models.OneToOneField(Album, related_name='access_policy')
     inherit = models.BooleanField(blank=True, default=True,
-            verbose_name="photos inherit album access policy")
+                                  verbose_name="photos inherit album access policy")
 
     class Meta:
         verbose_name = _("Album access policy")
@@ -112,6 +112,7 @@ class AlbumAccessPolicy(AccessPolicy):
 
     def __str__(self):
         return "Access policy for %s" % self.album
+
 
 class PhotoManager(models.Manager):
 

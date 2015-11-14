@@ -26,7 +26,8 @@ class SetAccessPolicyMixin(object):
         policy_model = {Album: AlbumAccessPolicy, Photo: PhotoAccessPolicy}[self.model]
         model_name = self.model._meta.model_name
         policy_model_name = policy_model._meta.model_name
-        form_class = modelform_factory(policy_model,
+        form_class = modelform_factory(
+            policy_model,
             exclude=(model_name,),
             widgets={
                 'users': FilteredSelectMultiple(ugettext("Users"), False),
@@ -59,9 +60,10 @@ class SetAccessPolicyMixin(object):
                         ap = policy_model(**{model_name: obj})
                         created += 1
                     form_class(request.POST, instance=ap).save()
-                self.message_user(request, ugettext("Successfully created "
-                    "%(created)d and changed %(changed)d access policies.")
-                    % {'created': created, 'changed': changed})
+                message = ugettext("Successfully created %(created)d and "
+                                   "changed %(changed)d access policies.")
+                message = message % {'created': created, 'changed': changed}
+                self.message_user(request, message)
                 return HttpResponseRedirect(reverse('admin:gallery_%s_changelist' % model_name))
         else:
             form = form_class()
@@ -104,8 +106,9 @@ class SetAccessPolicyMixin(object):
                 else:
                     ap.delete()
                     deleted += 1
-            self.message_user(request, ugettext("Successfully deleted "
-                "%(deleted)d access policies." % {'deleted': deleted}))
+            message = ugettext("Successfully deleted %(deleted)d access policies.")
+            message = message % {'deleted': deleted}
+            self.message_user(request, message)
             return HttpResponseRedirect(reverse('admin:gallery_%s_changelist' % model_name))
 
         context = {
@@ -199,10 +202,11 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
                 .prefetch_related('album__access_policy__users')
                 .prefetch_related('album__access_policy__groups'))
 
-    preview_template = Template(
-"""<a href="{{ photo.get_absolute_url }}">"""
-"""<img src="{% url 'gallery:photo-resized' preset='thumb' pk=photo.pk %}" width="128" height="128" alt="{{ photo }}">"""
-"""</a>""")
+    preview_template = Template("""
+<a href="{{ photo.get_absolute_url }}">
+<img src="{% url 'gallery:photo-resized' preset='thumb' pk=photo.pk %}"
+     width="128" height="128" alt="{{ photo }}" />
+</a>""")
 
     def preview(self, obj):
         return self.preview_template.render(Context({'photo': obj}))

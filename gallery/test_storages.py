@@ -44,7 +44,7 @@ class MemoryStorage(Storage):
         dirs, files = [], []
         for filename in sorted(self.files):
             filename = filename[len(name):]
-            if '/' in key:
+            if '/' in filename:
                 dirs.append(filename.partition('/')[0])
             else:
                 files.append(filename)

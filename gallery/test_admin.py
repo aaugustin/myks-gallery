@@ -20,8 +20,9 @@ from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
 class AdminTests(TestCase):
 
     def setUp(self):
-        self.album = Album.objects.create(category='default', dirpath='foo', date=datetime.date.today())
-        self.album2 = Album.objects.create(category='default', dirpath='foo2', date=datetime.date.today())
+        today = datetime.date.today()
+        self.album = Album.objects.create(category='default', dirpath='foo', date=today)
+        self.album2 = Album.objects.create(category='default', dirpath='foo2', date=today)
         AlbumAccessPolicy.objects.create(album=self.album, public=True, inherit=False)
         self.photo = Photo.objects.create(album=self.album, filename='bar')
         self.photo2 = Photo.objects.create(album=self.album, filename='bar2')
@@ -82,7 +83,7 @@ class AdminTests(TestCase):
         })
         self.assertTemplateUsed(response, 'admin/gallery/set_access_policy.html')
         self.assertFormError(response, 'form', 'users',
-            'Select a valid choice. -1 is not one of the available choices.')
+                             'Select a valid choice. -1 is not one of the available choices.')
 
     def test_set_album_access_policy_no_add_permission(self):
         self.user.is_superuser = False
@@ -198,7 +199,7 @@ class AdminTests(TestCase):
     # See https://code.djangoproject.com/ticket/24258
     if (3, 0) <= sys.version_info[:2] < (3, 3):             # pragma: no cover
         test_set_album_access_policy = unittest.expectedFailure(test_set_album_access_policy)
-        test_set_album_access_policy_add_permission = unittest.expectedFailure(test_set_album_access_policy_add_permission)
-        test_set_album_access_policy_change_permission = unittest.expectedFailure(test_set_album_access_policy_change_permission)
+        test_set_album_access_policy_add_permission = unittest.expectedFailure(test_set_album_access_policy_add_permission)  # noqa
+        test_set_album_access_policy_change_permission = unittest.expectedFailure(test_set_album_access_policy_change_permission)  # noqa
         test_unset_album_access_policy = unittest.expectedFailure(test_unset_album_access_policy)
-        test_unset_album_access_policy_delete_permission = unittest.expectedFailure(test_unset_album_access_policy_delete_permission)
+        test_unset_album_access_policy_delete_permission = unittest.expectedFailure(test_unset_album_access_policy_delete_permission)  # noqa

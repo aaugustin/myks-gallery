@@ -29,12 +29,14 @@ class Command(base.BaseCommand):
     if django.VERSION[:2] >= (1, 8):
 
         def add_arguments(self, parser):
-            parser.add_argument('--full',
+            parser.add_argument(
+                '--full',
                 action='store_true',
                 dest='full_sync',
                 default=False,
                 help='Perform a full resynchronization')
-            parser.add_argument('--resize',
+            parser.add_argument(
+                '--resize',
                 action='append',
                 dest='resize_presets',
                 default=[],
@@ -43,12 +45,14 @@ class Command(base.BaseCommand):
     else:
 
         option_list = base.BaseCommand.option_list + (
-            optparse.make_option('--full',
+            optparse.make_option(
+                '--full',
                 action='store_true',
                 dest='full_sync',
                 default=False,
                 help='Perform a full resynchronization'),
-            optparse.make_option('--resize',
+            optparse.make_option(
+                '--resize',
                 action='append',
                 dest='resize_presets',
                 default=[],
@@ -86,11 +90,13 @@ class Command(base.BaseCommand):
 
 ignores = [re.compile(i) for i in getattr(settings, 'GALLERY_IGNORES', ())]
 
+
 def is_ignored(path):
     return any(pat.match(path) for pat in ignores)
 
 
 patterns = [(cat, re.compile(pat)) for cat, pat in getattr(settings, 'GALLERY_PATTERNS', ())]
+
 
 def is_matched(path):
     for category, pattern in patterns:
@@ -165,8 +171,10 @@ def get_album_info(captures, command):
     """
     date = None
     try:
-        kwargs = dict((k, int(captures['a_' + k]))
-                for k in ('year', 'month', 'day'))
+        kwargs = {
+            k: int(captures['a_' + k])
+            for k in ('year', 'month', 'day')
+        }
         date = datetime.date(**kwargs)
     except KeyError:
         pass
@@ -187,8 +195,10 @@ def get_photo_info(captures, command):
     """
     date = None
     try:
-        kwargs = dict((k, int(captures['p_' + k]))
-                for k in ('year', 'month', 'day', 'hour', 'minute', 'second'))
+        kwargs = {
+            k: int(captures['p_' + k])
+            for k in ('year', 'month', 'day', 'hour', 'minute', 'second')
+        }
         date = datetime.datetime(**kwargs)
         if settings.USE_TZ:
             date = timezone.make_aware(date, timezone.get_default_timezone())
@@ -231,12 +241,16 @@ def synchronize_photos(albums, command):
         old_keys = set(p.filename for p in album.photo_set.all())
         for filename in sorted(new_keys - old_keys):
             date = get_photo_info(albums[category, dirpath][filename], command)
-            command.write_out("Adding photo %s to album %s (%s)" % (filename, dirpath, category), verbosity=2)
+            command.write_out(
+                "Adding photo %s to album %s (%s)" % (filename, dirpath, category),
+                verbosity=2)
             photo = Photo.objects.create(album=album, filename=filename, date=date)
             for preset in command.resize_presets:
                 photo.thumbnail(preset)
         for filename in sorted(old_keys - new_keys):
-            command.write_out("Removing photo %s from album %s (%s)" % (filename, dirpath, category), verbosity=2)
+            command.write_out(
+                "Removing photo %s from album %s (%s)" % (filename, dirpath, category),
+                verbosity=2)
             photo = Photo.objects.get(album=album, filename=filename)
             photo.delete()
         if not command.full_sync:
@@ -245,6 +259,8 @@ def synchronize_photos(albums, command):
             date = get_photo_info(albums[category, dirpath][filename], command)
             photo = Photo.objects.get(album=album, filename=filename)
             if date != photo.date:
-                command.write_out("Fixing date of photo %s from album %s (%s)" % (filename, dirpath, category), verbosity=2)
+                command.write_out(
+                    "Fixing date of photo %s from album %s (%s)" % (filename, dirpath, category),
+                    verbosity=2)
                 photo.date = date
                 photo.save()

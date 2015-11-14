@@ -13,7 +13,8 @@ from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
 class AccessPolicyTests(TestCase):
 
     def setUp(self):
-        self.album = Album.objects.create(category='default', dirpath='foo', date=datetime.date.today())
+        today = datetime.date.today()
+        self.album = Album.objects.create(category='default', dirpath='foo', date=today)
         self.photo = Photo.objects.create(album=self.album, filename='bar')
         self.group = Group.objects.create(name='group')
         self.user = User.objects.create_user('user', 'user@gallery', 'pass')

@@ -3,9 +3,7 @@
 from __future__ import unicode_literals
 
 import io
-import os
 
-from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
 from django.test.utils import override_settings
 from PIL import Image, ImageDraw
@@ -98,7 +96,7 @@ class ThumbnailTests(TestCase):
 
     def test_non_jpg_thumbnail(self):
         self.make_image(36, 36, 'original.png', 'PNG')
-        self.make_thumbnail('thumbnail','original.png', 'thumbnail.png')
+        self.make_thumbnail('thumbnail', 'original.png', 'thumbnail.png')
 
         im = self.open_image('thumbnail.png')
         self.assertEqual(im.format, 'PNG')

@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-import glob
 import hashlib
 import mimetypes
 import os
@@ -91,8 +90,11 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
             if self.can_view_all():
                 photos = list(album.photo_set.all())
             else:
-                photos = [photo for photo in album.photo_set.all()
-                                if photo.is_allowed_for_user(user)]
+                photos = [
+                    photo
+                    for photo in album.photo_set.all()
+                    if photo.is_allowed_for_user(user)
+                ]
             album.photos_count = len(photos)
             preview_count = getattr(settings, 'GALLERY_PREVIEW_COUNT', 5)
             if len(photos) > preview_count:
@@ -353,6 +355,7 @@ def serve_private_media(request, path):
 
 _sanitize_re = re.compile(r'[^0-9A-Za-z_.-]')
 
+
 def sanitize(value):
     value = unicodedata.normalize('NFKD', six.text_type(value))
     value = value.encode('ascii', 'ignore').decode('ascii')
@@ -364,8 +367,8 @@ def latest_album(request):
     if request.user.has_perm('gallery.view'):
         albums = Album.objects.all()
     else:
-        include_public = request.session.get('show_public',
-                not request.user.is_authenticated())
+        include_public = request.session.get(
+            'show_public', not request.user.is_authenticated())
         albums = Album.objects.allowed_for_user(request.user, include_public)
     albums = albums.order_by('-date')[:1]
     if albums:

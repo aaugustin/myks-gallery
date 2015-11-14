@@ -56,7 +56,8 @@ class ViewsTestsMixin(object):
                 GALLERY_CACHE_DIR=self.tmpdir,
                 GALLERY_SENDFILE_HEADER='X-Fake-Sendfile'):
             self.make_image()
-            response = self.client.get(reverse('gallery:album-export', args=[self.album.pk]))
+            url = reverse('gallery:album-export', args=[self.album.pk])
+            response = self.client.get(url)
             self.assertTrue(response['X-Fake-Sendfile'].startswith(self.tmpdir))
             with zipfile.ZipFile(response['X-Fake-Sendfile']) as archive:
                 self.assertEqual(archive.namelist(), ['original.jpg'])
@@ -68,9 +69,11 @@ class ViewsTestsMixin(object):
                 GALLERY_RESIZE_PRESETS={'resized': (120, 120, False)},
                 GALLERY_SENDFILE_HEADER='X-Fake-Sendfile'):
             self.make_image()
-            response = self.client.get(reverse('gallery:photo-resized', args=['resized', self.photo.pk]))
+            url = reverse('gallery:photo-resized', args=['resized', self.photo.pk])
+            response = self.client.get(url)
             self.assertTrue(response['X-Fake-Sendfile'].startswith(self.tmpdir))
-            self.assertNotEqual(response['X-Fake-Sendfile'], os.path.join(self.tmpdir, 'original.jpg'))
+            self.assertNotEqual(response['X-Fake-Sendfile'],
+                                os.path.join(self.tmpdir, 'original.jpg'))
 
     def test_photo_resized_view_remote(self):
         with self.settings(
@@ -78,7 +81,8 @@ class ViewsTestsMixin(object):
                 GALLERY_PHOTO_STORAGE='gallery.test_storages.RemoteStorage',
                 GALLERY_RESIZE_PRESETS={'resized': (120, 120, False)}):
             self.make_image()
-            response = self.client.get(reverse('gallery:photo-resized', args=['resized', self.photo.pk]))
+            url = reverse('gallery:photo-resized', args=['resized', self.photo.pk])
+            response = self.client.get(url)
             self.assertRedirects(response, '/url/of/' + self.photo.thumb_name('resized'),
                                  fetch_redirect_response=False)
 
@@ -87,14 +91,17 @@ class ViewsTestsMixin(object):
                 GALLERY_PHOTO_DIR=self.tmpdir,
                 GALLERY_SENDFILE_HEADER='X-Fake-Sendfile'):
             self.make_image()
-            response = self.client.get(reverse('gallery:photo-original', args=[self.photo.pk]))
-            self.assertEqual(response['X-Fake-Sendfile'], os.path.join(self.tmpdir, 'original.jpg'))
+            url = reverse('gallery:photo-original', args=[self.photo.pk])
+            response = self.client.get(url)
+            self.assertEqual(response['X-Fake-Sendfile'],
+                             os.path.join(self.tmpdir, 'original.jpg'))
 
     def test_photo_original_view_remote(self):
         with self.settings(
                 GALLERY_PHOTO_STORAGE='gallery.test_storages.RemoteStorage'):
             self.make_image()
-            response = self.client.get(reverse('gallery:photo-original', args=[self.photo.pk]))
+            url = reverse('gallery:photo-original', args=[self.photo.pk])
+            response = self.client.get(url)
             self.assertRedirects(response, '/url/of/' + self.photo.image_name(),
                                  fetch_redirect_response=False)
 
@@ -110,7 +117,8 @@ class ViewsWithPermissionTests(ViewsTestsMixin, TestCase):
 
     def setUp(self):
         super(ViewsWithPermissionTests, self).setUp()
-        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=datetime.date.today())
+        today = datetime.date.today()
+        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=today)
         self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
         self.user = User.objects.create_user('user', 'user@gallery', 'pass')
         self.user.user_permissions.add(Permission.objects.get(codename='view'))
@@ -121,7 +129,8 @@ class ViewsWithPrivateAccessPolicyTests(ViewsTestsMixin, TestCase):
 
     def setUp(self):
         super(ViewsWithPrivateAccessPolicyTests, self).setUp()
-        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=datetime.date.today())
+        today = datetime.date.today()
+        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=today)
         AlbumAccessPolicy.objects.create(album=self.album, public=False, inherit=True)
         self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
         self.user = User.objects.create_user('user', 'user@gallery', 'pass')
@@ -138,7 +147,8 @@ class ViewsWithPublicAccessPolicyTests(ViewsTestsMixin, TestCase):
 
     def setUp(self):
         super(ViewsWithPublicAccessPolicyTests, self).setUp()
-        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=datetime.date.today())
+        today = datetime.date.today()
+        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=today)
         AlbumAccessPolicy.objects.create(album=self.album, public=True, inherit=True),
         self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
 
@@ -193,13 +203,19 @@ class ServePrivateMediaTests(TestCase):
 
     # See https://tn123.org/mod_xsendfile/
 
-    @override_settings(DEBUG=True, GALLERY_SENDFILE_HEADER='X-SendFile', GALLERY_SENDFILE_ROOT='')
+    @override_settings(
+        DEBUG=True,
+        GALLERY_SENDFILE_HEADER='X-SendFile',
+        GALLERY_SENDFILE_ROOT='')
     def test_apache_dev(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-SendFile'), None)
         self.assertEqual(b''.join(response.streaming_content), self.file_contents)
 
-    @override_settings(DEBUG=False, GALLERY_SENDFILE_HEADER='X-SendFile', GALLERY_SENDFILE_ROOT='')
+    @override_settings(
+        DEBUG=False,
+        GALLERY_SENDFILE_HEADER='X-SendFile',
+        GALLERY_SENDFILE_ROOT='')
     def test_apache_prod(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-SendFile'), self.absolute_path)
@@ -207,13 +223,19 @@ class ServePrivateMediaTests(TestCase):
 
     # See http://wiki.nginx.org/XSendfile
 
-    @override_settings(DEBUG=True, GALLERY_SENDFILE_HEADER='X-Accel-Redirect', GALLERY_SENDFILE_ROOT=root_dir)
+    @override_settings(
+        DEBUG=True,
+        GALLERY_SENDFILE_HEADER='X-Accel-Redirect',
+        GALLERY_SENDFILE_ROOT=root_dir)
     def test_nginx_dev(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-Accel-Redirect'), None)
         self.assertEqual(b''.join(response.streaming_content), self.file_contents)
 
-    @override_settings(DEBUG=False, GALLERY_SENDFILE_HEADER='X-Accel-Redirect', GALLERY_SENDFILE_ROOT=root_dir)
+    @override_settings(
+        DEBUG=False,
+        GALLERY_SENDFILE_HEADER='X-Accel-Redirect',
+        GALLERY_SENDFILE_ROOT=root_dir)
     def test_nginx_prod(self):
         response = self.client.get(self.private_url)
         self.assertEqual(response.get('X-Accel-Redirect'), self.relative_path)
@@ -226,6 +248,9 @@ class ServePrivateMediaTests(TestCase):
         response = self.client.get(self.private_url + '.does.not.exist')
         self.assertEqual(response.status_code, 404)
 
-    @override_settings(DEBUG=False, GALLERY_SENDFILE_HEADER='X-Accel-Redirect', GALLERY_SENDFILE_ROOT=root_dir + root_dir)
+    @override_settings(
+        DEBUG=False,
+        GALLERY_SENDFILE_HEADER='X-Accel-Redirect',
+        GALLERY_SENDFILE_ROOT=root_dir + root_dir)
     def test_file_not_under_root(self):
         self.assertRaises(ValueError, self.client.get, self.private_url)
