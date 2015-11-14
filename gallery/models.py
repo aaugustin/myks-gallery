@@ -199,10 +199,6 @@ class Photo(models.Model):
                 | Q(date=self.date, filename__gt=self.filename))
         return photos.order_by('-date', '-filename')[:1].get()
 
-    def abspath(self):
-        # TODO: remove this function once all callers are refactored.
-        return os.path.join(settings.GALLERY_PHOTO_DIR, self.album.dirpath, self.filename)
-
     def image_name(self):
         return os.path.join(self.album.dirpath, self.filename)
 

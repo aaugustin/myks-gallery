@@ -10,6 +10,7 @@ import random
 import re
 import stat
 import sys
+import tempfile
 import time
 import unicodedata
 import zipfile
@@ -188,35 +189,55 @@ def export_album(request, pk):
     else:
         photos = album.photo_set.allowed_for_user(request.user)
 
+    zip_storage = get_storage('cache')
+    image_storage = get_storage('photo')
+
     hsh = hashlib.md5()
     hsh.update(str(settings.SECRET_KEY).encode())
     hsh.update(str(pk).encode())
     for photo in photos:
         hsh.update(str(photo.pk).encode())
-    zip_name = hsh.hexdigest() + '.zip'
-    zip_path = os.path.join(settings.GALLERY_CACHE_DIR, 'export', zip_name)
+    zip_name = os.path.join('export', hsh.hexdigest() + '.zip')
 
-    if not os.path.exists(zip_path):
+    if not zip_storage.exists(zip_name):
 
-        zip_dir = os.path.dirname(zip_path)
-        if not os.path.isdir(zip_dir):
-            os.makedirs(zip_dir)
+        # Expire old archives
+        default_expiry = 60 if hasattr(settings, 'GALLERY_PHOTO_DIR') else None
+        archive_expiry = getattr(settings, 'GALLERY_ARCHIVE_EXPIRY', default_expiry)
+        if archive_expiry is not None:
+            cutoff = time.time() - archive_expiry * 86400
+            try:
+                other_zip_names = zip_storage.listdir('export')[1]
+            except Exception:
+                other_zip_names = []
+            for other_zip_name in other_zip_names:
+                if not other_zip_name.endswith('.zip'):
+                    continue
+                other_zip_file = os.path.join('export', other_zip_name)
+                if zip_storage.modified_time(other_zip_file) < cutoff:
+                    zip_storage.delete(other_zip_file)
 
-        archive_expiry = getattr(settings, 'GALLERY_ARCHIVE_EXPIRY', 60)
-        cutoff = time.time() - archive_expiry * 86400
-        for zip_file in glob.glob(os.path.join(zip_dir, '*.zip')):
-            if os.path.getmtime(zip_file) < cutoff:
-                os.unlink(zip_file)
+        # Create the archive in a temporary file to avoid holding it in memory
+        with tempfile.TemporaryFile(suffix='.zip') as temp_zip:
+            with zipfile.ZipFile(temp_zip, 'w') as archive:
+                for photo in photos:
+                    data = image_storage.open(photo.image_name()).read()
+                    archive.writestr(photo.filename, data)
+            temp_zip.seek(0)
+            zip_storage.save(zip_name, temp_zip)
 
-        with zipfile.ZipFile(zip_path, 'w') as archive:
-            for photo in photos:
-                archive.write(photo.abspath(), photo.filename)
-
-    response = serve_private_media(request, zip_path)
-
-    ascii_filename = '%s_%s.zip' % (str(album.date), sanitize(album.name))
-    response['Content-Disposition'] = 'attachement; filename=%s;' % ascii_filename
-    return response
+    try:
+        zip_path = zip_storage.path(zip_name)
+    except NotImplementedError:
+        # Remote storage. Let the storage generate an URL.
+        zip_url = zip_storage.url(zip_name)
+        return HttpResponseRedirect(zip_url)
+    else:
+        # Local storage. Serve the file directly.
+        response = serve_private_media(request, zip_path)
+        ascii_filename = '%s_%s.zip' % (str(album.date), sanitize(album.name))
+        response['Content-Disposition'] = 'attachement; filename=%s;' % ascii_filename
+        return response
 
 
 def _get_photo_if_allowed(request, pk):

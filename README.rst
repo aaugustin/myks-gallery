@@ -264,9 +264,16 @@ Number of thumbnails shown in the preview of each album.
 ``GALLERY_ARCHIVE_EXPIRY``
 ..........................
 
-Default: ``60``
+Default: ``None`` or ``60``
 
-Duration in days during which album archives are kept in cache.
+Duration in days during which album archives are kept in cache. ``None``
+disables expiration.
+
+When using a remote storage system such as S3, configuring an expiry policy
+for the ``export`` folder directly on the storage system is more efficient.
+
+For compatibility with versions prior to 0.5, if ``GALLERY_CACHE_DIR`` is
+defined, ``GALLERY_ARCHIVE_EXPIRY`` defaults to ``60``.
 
 
 Running the sample application
