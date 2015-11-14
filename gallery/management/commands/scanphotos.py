@@ -25,7 +25,7 @@ from ...models import Album, Photo
 
 
 class Command(base.BaseCommand):
-    help = 'Scan GALLERY_PHOTO_DIR and update database.'
+    help = 'Scan photos and update database.'
 
     if django.VERSION[:2] >= (1, 8):
 
@@ -61,15 +61,28 @@ class Command(base.BaseCommand):
         self.full_sync = options['full_sync']
         self.resize_presets = options['resize_presets']
         self.verbosity = int(options['verbosity'])
-        if self.verbosity >= 1:
-            t = time.time()
-            self.stdout.write("Scanning %s\n" % settings.GALLERY_PHOTO_DIR)
+
+        t = time.time()
+
+        self.write_out("Scanning photos...", verbosity=1)
         albums = scan_photo_root(self)
+
+        self.write_out("Synchronizing albums...", verbosity=1)
         synchronize_albums(albums, self)
+
+        self.write_out("Synchronizing photos...", verbosity=1)
         synchronize_photos(albums, self)
-        if self.verbosity >= 1:
-            dt = time.time() - t
-            self.stdout.write("Done (%.02fs)\n" % dt)
+
+        dt = time.time() - t
+        self.write_out("Done (%.02fs)" % dt, verbosity=1)
+
+    def write_err(self, message, verbosity):
+        if self.verbosity >= verbosity:
+            self.stderr.write(self.style.ERROR(message + "\n"))
+
+    def write_out(self, message, verbosity):
+        if self.verbosity >= verbosity:
+            self.stdout.write(message + "\n")
 
 
 ignores = [re.compile(i) for i in getattr(settings, 'GALLERY_IGNORES', ())]
@@ -105,18 +118,15 @@ def iter_photo_root(command):
             filepath = unicodedata.normalize('NFKC', filepath)
             relpath = os.path.relpath(filepath, settings.GALLERY_PHOTO_DIR)
             if is_ignored(relpath):
-                if command.verbosity >= 3:
-                    command.stdout.write("- %s\n" % relpath)
+                command.write_out("- %s" % relpath, verbosity=3)
                 continue
             result = is_matched(relpath)
             if result is not None:
-                if command.verbosity >= 3:
-                    command.stdout.write("> %s\n" % relpath)
+                command.write_out("> %s" % relpath, verbosity=3)
                 category, captures = result
                 yield relpath, category, captures
             else:
-                if command.verbosity >= 1:
-                    command.stderr.write("? %s\n" % relpath)
+                command.write_err("? %s" % relpath, verbosity=1)
 
 
 def scan_photo_root(command):
@@ -147,8 +157,7 @@ def get_album_info(captures, command):
     except KeyError:
         pass
     except ValueError as e:
-        if command.verbosity >= 1:
-            command.stderr.write("%s %s\n" % (e, kwargs))
+        command.write_err("%s %s" % (e, kwargs), verbosity=1)
     name = ' '.join(v for k, v in sorted(captures.items())
                     if k.startswith('a_name') and v is not None)
     name = name.replace('/', ' > ')
@@ -170,8 +179,7 @@ def get_photo_info(captures, command):
     except KeyError:
         pass
     except ValueError as e:
-        if command.verbosity >= 1:
-            command.stderr.write("%s %s\n" % (e, kwargs))
+        command.write_err("%s %s" % (e, kwargs), verbosity=1)
     return date
 
 
@@ -185,12 +193,10 @@ def synchronize_albums(albums, command):
     for category, dirpath in sorted(new_keys - old_keys):
         random_capture = next(iter(albums[category, dirpath].values()))
         date, name = get_album_info(random_capture, command)
-        if command.verbosity >= 1:
-            command.stdout.write("Adding album %s (%s) as %s\n" % (dirpath, category, name))
+        command.write_out("Adding album %s (%s) as %s" % (dirpath, category, name), verbosity=1)
         Album.objects.create(category=category, dirpath=dirpath, date=date, name=name)
     for category, dirpath in sorted(old_keys - new_keys):
-        if command.verbosity >= 1:
-            command.stdout.write("Removing album %s (%s)\n" % (dirpath, category))
+        command.write_out("Removing album %s (%s)" % (dirpath, category), verbosity=1)
         Album.objects.get(category=category, dirpath=dirpath).delete()
 
 
@@ -205,14 +211,12 @@ def synchronize_photos(albums, command):
         old_keys = set(p.filename for p in album.photo_set.all())
         for filename in sorted(new_keys - old_keys):
             date = get_photo_info(albums[category, dirpath][filename], command)
-            if command.verbosity >= 2:
-                command.stdout.write("Adding photo %s to album %s (%s)\n" % (filename, dirpath, category))
+            command.write_out("Adding photo %s to album %s (%s)" % (filename, dirpath, category), verbosity=2)
             photo = Photo.objects.create(album=album, filename=filename, date=date)
             for preset in command.resize_presets:
                 photo.thumbnail(preset)
         for filename in sorted(old_keys - new_keys):
-            if command.verbosity >= 2:
-                command.stdout.write("Removing photo %s from album %s (%s)\n" % (filename, dirpath, category))
+            command.write_out("Removing photo %s from album %s (%s)" % (filename, dirpath, category), verbosity=2)
             photo = Photo.objects.get(album=album, filename=filename)
             photo.delete()
         if not command.full_sync:
@@ -221,7 +225,6 @@ def synchronize_photos(albums, command):
             date = get_photo_info(albums[category, dirpath][filename], command)
             photo = Photo.objects.get(album=album, filename=filename)
             if date != photo.date:
-                if command.verbosity >= 2:
-                    command.stdout.write("Fixing date of photo %s from album %s (%s)\n" % (filename, dirpath, category))
+                command.write_out("Fixing date of photo %s from album %s (%s)" % (filename, dirpath, category), verbosity=2)
                 photo.date = date
                 photo.save()
