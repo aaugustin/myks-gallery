@@ -5,15 +5,16 @@ from __future__ import unicode_literals
 import re
 
 from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import ImproperlyConfigured
+from django.core.files.storage import FileSystemStorage
+from django.dispatch import receiver
+from django.utils.lru_cache import lru_cache
+from django.utils.module_loading import import_string
+
 try:
     from django.test.signals import setting_changed         # Django ≥ 1.8
 except ImportError:                                         # pragma: no cover
     from django.core.signals import setting_changed         # Django < 1.8
-from django.dispatch import receiver
-from django.utils.module_loading import import_string
-from django.utils.lru_cache import lru_cache
 
 
 @lru_cache()

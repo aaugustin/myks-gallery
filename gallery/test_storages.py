@@ -94,4 +94,3 @@ class StoragesTest(TestCase):
     def test_get_storage_unconfigured(self):
         with self.assertRaises(ImproperlyConfigured):
             get_storage('foo')
-

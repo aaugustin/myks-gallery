@@ -2,13 +2,12 @@
 from __future__ import unicode_literals
 
 from django.conf.urls import url
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.decorators import permission_required
-from django.contrib import messages
-from django.core.exceptions import PermissionDenied
 from django.core import management
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect

@@ -10,7 +10,7 @@ import tempfile
 import unittest
 
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import Permission, User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 

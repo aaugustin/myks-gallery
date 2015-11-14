@@ -5,12 +5,10 @@ from __future__ import unicode_literals
 import io
 import os
 
-from PIL import Image
-from PIL import ImageDraw
-
 from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
 from django.test.utils import override_settings
+from PIL import Image, ImageDraw
 
 from .imgutil import make_thumbnail
 from .test_storages import MemoryStorage

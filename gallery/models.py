@@ -6,7 +6,7 @@ import hashlib
 import os
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.db import models
 from django.db.models import Q
 from django.utils.encoding import python_2_unicode_compatible

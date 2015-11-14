@@ -18,11 +18,12 @@ import zipfile
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import (Http404, HttpResponse, HttpResponseNotModified,
-    HttpResponseRedirect, StreamingHttpResponse)
+from django.http import (
+    Http404, HttpResponse, HttpResponseNotModified, HttpResponseRedirect,
+    StreamingHttpResponse)
 from django.shortcuts import get_object_or_404
-from django.utils.http import http_date
 from django.utils import six
+from django.utils.http import http_date
 from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
 from django.views.static import was_modified_since
 
