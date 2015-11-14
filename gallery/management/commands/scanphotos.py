@@ -129,12 +129,15 @@ def iter_photo_root(command):
                 command.write_err("? %s" % relpath, verbosity=1)
 
 
-def scan_photo_root(command):
-    """Return a dictionary of albums, keyed by (category, dirpath).
+def scan_photo_storage(command):
+    """
+    Return a dictionary of albums keyed by (category, dirpath).
 
     Each album is a dictionary of photos, keyed by filename.
 
-    The result can be passed to synchronize_albums and synchronize_photos.
+    The result can be passed to ``synchronize_albums`` and
+    ``synchronize_photos``.
+
     """
     albums = collections.defaultdict(lambda: {})
     for path, category, captures in iter_photo_root(command):
@@ -144,10 +147,12 @@ def scan_photo_root(command):
 
 
 def get_album_info(captures, command):
-    """Return the date and name of an album.
+    """
+    Return the date and name of an album.
 
-    `captures` are elements extracted from the file name of a random photo
+    ``captures`` are elements extracted from the file name of a random photo
     in the album.
+
     """
     date = None
     try:
@@ -165,9 +170,11 @@ def get_album_info(captures, command):
 
 
 def get_photo_info(captures, command):
-    """Return the datetime of a photo.
+    """
+    Return the datetime of a photo.
 
-    `captures` are elements extracted from the file name of the photo.
+    ``captures`` are elements extracted from the file name of the photo.
+
     """
     date = None
     try:
@@ -184,9 +191,11 @@ def get_photo_info(captures, command):
 
 
 def synchronize_albums(albums, command):
-    """Synchronize albums from the filesystem to the database.
+    """
+    Synchronize albums from the filesystem to the database.
 
-    `albums` is the result of `scan_photo_root`.
+    ``albums`` is the result of ``scan_photo_storage``.
+
     """
     new_keys = set(albums.keys())
     old_keys = set((a.category, a.dirpath) for a in Album.objects.all())
@@ -201,9 +210,11 @@ def synchronize_albums(albums, command):
 
 
 def synchronize_photos(albums, command):
-    """Synchronize photos from the filesystem to the database.
+    """
+    Synchronize photos from the filesystem to the database.
 
-    `albums` is the result of `scan_photo_root`.
+    ``albums`` is the result of ``scan_photo_storage``.
+
     """
     for (category, dirpath), filenames in albums.items():
         album = Album.objects.get(category=category, dirpath=dirpath)
