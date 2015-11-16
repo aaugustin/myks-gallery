@@ -60,15 +60,14 @@ myks-gallery requires two storage areas:
 
 myks-gallery accesses them through Django's `file storage API`_, meaning that
 you can use any storage for which a Django storage backend exists. You should
-use `django-storages-redux`_ if you're storing files in a cloud service and
-Djang's built-in ``FileSystemStorage`` if you're storing them locally on the
-filesystem, typically for local development.
+use a third-party storage backend if you're storing files in a cloud service
+and Djang's built-in ``FileSystemStorage`` if you're storing them locally on
+the filesystem, typically for local development.
 
 .. _aws s3 sync: http://docs.aws.amazon.com/cli/latest/reference/s3/sync.html
 .. _gsutil rsync: https://cloud.google.com/storage/docs/gsutil/commands/rsync
 .. _rsync: http://rsync.samba.org/
 .. _file storage API: https://docs.djangoproject.com/en/stable/ref/files/storage/
-.. _django-storages-redux: https://github.com/jschneier/django-storages
 
 Installation guide
 ------------------
