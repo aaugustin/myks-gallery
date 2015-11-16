@@ -322,10 +322,13 @@ Running the sample application
 Changelog
 =========
 
-0.5
+0.6
 ---
 
 *Under development*
+
+0.5
+---
 
 This version uses the Django file storage API for all operations on files,
 making it possible to use services such as Amazon S3 or Google Cloud Storage

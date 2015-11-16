@@ -19,7 +19,7 @@ with open(README) as f:
 
 setup(
     name='myks-gallery',
-    version='0.4',
+    version='0.5',
     author='Aymeric Augustin',
     author_email='aymeric.augustin@m4x.org',
     url='https://github.com/aaugustin/myks-gallery',
