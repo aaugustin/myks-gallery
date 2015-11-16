@@ -1,6 +1,6 @@
 # coding: utf-8
 
-# If you have non-ascii characters in filenames, you probably need:
+# If you have non-ascii characters in filenames, on Python 2, you may need:
 # export PYTHONIOENCODING=utf-8
 
 from __future__ import unicode_literals
