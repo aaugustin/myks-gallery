@@ -1,7 +1,8 @@
 # coding: utf-8
 
-import distutils.core
 import os
+
+from setuptools import setup
 
 # Avoid polluting the .tar.gz with ._* files under Mac OS X
 os.putenv('COPYFILE_DISABLE', 'true')
@@ -16,7 +17,7 @@ description = 'Photo gallery with granular access control'
 with open(README) as f:
     long_description = '\n\n'.join(f.read().split('\n\n')[2:6])
 
-distutils.core.setup(
+setup(
     name='myks-gallery',
     version='0.4',
     author='Aymeric Augustin',
