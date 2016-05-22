@@ -85,24 +85,24 @@ class Album(models.Model):
 
     def get_next_in_queryset(self, albums):
         albums = albums.filter(
-            Q(date__gt=self.date)
-            | Q(date=self.date, name__gt=self.name)
-            | Q(date=self.date, name=self.name, dirpath__gt=self.dirpath)
-            | Q(date=self.date, name=self.name, dirpath=self.dirpath, category__gt=self.category))
+            Q(date__gt=self.date) |
+            Q(date=self.date, name__gt=self.name) |
+            Q(date=self.date, name=self.name, dirpath__gt=self.dirpath) |
+            Q(date=self.date, name=self.name, dirpath=self.dirpath, category__gt=self.category))
         return albums.order_by('date', 'name', 'dirpath', 'category')[:1].get()
 
     def get_previous_in_queryset(self, albums):
         albums = albums.filter(
-            Q(date__lt=self.date)
-            | Q(date=self.date, name__lt=self.name)
-            | Q(date=self.date, name=self.name, dirpath__lt=self.dirpath)
-            | Q(date=self.date, name=self.name, dirpath=self.dirpath, category__lt=self.category))
+            Q(date__lt=self.date) |
+            Q(date=self.date, name__lt=self.name) |
+            Q(date=self.date, name=self.name, dirpath__lt=self.dirpath) |
+            Q(date=self.date, name=self.name, dirpath=self.dirpath, category__lt=self.category))
         return albums.order_by('-date', '-name', '-dirpath', '-category')[:1].get()
 
 
 @python_2_unicode_compatible
 class AlbumAccessPolicy(AccessPolicy):
-    album = models.OneToOneField(Album, related_name='access_policy')
+    album = models.OneToOneField(Album, on_delete=models.CASCADE, related_name='access_policy')
     inherit = models.BooleanField(blank=True, default=True,
                                   verbose_name="photos inherit album access policy")
 
@@ -130,7 +130,7 @@ class PhotoManager(models.Manager):
 
 @python_2_unicode_compatible
 class Photo(models.Model):
-    album = models.ForeignKey(Album)
+    album = models.ForeignKey(Album, on_delete=models.CASCADE)
     filename = models.CharField(max_length=100, verbose_name="file name")
     date = models.DateTimeField(null=True, blank=True)
 
@@ -181,12 +181,12 @@ class Photo(models.Model):
     def get_next_in_queryset(self, photos):
         if self.date is None:
             photos = photos.filter(
-                Q(date__isnull=False)
-                | Q(date__isnull=True, filename__gt=self.filename))
+                Q(date__isnull=False) |
+                Q(date__isnull=True, filename__gt=self.filename))
         else:
             photos = photos.filter(
-                Q(date__gt=self.date)
-                | Q(date=self.date, filename__gt=self.filename))
+                Q(date__gt=self.date) |
+                Q(date=self.date, filename__gt=self.filename))
         return photos.order_by('date', 'filename')[:1].get()
 
     def get_previous_in_queryset(self, photos):
@@ -195,9 +195,9 @@ class Photo(models.Model):
                 date__isnull=True, filename__lt=self.filename)
         else:
             photos = photos.filter(
-                Q(date__isnull=True)
-                | Q(date__lt=self.date)
-                | Q(date=self.date, filename__gt=self.filename))
+                Q(date__isnull=True) |
+                Q(date__lt=self.date) |
+                Q(date=self.date, filename__gt=self.filename))
         return photos.order_by('-date', '-filename')[:1].get()
 
     def image_name(self):
@@ -226,7 +226,7 @@ class Photo(models.Model):
 
 @python_2_unicode_compatible
 class PhotoAccessPolicy(AccessPolicy):
-    photo = models.OneToOneField(Photo, related_name='access_policy')
+    photo = models.OneToOneField(Photo, on_delete=models.CASCADE, related_name='access_policy')
 
     class Meta:
         verbose_name = _("Photo access policy")

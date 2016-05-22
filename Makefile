@@ -10,6 +10,6 @@ coverage:
 	coverage html
 
 clean:
-	find . -name '*.pyc' -delete
-	find . -name __pycache__ -delete
+	find gallery -name '*.pyc' -delete
+	find gallery -name __pycache__ -delete
 	rm -rf .coverage *.egg-info build dist htmlcov MANIFEST
