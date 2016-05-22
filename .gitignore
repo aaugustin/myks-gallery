@@ -1,10 +1,12 @@
+*.egg-info
 *.pyc
 .coverage
+.tox
+build
 dist
 htmlcov
 MANIFEST
 README
-.tox
 
 example/photos
 example/cache
