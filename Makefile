@@ -13,3 +13,9 @@ clean:
 	find gallery -name '*.pyc' -delete
 	find gallery -name __pycache__ -delete
 	rm -rf .coverage *.egg-info build dist htmlcov MANIFEST
+
+flake8:
+	flake8 example gallery
+
+isort:
+	isort --check-only --recursive example gallery

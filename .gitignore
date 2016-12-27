@@ -6,7 +6,6 @@ build
 dist
 htmlcov
 MANIFEST
-README
 
 example/photos
 example/cache

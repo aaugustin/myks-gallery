@@ -174,6 +174,7 @@ class AlbumAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
             return access_policy.inherit
     inherit.boolean = True
 
+
 admin.site.register(Album, AlbumAdmin)
 
 
@@ -232,6 +233,7 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
             return ', '.join(six.text_type(user) for user in access_policy.users.all())
         else:
             return '-'
+
 
 admin.site.register(Photo, PhotoAdmin)
 
