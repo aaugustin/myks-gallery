@@ -13,7 +13,7 @@ with codecs.open(os.path.join(root_dir, 'README.rst'), encoding='utf-8') as f:
 
 setuptools.setup(
     name='myks-gallery',
-    version='0.5',
+    version='0.6',
     description=description,
     long_description=long_description,
     url='https://github.com/aaugustin/myks-gallery',

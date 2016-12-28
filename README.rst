@@ -322,10 +322,15 @@ Running the sample application
 Changelog
 =========
 
-0.6
+0.7
 ---
 
 *Under development*
+
+0.6
+---
+
+* Added migrations for compatibility with Django 1.9.
 
 0.5
 ---
