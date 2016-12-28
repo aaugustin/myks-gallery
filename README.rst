@@ -332,6 +332,8 @@ Changelog
 
 * Added migrations for compatibility with Django 1.9.
 
+To upgrade an existing project, run: ``django-admin migrate --fake-initial``.
+
 0.5
 ---
 
