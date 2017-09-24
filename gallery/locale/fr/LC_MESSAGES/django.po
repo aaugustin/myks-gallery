@@ -45,29 +45,29 @@ msgstr "Scanner les photos"
 msgid "Gallery"
 msgstr "Galerie"
 
-msgid "Album"
-msgstr "Album"
+msgid "album"
+msgstr "album"
 
-msgid "Albums"
-msgstr "Albums"
+msgid "albums"
+msgstr "albums"
 
-msgid "Album access policy"
-msgstr "Politique d'accès à un album"
+msgid "album access policy"
+msgstr "politique d'accès à un album"
 
-msgid "Album access policies"
-msgstr "Politiques d'accès aux albums"
+msgid "album access policies"
+msgstr "politiques d'accès aux albums"
 
-msgid "Photo"
-msgstr "Photo"
+msgid "photo"
+msgstr "photo"
 
-msgid "Photos"
-msgstr "Photos"
+msgid "photos"
+msgstr "photos"
 
-msgid "Photo access policy"
-msgstr "Politique d'accès à une photo"
+msgid "photo access policy"
+msgstr "politique d'accès à une photo"
 
-msgid "Photo access policies"
-msgstr "Politiques d'accès à des photos"
+msgid "photo access policies"
+msgstr "politiques d'accès à des photos"
 
 msgid "Home"
 msgstr "Accueil"

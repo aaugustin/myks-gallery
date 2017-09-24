@@ -59,8 +59,8 @@ class Album(models.Model):
     class Meta:
         ordering = ('date', 'name', 'dirpath', 'category')
         unique_together = ('dirpath', 'category')
-        verbose_name = _("Album")
-        verbose_name_plural = _("Albums")
+        verbose_name = _("album")
+        verbose_name_plural = _("albums")
 
     def __str__(self):
         return self.dirpath
@@ -107,8 +107,8 @@ class AlbumAccessPolicy(AccessPolicy):
                                   verbose_name="photos inherit album access policy")
 
     class Meta:
-        verbose_name = _("Album access policy")
-        verbose_name_plural = _("Album access policies")
+        verbose_name = _("album access policy")
+        verbose_name_plural = _("album access policies")
 
     def __str__(self):
         return "Access policy for %s" % self.album
@@ -143,8 +143,8 @@ class Photo(models.Model):
             ("scan", "Can scan the photos directory"),
         )
         unique_together = ('album', 'filename')
-        verbose_name = _("Photo")
-        verbose_name_plural = _("Photos")
+        verbose_name = _("photo")
+        verbose_name_plural = _("photos")
 
     def __str__(self):
         return self.filename
@@ -229,8 +229,8 @@ class PhotoAccessPolicy(AccessPolicy):
     photo = models.OneToOneField(Photo, on_delete=models.CASCADE, related_name='access_policy')
 
     class Meta:
-        verbose_name = _("Photo access policy")
-        verbose_name_plural = _("Photo access policies")
+        verbose_name = _("photo access policy")
+        verbose_name_plural = _("photo access policies")
 
     def __str__(self):
         return "Access policy for %s" % self.photo
