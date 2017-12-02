@@ -6,6 +6,8 @@ from django.conf.urls import url
 
 from . import views
 
+app_name = 'gallery'
+
 urlpatterns = [
     url(r'^$', views.GalleryIndexView.as_view(), name='index'),
     url(r'^year/(?P<year>\d{4})/$', views.GalleryYearView.as_view(), name='year'),

@@ -4,8 +4,9 @@ from __future__ import division, unicode_literals
 
 import io
 
-from django.conf import settings
 from PIL import Image, ImageFile
+
+from django.conf import settings
 
 exif_rotations = [                                          # pragma: no cover
     None,

@@ -34,7 +34,7 @@ LOGGING = {
 }
 
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -71,5 +71,3 @@ TEMPLATES = [
         },
     },
 ]
-
-TEMPLATE_DIRS = TEMPLATES[0]['DIRS']

@@ -16,11 +16,11 @@ import zipfile
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.http import (
     Http404, HttpResponse, HttpResponseNotModified, HttpResponseRedirect,
     StreamingHttpResponse)
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils import six
 from django.utils.http import http_date
 from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
@@ -42,7 +42,7 @@ class GalleryCommonMixin(object):
     def show_public(self):
         session = self.request.session
         if not hasattr(self, '_show_public'):
-            if self.request.user.is_authenticated() and not self.can_view_all():
+            if self.request.user.is_authenticated and not self.can_view_all():
                 if 'show_public' in self.request.GET:
                     self._show_public = session['show_public'] = True
                 elif 'hide_public' in self.request.GET:
@@ -83,7 +83,7 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
     def get_context_data(self, **kwargs):
         context = super(AlbumListWithPreviewMixin, self).get_context_data(**kwargs)
         user = self.request.user
-        if not self.can_view_all() and user.is_authenticated():
+        if not self.can_view_all() and user.is_authenticated:
             # Avoid repeated queries - this is specific to django.contrib.auth
             user = User.objects.prefetch_related('groups').get(pk=user.pk)
         for album in context['object_list']:
@@ -368,7 +368,7 @@ def latest_album(request):
         albums = Album.objects.all()
     else:
         include_public = request.session.get(
-            'show_public', not request.user.is_authenticated())
+            'show_public', not request.user.is_authenticated)
         albums = Album.objects.allowed_for_user(request.user, include_public)
     albums = albums.order_by('-date')[:1]
     if albums:

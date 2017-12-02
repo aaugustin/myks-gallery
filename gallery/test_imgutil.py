@@ -4,9 +4,10 @@ from __future__ import unicode_literals
 
 import io
 
+from PIL import Image, ImageDraw
+
 from django.test import TestCase
 from django.test.utils import override_settings
-from PIL import Image, ImageDraw
 
 from .imgutil import make_thumbnail
 from .test_storages import MemoryStorage

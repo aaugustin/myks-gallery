@@ -9,11 +9,11 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.decorators import permission_required
 from django.core import management
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
 from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template import Context, Template
+from django.urls import reverse
 from django.utils import six
 from django.utils.translation import ugettext, ugettext_lazy
 
