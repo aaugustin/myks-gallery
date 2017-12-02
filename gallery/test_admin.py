@@ -11,7 +11,7 @@ import unittest
 
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.auth.models import Permission, User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 
 from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy

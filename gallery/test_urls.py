@@ -7,10 +7,8 @@ from django.contrib import admin
 
 from . import views
 
-admin.autodiscover()
-
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^private(?P<path>/.+)$', views.serve_private_media, name='gallery:album'),
-    url(r'^', include('gallery.urls', namespace='gallery', app_name='gallery')),
+    url(r'^admin/', admin.site.urls),
+    url(r'^private(?P<path>/.+)$', views.serve_private_media),
+    url(r'^', include('gallery.urls', namespace='gallery')),
 ]

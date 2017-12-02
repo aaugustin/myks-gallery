@@ -6,6 +6,7 @@ import hashlib
 import os
 
 from django.conf import settings
+from django.urls import reverse
 from django.contrib.auth.models import Group, User
 from django.db import models
 from django.db.models import Q
@@ -27,7 +28,7 @@ class AccessPolicy(models.Model):
     def allows(self, user):
         if self.public:
             return True
-        if user.is_authenticated():
+        if user.is_authenticated:
             if set(self.groups.all()) & set(user.groups.all()):
                 return True
             if user in self.users.all():
@@ -41,7 +42,7 @@ class AlbumManager(models.Manager):
         album_cond = Q()
         if include_public:
             album_cond |= Q(access_policy__public=True)
-        if user.is_authenticated():
+        if user.is_authenticated:
             album_cond |= Q(access_policy__users=user)
             album_cond |= Q(access_policy__groups__user=user)
         return self.filter(album_cond).distinct()
@@ -65,9 +66,8 @@ class Album(models.Model):
     def __str__(self):
         return self.dirpath
 
-    @models.permalink
     def get_absolute_url(self):
-        return 'gallery:album', [self.pk]
+        return reverse('gallery:album', args=[self.pk])
 
     @property
     def display_name(self):
@@ -120,7 +120,7 @@ class PhotoManager(models.Manager):
         photo_cond = Q(access_policy__public=True)
         inherit = Q(album__access_policy__inherit=True)
         album_cond = Q(album__access_policy__public=True)
-        if user.is_authenticated():
+        if user.is_authenticated:
             photo_cond |= Q(access_policy__users=user)
             photo_cond |= Q(access_policy__groups__user=user)
             album_cond |= Q(album__access_policy__users=user)
@@ -149,9 +149,8 @@ class Photo(models.Model):
     def __str__(self):
         return self.filename
 
-    @models.permalink
     def get_absolute_url(self):
-        return 'gallery:photo', [self.pk]
+        return reverse('gallery:photo', args=[self.pk])
 
     @property
     def display_name(self):
