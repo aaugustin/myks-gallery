@@ -322,10 +322,13 @@ Running the sample application
 Changelog
 =========
 
-0.7
+0.8
 ---
 
 *Under development*
+
+0.7
+---
 
 * Updated for Django 2.0.
 
