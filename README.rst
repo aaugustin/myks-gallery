@@ -43,8 +43,9 @@ photos with relatives. You might want to use django-sesame_.
 Setup
 =====
 
-myks-gallery is a pluggable Django application. It requires Django 1.11 (LTS)
-or 2.0 and Pillow. It works with any version of Python supported by Django.
+myks-gallery is a pluggable Django application. It requires Django 1.11 (LTS),
+2.0 or 2.1. It also depends on Pillow. It works with any version of Python
+supported by Django.
 
 Architecture
 ------------
