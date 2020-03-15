@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import six
+
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
@@ -14,7 +16,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template import Context, Template
 from django.urls import reverse
-from django.utils import six
 from django.utils.translation import ugettext, ugettext_lazy
 
 from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy

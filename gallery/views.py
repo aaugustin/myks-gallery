@@ -7,6 +7,7 @@ import mimetypes
 import os
 import random
 import re
+import six
 import stat
 import sys
 import tempfile
@@ -21,7 +22,6 @@ from django.http import (
     StreamingHttpResponse)
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils import six
 from django.utils.http import http_date
 from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
 from django.views.static import was_modified_since

@@ -10,7 +10,7 @@ from django.contrib.auth.models import Group, User
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
-from django.utils.encoding import python_2_unicode_compatible
+from six import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from .imgutil import make_thumbnail

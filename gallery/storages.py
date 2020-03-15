@@ -9,7 +9,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.files.storage import FileSystemStorage
 from django.dispatch import receiver
 from django.test.signals import setting_changed
-from django.utils.lru_cache import lru_cache
+from functools import lru_cache
 from django.utils.module_loading import import_string
 
 
