@@ -1,0 +1,39 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+branch = true
+source = ["gallery"]
+
+[tool.isort]
+multi_line_output = 4
+
+[tool.poetry]
+name = "myks-gallery"
+version = "0.8"
+description = "Photo gallery with granular access control"
+authors = ["Aymeric Augustin <aymeric.augustin@m4x.org>"]
+license = "BSD-3-Clause"
+readme = "README.rst"
+repository = "https://github.com/aaugustin/myks-gallery"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 2.2",
+    "Framework :: Django :: 3.0",
+    "Framework :: Django :: 3.1",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+]
+packages = [{ include = "gallery"}]
+
+[tool.poetry.dependencies]
+django = ">=2.2"
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+coverage = "*"
+flake8 = "*"
+isort = "*"

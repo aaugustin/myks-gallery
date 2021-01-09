@@ -1,11 +1,9 @@
-*.egg-info
 *.pyc
 .coverage
 .tox
-build
 dist
 htmlcov
-MANIFEST
+poetry.lock
 
 example/photos
 example/cache
