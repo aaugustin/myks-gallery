@@ -13,7 +13,7 @@ It powers my `humble photo gallery`_, allowing me to:
 - make some albums public.
 
 .. _myks-gallery: https://github.com/aaugustin/myks-gallery
-.. _humble photo gallery: http://myks.org/photos/
+.. _humble photo gallery: https://myks.org/photos/
 
 Use case
 ========
@@ -25,7 +25,7 @@ synchronize my collection to a remote storage. I serve my gallery from there.
 
 If you have a similar workflow, you may find myks-gallery useful.
 
-Whenever I upload new photos, I re-scan the collection with ``./manage.py
+Whenever I upload new photos, I re-scan the collection with ``django-admin
 scanphotos`` or with the button in the admin. myks-gallery detects new albums
 and photos. Then I define users, groups and access policies in the admin.
 
@@ -43,9 +43,10 @@ photos with relatives. You might want to use django-sesame_.
 Setup
 =====
 
-myks-gallery is a pluggable Django application. It requires Django 1.11 (LTS),
-2.0 or 2.1. It also depends on Pillow. It works with any version of Python
-supported by Django.
+myks-gallery is a pluggable Django application. It requires:
+
+* Django ≥ 2.2 (LTS)
+* Python ≥ 3.6
 
 Architecture
 ------------
@@ -54,10 +55,10 @@ myks-gallery requires two storage areas:
 
 - The first one contains the original photos. It's a read-only reference. You
   can upload photos there with `aws s3 sync`_, `gsutil rsync`_, rsync_, etc.
-  depending on the platform. (I don't know any such tool for Azure storage.)
+  depending on the platform.
 - The second one contains downscaled photos and ZIP archives of album exports.
-  It's a read-write cache. You can set up expiry policies and clear it without
-  affecting the gallery, aside from the cost of rescaling images again.
+  It's a cache. You can set up expiry policies and clear it without affecting
+  the gallery, aside from the cost of rescaling images again.
 
 myks-gallery accesses them through Django's `file storage API`_, meaning that
 you can use any storage for which a Django storage backend exists. You should
@@ -83,7 +84,7 @@ website:
 
 2.  Add ``gallery.apps.GalleryConfig`` to ``INSTALLED_APPS``::
 
-        INSTALLED_APPS += 'gallery.apps.GalleryConfig',
+        INSTALLED_APPS += ['gallery.apps.GalleryConfig']
 
 3.  Configure the settings — see below for the list.
 
@@ -323,10 +324,15 @@ Running the sample application
 Changelog
 =========
 
-0.8
+0.9
 ---
 
 *Under development*
+
+0.8
+---
+
+* Updated for Django 3.0.
 
 0.7
 ---

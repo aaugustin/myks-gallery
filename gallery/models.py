@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import unicode_literals
-
 import hashlib
 import os
 
@@ -10,8 +6,7 @@ from django.contrib.auth.models import Group, User
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
-from django.utils.encoding import python_2_unicode_compatible
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from .imgutil import make_thumbnail
 from .storages import get_storage
@@ -48,7 +43,6 @@ class AlbumManager(models.Manager):
         return self.filter(album_cond).distinct()
 
 
-@python_2_unicode_compatible
 class Album(models.Model):
     category = models.CharField(max_length=100)
     dirpath = models.CharField(max_length=200, verbose_name="directory path")
@@ -100,7 +94,6 @@ class Album(models.Model):
         return albums.order_by('-date', '-name', '-dirpath', '-category')[:1].get()
 
 
-@python_2_unicode_compatible
 class AlbumAccessPolicy(AccessPolicy):
     album = models.OneToOneField(Album, on_delete=models.CASCADE, related_name='access_policy')
     inherit = models.BooleanField(blank=True, default=True,
@@ -128,7 +121,6 @@ class PhotoManager(models.Manager):
         return self.filter(photo_cond | (inherit & album_cond)).distinct()
 
 
-@python_2_unicode_compatible
 class Photo(models.Model):
     album = models.ForeignKey(Album, on_delete=models.CASCADE)
     filename = models.CharField(max_length=100, verbose_name="file name")
@@ -223,7 +215,6 @@ class Photo(models.Model):
         return thumb_name
 
 
-@python_2_unicode_compatible
 class PhotoAccessPolicy(AccessPolicy):
     photo = models.OneToOneField(Photo, on_delete=models.CASCADE, related_name='access_policy')
 

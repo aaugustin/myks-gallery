@@ -1,12 +1,7 @@
-# coding: utf-8
-
-from __future__ import division, unicode_literals
-
 import io
 
-from PIL import Image, ImageFile
-
 from django.conf import settings
+from PIL import Image, ImageFile
 
 exif_rotations = [                                          # pragma: no cover
     None,

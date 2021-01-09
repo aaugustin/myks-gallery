@@ -1,6 +1,4 @@
-# coding: utf-8
-
-from __future__ import unicode_literals
+import io
 
 from django.conf.urls import url
 from django.contrib import admin, messages
@@ -14,8 +12,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template import Context, Template
 from django.urls import reverse
-from django.utils import six
-from django.utils.translation import ugettext, ugettext_lazy
+from django.utils.translation import gettext, gettext_lazy
 
 from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
 
@@ -31,8 +28,8 @@ class SetAccessPolicyMixin(object):
             policy_model,
             exclude=(model_name,),
             widgets={
-                'users': FilteredSelectMultiple(ugettext("Users"), False),
-                'groups': FilteredSelectMultiple(ugettext("Groups"), False),
+                'users': FilteredSelectMultiple(gettext("Users"), False),
+                'groups': FilteredSelectMultiple(gettext("Groups"), False),
             })
 
         if request.POST.get('set_access_policy'):
@@ -61,8 +58,8 @@ class SetAccessPolicyMixin(object):
                         ap = policy_model.objects.create(**{model_name: obj})
                         created += 1
                     form_class(request.POST, instance=ap).save()
-                message = ugettext("Successfully created %(created)d and "
-                                   "changed %(changed)d access policies.")
+                message = gettext("Successfully created %(created)d and "
+                                  "changed %(changed)d access policies.")
                 message = message % {'created': created, 'changed': changed}
                 self.message_user(request, message)
                 return HttpResponseRedirect(reverse('admin:gallery_%s_changelist' % model_name))
@@ -75,11 +72,11 @@ class SetAccessPolicyMixin(object):
             'media': self.media + form.media,
             'photos': Photo.objects.filter(album__in=queryset),
             'queryset': queryset,
-            'title': ugettext("Set access policy"),
+            'title': gettext("Set access policy"),
         }
         return render(request, 'admin/gallery/set_access_policy.html', context)
 
-    set_access_policy.short_description = ugettext_lazy("Set access policy")
+    set_access_policy.short_description = gettext_lazy("Set access policy")
 
     def unset_access_policy(self, request, queryset):
         policy_model = {Album: AlbumAccessPolicy, Photo: PhotoAccessPolicy}[self.model]
@@ -107,7 +104,7 @@ class SetAccessPolicyMixin(object):
                 else:
                     ap.delete()
                     deleted += 1
-            message = ugettext("Successfully deleted %(deleted)d access policies.")
+            message = gettext("Successfully deleted %(deleted)d access policies.")
             message = message % {'deleted': deleted}
             self.message_user(request, message)
             return HttpResponseRedirect(reverse('admin:gallery_%s_changelist' % model_name))
@@ -117,11 +114,11 @@ class SetAccessPolicyMixin(object):
             'opts': self.model._meta,
             'photos': Photo.objects.filter(album__in=queryset),
             'queryset': queryset,
-            'title': ugettext("Unset access policy"),
+            'title': gettext("Unset access policy"),
         }
         return render(request, 'admin/gallery/unset_access_policy.html', context)
 
-    unset_access_policy.short_description = ugettext_lazy("Unset access policy")
+    unset_access_policy.short_description = gettext_lazy("Unset access policy")
 
 
 class AccessPolicyInline(admin.StackedInline):
@@ -156,7 +153,7 @@ class AlbumAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
         access_policy = obj.get_access_policy()
         if access_policy:
             groups = access_policy.groups.all()
-            return ', '.join(six.text_type(group) for group in groups)
+            return ', '.join(str(group) for group in groups)
         else:
             return '-'
 
@@ -164,7 +161,7 @@ class AlbumAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
         access_policy = obj.get_access_policy()
         if access_policy:
             users = access_policy.users.all()
-            return ', '.join(six.text_type(user) for user in users)
+            return ', '.join(str(user) for user in users)
         else:
             return '-'
 
@@ -223,14 +220,14 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
     def groups(self, obj):
         access_policy = obj.get_effective_access_policy()
         if access_policy:
-            return ', '.join(six.text_type(group) for group in access_policy.groups.all())
+            return ', '.join(str(group) for group in access_policy.groups.all())
         else:
             return '-'
 
     def users(self, obj):
         access_policy = obj.get_effective_access_policy()
         if access_policy:
-            return ', '.join(six.text_type(user) for user in access_policy.users.all())
+            return ', '.join(str(user) for user in access_policy.users.all())
         else:
             return '-'
 
@@ -241,7 +238,7 @@ admin.site.register(Photo, PhotoAdmin)
 @permission_required('gallery.scan')
 def scan_photos(request):
     if request.method == 'POST':
-        stdout, stderr = six.StringIO(), six.StringIO()
+        stdout, stderr = io.StringIO(), io.StringIO()
         management.call_command('scanphotos', stdout=stdout, stderr=stderr)
         for line in stdout.getvalue().splitlines():
             messages.info(request, line)
@@ -250,6 +247,6 @@ def scan_photos(request):
         return HttpResponseRedirect(reverse('admin:gallery_scan_photos'))
     context = {
         'app_label': 'gallery',
-        'title': ugettext("Scan photos"),
+        'title': gettext("Scan photos"),
     }
     return render(request, 'admin/gallery/scan_photos.html', context)

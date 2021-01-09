@@ -1,19 +1,10 @@
-# coding: utf-8
-
-# If you have non-ascii characters in filenames, on Python 2, you may need:
-# export PYTHONIOENCODING=utf-8
-
-from __future__ import unicode_literals
-
 import collections
 import datetime
-import optparse
 import os
 import re
 import time
 import unicodedata
 
-import django
 from django.conf import settings
 from django.core.management import base
 from django.db import transaction
@@ -26,38 +17,19 @@ from ...storages import get_storage
 class Command(base.BaseCommand):
     help = 'Scan photos and update database.'
 
-    if django.VERSION[:2] >= (1, 8):
-
-        def add_arguments(self, parser):
-            parser.add_argument(
-                '--full',
-                action='store_true',
-                dest='full_sync',
-                default=False,
-                help='Perform a full resynchronization')
-            parser.add_argument(
-                '--resize',
-                action='append',
-                dest='resize_presets',
-                default=[],
-                help='Resize with given preset')
-
-    else:
-
-        option_list = base.BaseCommand.option_list + (
-            optparse.make_option(
-                '--full',
-                action='store_true',
-                dest='full_sync',
-                default=False,
-                help='Perform a full resynchronization'),
-            optparse.make_option(
-                '--resize',
-                action='append',
-                dest='resize_presets',
-                default=[],
-                help='Resize with given preset'),
-            )
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--full',
+            action='store_true',
+            dest='full_sync',
+            default=False,
+            help='Perform a full resynchronization')
+        parser.add_argument(
+            '--resize',
+            action='append',
+            dest='resize_presets',
+            default=[],
+            help='Resize with given preset')
 
     @transaction.atomic
     def handle(self, **options):

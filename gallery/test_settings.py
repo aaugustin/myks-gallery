@@ -1,11 +1,7 @@
-# coding: utf-8
-
-from __future__ import unicode_literals
-
 import os
 
 DATABASES = {
-    'default': {'ENGINE': 'django.db.backends.sqlite3'},
+    'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:'},
 }
 
 INSTALLED_APPS = [
@@ -64,6 +60,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.i18n',
                 'django.template.context_processors.media',
+                'django.template.context_processors.request',
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',

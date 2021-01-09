@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import unicode_literals
-
 import hashlib
 import mimetypes
 import os
@@ -21,7 +17,6 @@ from django.http import (
     StreamingHttpResponse)
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils import six
 from django.utils.http import http_date
 from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
 from django.views.static import was_modified_since
@@ -357,7 +352,7 @@ _sanitize_re = re.compile(r'[^0-9A-Za-z_.-]')
 
 
 def sanitize(value):
-    value = unicodedata.normalize('NFKD', six.text_type(value))
+    value = unicodedata.normalize('NFKD', str(value))
     value = value.encode('ascii', 'ignore').decode('ascii')
     value = _sanitize_re.sub('', value.replace(' ', '_'))
     return value

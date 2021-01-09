@@ -32,8 +32,10 @@ packages = [{ include = "gallery"}]
 [tool.poetry.dependencies]
 django = ">=2.2"
 python = "^3.6"
+Pillow = "*"
+
 
 [tool.poetry.dev-dependencies]
-coverage = "*"
+coverage = {extras = ["toml"], version = "*"}
 flake8 = "*"
 isort = "*"

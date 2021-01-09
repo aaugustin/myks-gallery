@@ -1,7 +1,4 @@
-# coding: utf-8
-
-from __future__ import unicode_literals
-
+import functools
 import re
 
 from django.conf import settings
@@ -9,11 +6,10 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.files.storage import FileSystemStorage
 from django.dispatch import receiver
 from django.test.signals import setting_changed
-from django.utils.lru_cache import lru_cache
 from django.utils.module_loading import import_string
 
 
-@lru_cache()
+@functools.lru_cache()
 def get_storage(name):
     name = name.upper()
     storage_setting = 'GALLERY_{}_STORAGE'.format(name)
