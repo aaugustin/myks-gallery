@@ -55,7 +55,7 @@ class AlbumListMixin(object):
     date_field = 'date'
 
     def get_context_data(self, **kwargs):
-        context = super(AlbumListMixin, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['show_public'] = self.show_public()
         return context
 
@@ -76,7 +76,7 @@ class AlbumListWithPreviewMixin(AlbumListMixin):
     """Compute preview lists for albums."""
 
     def get_context_data(self, **kwargs):
-        context = super(AlbumListWithPreviewMixin, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         user = self.request.user
         if not self.can_view_all() and user.is_authenticated:
             # Avoid repeated queries - this is specific to django.contrib.auth
@@ -107,14 +107,14 @@ class GalleryIndexView(GalleryCommonMixin, AlbumListWithPreviewMixin, ArchiveInd
     paginate_by = 20
 
     def get_queryset(self):
-        qs = super(GalleryIndexView, self).get_queryset()
+        qs = super().get_queryset()
         query = self.request.GET.get('q', '')
         if query:
             qs = qs.filter(name__contains=query)
         return qs
 
     def get_context_data(self, **kwargs):
-        context = super(GalleryIndexView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         query = self.request.GET.get('q', '')
         if query:
             context['q'] = query
@@ -131,7 +131,7 @@ class AlbumView(GalleryCommonMixin, AlbumListMixin, DetailView):
     context_object_name = 'album'
 
     def get_context_data(self, **kwargs):
-        context = super(AlbumView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         if self.can_view_all():
             context['photos'] = self.object.photo_set.all()
         else:
@@ -163,7 +163,7 @@ class PhotoView(GalleryCommonMixin, DetailView):
         return qs.select_related('album')
 
     def get_context_data(self, **kwargs):
-        context = super(PhotoView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         if self.can_view_all():
             qs = self.object.album.photo_set.all()
         else:

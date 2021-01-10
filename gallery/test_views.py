@@ -18,7 +18,7 @@ from .test_imgutil import make_image
 class ViewsTestsMixin(object):
 
     def setUp(self):
-        super(ViewsTestsMixin, self).setUp()
+        super().setUp()
         self.tmpdir = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.tmpdir)
         self.storage = FileSystemStorage(location=self.tmpdir)
@@ -112,7 +112,7 @@ class ViewsTestsMixin(object):
 class ViewsWithPermissionTests(ViewsTestsMixin, TestCase):
 
     def setUp(self):
-        super(ViewsWithPermissionTests, self).setUp()
+        super().setUp()
         today = datetime.date.today()
         self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=today)
         self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
@@ -124,7 +124,7 @@ class ViewsWithPermissionTests(ViewsTestsMixin, TestCase):
 class ViewsWithPrivateAccessPolicyTests(ViewsTestsMixin, TestCase):
 
     def setUp(self):
-        super(ViewsWithPrivateAccessPolicyTests, self).setUp()
+        super().setUp()
         today = datetime.date.today()
         self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=today)
         AlbumAccessPolicy.objects.create(album=self.album, public=False, inherit=True)
@@ -142,7 +142,7 @@ class ViewsWithPrivateAccessPolicyTests(ViewsTestsMixin, TestCase):
 class ViewsWithPublicAccessPolicyTests(ViewsTestsMixin, TestCase):
 
     def setUp(self):
-        super(ViewsWithPublicAccessPolicyTests, self).setUp()
+        super().setUp()
         today = datetime.date.today()
         self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=today)
         AlbumAccessPolicy.objects.create(album=self.album, public=True, inherit=True),

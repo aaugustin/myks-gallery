@@ -17,7 +17,7 @@ class MemoryStorage(Storage):
 
     """
     def __init__(self, *args, **kwargs):
-        super(MemoryStorage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.files = {}
 
     def _open(self, name, mode='rb'):

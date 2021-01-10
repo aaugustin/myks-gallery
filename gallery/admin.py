@@ -139,7 +139,7 @@ class AlbumAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
     search_fields = ('name', 'dirpath')
 
     def get_queryset(self, request):
-        return (super(AlbumAdmin, self).get_queryset(request)
+        return (super().get_queryset(request)
                 .prefetch_related('access_policy__users')
                 .prefetch_related('access_policy__groups'))
 
@@ -195,7 +195,7 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
         ] + super(PhotoAdmin, self).get_urls()
 
     def get_queryset(self, request):
-        return (super(PhotoAdmin, self).get_queryset(request)
+        return (super().get_queryset(request)
                 .prefetch_related('access_policy__users')
                 .prefetch_related('access_policy__groups')
                 .prefetch_related('album__access_policy__users')

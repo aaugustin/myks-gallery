@@ -33,7 +33,7 @@ def make_image(storage, name, width, height, format='JPEG', mode='RGB'):
 class ThumbnailTests(TestCase):
 
     def setUp(self):
-        super(ThumbnailTests, self).setUp()
+        super().setUp()
         self.storage = MemoryStorage()
 
     def make_image(self, width, height,
