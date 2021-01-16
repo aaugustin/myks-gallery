@@ -1,16 +1,16 @@
-from django.conf.urls import url
+from django.urls import path
 
 from . import views
 
 app_name = 'gallery'
 
 urlpatterns = [
-    url(r'^$', views.GalleryIndexView.as_view(), name='index'),
-    url(r'^year/(?P<year>\d{4})/$', views.GalleryYearView.as_view(), name='year'),
-    url(r'^album/(?P<pk>\d+)/$', views.AlbumView.as_view(), name='album'),
-    url(r'^export/(?P<pk>\d+)/$', views.export_album, name='album-export'),
-    url(r'^photo/(?P<pk>\d+)/$', views.PhotoView.as_view(), name='photo'),
-    url(r'^original/(?P<pk>\d+)/$', views.original_photo, name='photo-original'),
-    url(r'^(?P<preset>\w+)/(?P<pk>\d+)/$', views.resized_photo, name='photo-resized'),
-    url(r'^latest/$', views.latest_album, name='latest'),
+    path('', views.GalleryIndexView.as_view(), name='index'),
+    path('latest/', views.latest_album, name='latest'),
+    path('year/<int:year>/', views.GalleryYearView.as_view(), name='year'),
+    path('album/<int:pk>/', views.AlbumView.as_view(), name='album'),
+    path('export/<int:pk>/', views.export_album, name='album-export'),
+    path('photo/<int:pk>/', views.PhotoView.as_view(), name='photo'),
+    path('original/<int:pk>/', views.original_photo, name='photo-original'),
+    path('resized/<slug:preset>/<int:pk>/', views.resized_photo, name='photo-resized'),
 ]

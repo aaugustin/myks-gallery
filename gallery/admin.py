@@ -1,6 +1,5 @@
 import io
 
-from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -11,7 +10,7 @@ from django.forms.models import modelform_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template import Context, Template
-from django.urls import reverse
+from django.urls import path, reverse
 from django.utils.translation import gettext, gettext_lazy
 
 from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
@@ -191,7 +190,7 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
 
     def get_urls(self):
         return [
-            url(r'^scan/$', scan_photos, name='gallery_scan_photos'),
+            path('scan/', scan_photos, name='gallery_scan_photos'),
         ] + super(PhotoAdmin, self).get_urls()
 
     def get_queryset(self, request):
