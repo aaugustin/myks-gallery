@@ -110,8 +110,8 @@ class AlbumAccessPolicy(AccessPolicy):
 class PhotoManager(models.Manager):
 
     def allowed_for_user(self, user):
+        inherit = Q(access_policy__isnull=True, album__access_policy__inherit=True)
         photo_cond = Q(access_policy__public=True)
-        inherit = Q(album__access_policy__inherit=True)
         album_cond = Q(album__access_policy__public=True)
         if user.is_authenticated:
             photo_cond |= Q(access_policy__users=user)

@@ -113,6 +113,32 @@ help you see how everything fits together. See below for how to run it.
 .. _mod_xsendfile: https://tn123.org/mod_xsendfile/
 .. _source: https://github.com/aaugustin/myks-gallery
 
+Access control
+--------------
+
+myks-gallery provides two levels of access control: by album and by photo.
+
+By default, albums and photos aren't visible by anyone, except users with the
+"Can see all photos" permission, including superusers who have it implicitly.
+
+To make them visible, you must define an access policy. You have two options:
+public access or access restricted to select users or groups.
+
+Access policies for albums are configured explicitly in the admin.
+
+In most cases, you will enable the "Photos inherit album access policy"
+option, so that the access policy also applies to all photos in the album.
+
+Access policies for photos may also be configured for granular control.
+
+For example, if you want to publish just a few photos in an album, make these
+photos public, make the album public, but don't enable "Photos inherit album
+access policy". Other photos in the album won't be visible.
+
+Another example, if you want to share an album privately except for a few
+photos, set an empty access policy on these photos (e.g. by adding then
+removing yourself), then allow some groups or users to view the album.
+
 Permissions
 -----------
 
@@ -335,6 +361,9 @@ Changelog
 0.8
 ---
 
+* Changed photo access policies to always override album access policies, even
+  when "Photos inherit album access policy" is enabled. This makes it possible
+  to restrict access with photo access policies, rather than just extend it.
 * Updated for Django 3.0.
 
 0.7
