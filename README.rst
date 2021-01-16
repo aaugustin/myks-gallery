@@ -213,6 +213,8 @@ The default templates assume the following values::
 
 You may double these sizes for better results on high DPI displays.
 
+The admin expects a ``'thumb'`` preset.
+
 ``GALLERY_RESIZE_OPTIONS``
 ..........................
 
