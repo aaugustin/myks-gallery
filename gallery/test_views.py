@@ -15,7 +15,7 @@ from .storages import get_storage
 from .test_imgutil import make_image
 
 
-class ViewsTestsMixin(object):
+class ViewsTestsMixin:
 
     def setUp(self):
         super().setUp()

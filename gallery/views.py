@@ -25,7 +25,7 @@ from .models import Album, Photo
 from .storages import get_storage
 
 
-class GalleryCommonMixin(object):
+class GalleryCommonMixin:
     """Provide can_view_all() and show_public() utility methods."""
     allow_future = True
 
@@ -49,7 +49,7 @@ class GalleryCommonMixin(object):
         return self._show_public
 
 
-class AlbumListMixin(object):
+class AlbumListMixin:
     """Perform access control and database optimization for albums."""
     model = Album
     date_field = 'date'

@@ -17,7 +17,7 @@ from django.utils.translation import gettext, gettext_lazy
 from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
 
 
-class SetAccessPolicyMixin(object):
+class SetAccessPolicyMixin:
     actions = ['set_access_policy', 'unset_access_policy']
 
     def set_access_policy(self, request, queryset):
