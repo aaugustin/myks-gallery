@@ -191,7 +191,7 @@ class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
     def get_urls(self):
         return [
             path('scan/', scan_photos, name='gallery_scan_photos'),
-        ] + super(PhotoAdmin, self).get_urls()
+        ] + super().get_urls()
 
     def get_queryset(self, request):
         return (super().get_queryset(request)
