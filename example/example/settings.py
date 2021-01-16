@@ -1,17 +1,17 @@
-import os
+from pathlib import Path
 
-ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Django settings for example project.
-
-DEBUG = True
+# Django settings
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+DEBUG = True
 
 INSTALLED_APPS = [
     'example',
@@ -19,8 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.messages',
     'django.contrib.sessions',
+    'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
 
@@ -30,7 +30,6 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -39,13 +38,12 @@ ROOT_URLCONF = 'example.urls'
 
 SECRET_KEY = "don't run in production with a secret key committed to GitHub"
 
-SITE_ID = 1
-
 STATIC_URL = '/static/'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

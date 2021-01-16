@@ -306,6 +306,7 @@ Running the sample application
 3.  Run the development server::
 
     $ ./manage.py migrate
+    $ ./manage.py createsuperuser
     $ ./manage.py runserver
 
 4.  Go to http://localhost:8000/admin/gallery/album/ and log in. Click the

@@ -1,13 +1,10 @@
-import os.path
-
+from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-
-from .settings import ROOT_DIR
 
 
 def photo():
-    return FileSystemStorage(location=os.path.join(ROOT_DIR, 'photos'))
+    return FileSystemStorage(location=settings.BASE_DIR / 'photos')
 
 
 def cache():
-    return FileSystemStorage(location=os.path.join(ROOT_DIR, 'cache'))
+    return FileSystemStorage(location=settings.BASE_DIR / 'cache')
