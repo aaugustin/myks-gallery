@@ -17,6 +17,7 @@ from django.http import (
     StreamingHttpResponse)
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.http import http_date
 from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
 from django.views.static import was_modified_since
@@ -26,45 +27,56 @@ from .storages import get_storage
 
 
 class GalleryCommonMixin:
-    """Provide can_view_all() and show_public() utility methods."""
     allow_future = True
 
+    @cached_property
     def can_view_all(self):
-        if not hasattr(self, '_can_view_all'):
-            self._can_view_all = self.request.user.has_perm('gallery.view')
-        return self._can_view_all
+        """
+        Can the user view all photos, regardless of access policies?
 
+        """
+        return self.request.user.has_perm('gallery.view')
+
+    @cached_property
     def show_public(self):
+        """
+        Should public albums be displayed, or only private ones?
+
+        When the same gallery contains both public and private albums,
+        authenticated users only see private albums by default, unless
+        they have access to all photos.
+
+        """
         session = self.request.session
-        if not hasattr(self, '_show_public'):
-            if self.request.user.is_authenticated and not self.can_view_all():
-                if 'show_public' in self.request.GET:
-                    self._show_public = session['show_public'] = True
-                elif 'hide_public' in self.request.GET:
-                    self._show_public = session['show_public'] = False
-                else:
-                    self._show_public = session.setdefault('show_public', False)
-            else:
-                self._show_public = True
-        return self._show_public
+        if self.request.user.is_authenticated and not self.can_view_all:
+            if 'show_public' in self.request.GET:
+                session['show_public'] = True
+            elif 'hide_public' in self.request.GET:
+                session['show_public'] = False
+            return session.get('show_public', False)
+        else:
+            return True
 
 
 class AlbumListMixin:
-    """Perform access control and database optimization for albums."""
+    """
+    Perform access control and database optimization for albums.
+
+    """
     model = Album
     date_field = 'date'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['show_public'] = self.show_public()
+        context['show_public'] = self.show_public
         return context
 
     def get_queryset(self):
-        if self.can_view_all():
+        if self.can_view_all:
             qs = Album.objects.all()
             qs = qs.prefetch_related('photo_set')
         else:
-            qs = Album.objects.allowed_for_user(self.request.user, self.show_public())
+            qs = Album.objects.allowed_for_user(self.request.user, self.show_public)
             qs = qs.prefetch_related('access_policy__groups')
             qs = qs.prefetch_related('access_policy__users')
             qs = qs.prefetch_related('photo_set__access_policy__groups')
@@ -73,16 +85,19 @@ class AlbumListMixin:
 
 
 class AlbumListWithPreviewMixin(AlbumListMixin):
-    """Compute preview lists for albums."""
+    """
+    Compute preview lists for albums.
+
+    """
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        if not self.can_view_all() and user.is_authenticated:
+        if not self.can_view_all and user.is_authenticated:
             # Avoid repeated queries - this is specific to django.contrib.auth
             user = User.objects.prefetch_related('groups').get(pk=user.pk)
         for album in context['object_list']:
-            if self.can_view_all():
+            if self.can_view_all:
                 photos = list(album.photo_set.all())
             else:
                 photos = [
@@ -132,14 +147,14 @@ class AlbumView(GalleryCommonMixin, AlbumListMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.can_view_all():
+        if self.can_view_all:
             context['photos'] = self.object.photo_set.all()
         else:
             context['photos'] = self.object.photo_set.allowed_for_user(self.request.user)
-        if self.can_view_all():
+        if self.can_view_all:
             qs = Album.objects.all()
         else:
-            qs = Album.objects.allowed_for_user(self.request.user, self.show_public())
+            qs = Album.objects.allowed_for_user(self.request.user, self.show_public)
         try:
             context['previous_album'] = self.object.get_previous_in_queryset(qs)
         except Album.DoesNotExist:
@@ -156,7 +171,7 @@ class PhotoView(GalleryCommonMixin, DetailView):
     context_object_name = 'photo'
 
     def get_queryset(self):
-        if self.can_view_all():
+        if self.can_view_all:
             qs = Photo.objects.all()
         else:
             qs = Photo.objects.allowed_for_user(self.request.user)
@@ -164,7 +179,7 @@ class PhotoView(GalleryCommonMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.can_view_all():
+        if self.can_view_all:
             qs = self.object.album.photo_set.all()
         else:
             qs = self.object.album.photo_set.allowed_for_user(self.request.user)
@@ -180,7 +195,10 @@ class PhotoView(GalleryCommonMixin, DetailView):
 
 
 def export_album(request, pk):
-    """Serve a zip archive containing an entire album."""
+    """
+    Serve a zip archive containing an entire album.
+
+    """
     album = get_object_or_404(Album, pk=pk)
     if request.user.has_perm('gallery.view'):
         photos = album.photo_set.all()

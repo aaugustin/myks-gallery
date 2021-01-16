@@ -116,7 +116,7 @@ help you see how everything fits together. See below for how to run it.
 Permissions
 -----------
 
-myks-gallery defines two permissions:
+myks-gallery defines two permissions for ``django.contrib.auth``:
 
 - "Can scan the photos directory" allows using the "Scan photos" button in the
   admin.
