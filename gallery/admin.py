@@ -36,8 +36,8 @@ class SetAccessPolicyMixin:
             if form.is_valid():
                 queryset = queryset.select_related('access_policy')
                 # Check permissions
-                has_add_perm = request.user.has_perm('gallery.add_%s' % policy_model_name)
-                has_change_perm = request.user.has_perm('gallery.change_%s' % policy_model_name)
+                has_add_perm = request.user.has_perm(f'gallery.add_{policy_model_name}')
+                has_change_perm = request.user.has_perm(f'gallery.change_{policy_model_name}')
                 for obj in queryset:
                     try:
                         obj.access_policy
@@ -61,7 +61,7 @@ class SetAccessPolicyMixin:
                                   "changed %(changed)d access policies.")
                 message = message % {'created': created, 'changed': changed}
                 self.message_user(request, message)
-                return HttpResponseRedirect(reverse('admin:gallery_%s_changelist' % model_name))
+                return HttpResponseRedirect(reverse(f'admin:gallery_{model_name}_changelist'))
         else:
             form = form_class()
         context = {
@@ -84,7 +84,7 @@ class SetAccessPolicyMixin:
         if request.POST.get('unset_access_policy'):
             queryset = queryset.select_related('access_policy')
             # Check permissions
-            has_delete_perm = request.user.has_perm('gallery.delete_%s' % policy_model_name)
+            has_delete_perm = request.user.has_perm(f'gallery.delete_{policy_model_name}')
             for obj in queryset:
                 try:
                     obj.access_policy
@@ -106,7 +106,7 @@ class SetAccessPolicyMixin:
             message = gettext("Successfully deleted %(deleted)d access policies.")
             message = message % {'deleted': deleted}
             self.message_user(request, message)
-            return HttpResponseRedirect(reverse('admin:gallery_%s_changelist' % model_name))
+            return HttpResponseRedirect(reverse(f'admin:gallery_{model_name}_changelist'))
 
         context = {
             'action_checkbox_name': ACTION_CHECKBOX_NAME,

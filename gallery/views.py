@@ -251,8 +251,8 @@ def export_album(request, pk):
     else:
         # Local storage. Serve the file directly.
         response = serve_private_media(request, zip_path)
-        ascii_filename = '%s_%s.zip' % (str(album.date), sanitize(album.name))
-        response['Content-Disposition'] = 'attachement; filename=%s;' % ascii_filename
+        ascii_filename = f'{album.date}_{sanitize(album.name)}.zip'
+        response['Content-Disposition'] = f'attachement; filename={ascii_filename}'
         return response
 
 
@@ -280,8 +280,8 @@ def resized_photo(request, preset, pk):
         response = serve_private_media(request, thumb_path)
         root, ext = os.path.splitext(sanitize(photo.filename))
         width, height, _ = settings.GALLERY_RESIZE_PRESETS[preset]
-        ascii_filename = '%s_%sx%s%s' % (root, width, height, ext)
-        response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
+        ascii_filename = f'{root}_{width}x{height}{ext}'
+        response['Content-Disposition'] = f'inline; filename={ascii_filename}'
         return response
 
 
@@ -300,7 +300,7 @@ def original_photo(request, pk):
         # Local storage. Serve the file directly.
         response = serve_private_media(request, image_path)
         ascii_filename = sanitize(photo.filename)
-        response['Content-Disposition'] = 'inline; filename=%s;' % ascii_filename
+        response['Content-Disposition'] = f'inline; filename={ascii_filename}'
         return response
 
 

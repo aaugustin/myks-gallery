@@ -104,7 +104,7 @@ class AlbumAccessPolicy(AccessPolicy):
         verbose_name_plural = _("album access policies")
 
     def __str__(self):
-        return "Access policy for %s" % self.album
+        return f"Access policy for {self.album}"
 
 
 class PhotoManager(models.Manager):
@@ -223,4 +223,4 @@ class PhotoAccessPolicy(AccessPolicy):
         verbose_name_plural = _("photo access policies")
 
     def __str__(self):
-        return "Access policy for %s" % self.photo
+        return f"Access policy for {self.photo}"

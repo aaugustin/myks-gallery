@@ -49,7 +49,7 @@ class Command(base.BaseCommand):
         synchronize_photos(albums, self)
 
         dt = time.time() - t
-        self.write_out("Done (%.02fs)" % dt, verbosity=1)
+        self.write_out(f"Done ({dt:02f}s)", verbosity=1)
 
     def write_err(self, message, verbosity):
         if self.verbosity >= verbosity:
@@ -105,15 +105,15 @@ def iter_photo_storage(command):
             # HFS+ stores names in NFD which causes issues with some fonts.
             filepath = unicodedata.normalize('NFKC', filepath)
             if is_ignored(filepath):
-                command.write_out("- %s" % filepath, verbosity=3)
+                command.write_out(f"- {filepath}", verbosity=3)
                 continue
             result = is_matched(filepath)
             if result is not None:
-                command.write_out("> %s" % filepath, verbosity=3)
+                command.write_out(f"> {filepath}", verbosity=3)
                 category, captures = result
                 yield filepath, category, captures
             else:
-                command.write_err("? %s" % filepath, verbosity=1)
+                command.write_err(f"? {filepath}", verbosity=1)
 
 
 def scan_photo_storage(command):
@@ -151,7 +151,7 @@ def get_album_info(captures, command):
     except KeyError:
         pass
     except ValueError as e:
-        command.write_err("%s %s" % (e, kwargs), verbosity=1)
+        command.write_err(f"{e} {kwargs}", verbosity=1)
     name = ' '.join(v for k, v in sorted(captures.items())
                     if k.startswith('a_name') and v is not None)
     name = name.replace('/', ' > ')
@@ -177,7 +177,7 @@ def get_photo_info(captures, command):
     except KeyError:
         pass
     except ValueError as e:
-        command.write_err("%s %s" % (e, kwargs), verbosity=1)
+        command.write_err(f"{e} {kwargs}", verbosity=1)
     return date
 
 
@@ -193,10 +193,10 @@ def synchronize_albums(albums, command):
     for category, dirpath in sorted(new_keys - old_keys):
         random_capture = next(iter(albums[category, dirpath].values()))
         date, name = get_album_info(random_capture, command)
-        command.write_out("Adding album %s (%s) as %s" % (dirpath, category, name), verbosity=1)
+        command.write_out(f"Adding album {dirpath} ({category}) as {name}", verbosity=1)
         Album.objects.create(category=category, dirpath=dirpath, date=date, name=name)
     for category, dirpath in sorted(old_keys - new_keys):
-        command.write_out("Removing album %s (%s)" % (dirpath, category), verbosity=1)
+        command.write_out(f"Removing album {dirpath} ({category})", verbosity=1)
         Album.objects.get(category=category, dirpath=dirpath).delete()
 
 
@@ -214,14 +214,14 @@ def synchronize_photos(albums, command):
         for filename in sorted(new_keys - old_keys):
             date = get_photo_info(albums[category, dirpath][filename], command)
             command.write_out(
-                "Adding photo %s to album %s (%s)" % (filename, dirpath, category),
+                f"Adding photo {filename} to album {dirpath} ({category})",
                 verbosity=2)
             photo = Photo.objects.create(album=album, filename=filename, date=date)
             for preset in command.resize_presets:
                 photo.thumbnail(preset)
         for filename in sorted(old_keys - new_keys):
             command.write_out(
-                "Removing photo %s from album %s (%s)" % (filename, dirpath, category),
+                f"Removing photo {filename} from album {dirpath} ({category})",
                 verbosity=2)
             photo = Photo.objects.get(album=album, filename=filename)
             photo.delete()
@@ -232,7 +232,7 @@ def synchronize_photos(albums, command):
             photo = Photo.objects.get(album=album, filename=filename)
             if date != photo.date:
                 command.write_out(
-                    "Fixing date of photo %s from album %s (%s)" % (filename, dirpath, category),
+                    f"Fixing date of photo {filename} from album {dirpath} ({category})",
                     verbosity=2)
                 photo.date = date
                 photo.save()
