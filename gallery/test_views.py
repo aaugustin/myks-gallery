@@ -90,7 +90,7 @@ class ViewsTestsMixin:
             url = reverse('gallery:photo-original', args=[self.photo.pk])
             response = self.client.get(url)
             self.assertEqual(response['X-Fake-Sendfile'],
-                             os.path.join(self.tmpdir, 'original.jpg'))
+                             os.path.join(self.tmpdir, 'album/original.jpg'))
 
     def test_photo_original_view_remote(self):
         with self.settings(
@@ -114,7 +114,7 @@ class ViewsWithPermissionTests(ViewsTestsMixin, TestCase):
     def setUp(self):
         super().setUp()
         today = datetime.date.today()
-        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=today)
+        self.album = Album.objects.create(category='default', dirpath='album', date=today)
         self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
         self.user = User.objects.create_user('user', 'user@gallery', 'pass')
         self.user.user_permissions.add(Permission.objects.get(codename='view'))
@@ -126,7 +126,7 @@ class ViewsWithPrivateAccessPolicyTests(ViewsTestsMixin, TestCase):
     def setUp(self):
         super().setUp()
         today = datetime.date.today()
-        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=today)
+        self.album = Album.objects.create(category='default', dirpath='album', date=today)
         AlbumAccessPolicy.objects.create(album=self.album, public=False, inherit=True)
         self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
         self.user = User.objects.create_user('user', 'user@gallery', 'pass')
@@ -144,7 +144,7 @@ class ViewsWithPublicAccessPolicyTests(ViewsTestsMixin, TestCase):
     def setUp(self):
         super().setUp()
         today = datetime.date.today()
-        self.album = Album.objects.create(category='default', dirpath=self.tmpdir, date=today)
+        self.album = Album.objects.create(category='default', dirpath='album', date=today)
         AlbumAccessPolicy.objects.create(album=self.album, public=True, inherit=True),
         self.photo = Photo.objects.create(album=self.album, filename='original.jpg')
 

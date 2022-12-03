@@ -45,7 +45,7 @@ Setup
 
 myks-gallery is a pluggable Django application. It requires:
 
-* Django ≥ 2.2 (LTS)
+* Django ≥ 3.2 (LTS)
 * Python ≥ 3.6
 
 Architecture
@@ -357,6 +357,8 @@ Changelog
 ---
 
 *Under development*
+
+* Updated for Django 4.0.
 
 0.8
 ---

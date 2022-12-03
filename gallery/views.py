@@ -338,7 +338,7 @@ def serve_private_media(request, path):
     content_type, encoding = mimetypes.guess_type(path)
     content_type = content_type or 'application/octet-stream'
     if not was_modified_since(request.META.get('HTTP_IF_MODIFIED_SINCE'),
-                              statobj.st_mtime, statobj.st_size):   # pragma: no cover
+                              statobj.st_mtime):   # pragma: no cover
         return HttpResponseNotModified()
     # pause copy-paste from django.views.static.serve
 
