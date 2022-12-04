@@ -308,6 +308,8 @@ Changelog
 
 *Under development*
 
+The ``--resize`` option of ``django-admin scanphotos`` is removed.
+
 Expiration of album archives with the ``GALLERY_ARCHIVE_EXPIRY`` setting is
 removed. Configure lifecycle for the ``export`` folder on the cloud storage
 service instead.

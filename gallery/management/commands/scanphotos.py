@@ -24,17 +24,10 @@ class Command(base.BaseCommand):
             dest='full_sync',
             default=False,
             help='Perform a full resynchronization')
-        parser.add_argument(
-            '--resize',
-            action='append',
-            dest='resize_presets',
-            default=[],
-            help='Resize with given preset')
 
     @transaction.atomic
     def handle(self, **options):
         self.full_sync = options['full_sync']
-        self.resize_presets = options['resize_presets']
         self.verbosity = int(options['verbosity'])
 
         t = time.time()
@@ -217,8 +210,6 @@ def synchronize_photos(albums, command):
                 f"Adding photo {filename} to album {dirpath} ({category})",
                 verbosity=2)
             photo = Photo.objects.create(album=album, filename=filename, date=date)
-            for preset in command.resize_presets:
-                photo.thumbnail(preset)
         for filename in sorted(old_keys - new_keys):
             command.write_out(
                 f"Removing photo {filename} from album {dirpath} ({category})",
