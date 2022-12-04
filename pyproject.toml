@@ -2,12 +2,15 @@
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.black]
+exclude = ".*/migrations/.*\\.py"
+
 [tool.coverage.run]
 branch = true
 source = ["gallery"]
 
 [tool.isort]
-multi_line_output = 4
+profile = "black"
 
 [tool.poetry]
 name = "myks-gallery"
