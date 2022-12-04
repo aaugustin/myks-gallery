@@ -243,15 +243,16 @@ The admin expects a ``'thumb'`` preset.
 
 Default: ``{}``
 
-Dictionary mapping image formats names to to dictionaries of options for
-Pillow's ``save`` method. Options are described for each file format in
-Pillow's documentation.
+Dictionary mapping image formats names to dictionaries of options for Pillow's
+``save`` method. Pillow's documentation describes options for each file format.
 
 The following a reasonable value for high-quality thumbnails and previews::
 
     GALLERY_RESIZE_OPTIONS = {
         'JPEG': {'quality': 90, 'optimize': True},
     }
+
+The default resizer honors this setting. Other resizers may ignore it.
 
 ``GALLERY_TITLE``
 .................
