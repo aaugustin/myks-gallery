@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from .storages import get_storage
 
 
-class MemoryStorage(Storage):
+class MemoryStorage(Storage):  # pragma: no cover
     """
     Limited implementation of an in-memory file storage.
 

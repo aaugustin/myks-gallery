@@ -23,7 +23,7 @@ class ViewsTestsMixin:
         self.storage = FileSystemStorage(location=self.tmpdir)
 
     def make_image(self):
-        make_image(get_storage('photo'), self.photo.image_name, 48, 36)
+        make_image(self.photo.image_name, 48, 36, get_storage('photo'))
 
     def test_index_view(self):
         response = self.client.get(reverse('gallery:index'))
