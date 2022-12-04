@@ -17,7 +17,7 @@ from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
 
 
 class SetAccessPolicyMixin:
-    actions = ['set_access_policy', 'unset_access_policy']
+    actions = ["set_access_policy", "unset_access_policy"]
 
     def set_access_policy(self, request, queryset):
         policy_model = {Album: AlbumAccessPolicy, Photo: PhotoAccessPolicy}[self.model]
@@ -27,17 +27,20 @@ class SetAccessPolicyMixin:
             policy_model,
             exclude=(model_name,),
             widgets={
-                'users': FilteredSelectMultiple(gettext("Users"), False),
-                'groups': FilteredSelectMultiple(gettext("Groups"), False),
-            })
+                "users": FilteredSelectMultiple(gettext("Users"), False),
+                "groups": FilteredSelectMultiple(gettext("Groups"), False),
+            },
+        )
 
-        if request.POST.get('set_access_policy'):
+        if request.POST.get("set_access_policy"):
             form = form_class(request.POST)
             if form.is_valid():
-                queryset = queryset.select_related('access_policy')
+                queryset = queryset.select_related("access_policy")
                 # Check permissions
-                has_add_perm = request.user.has_perm(f'gallery.add_{policy_model_name}')
-                has_change_perm = request.user.has_perm(f'gallery.change_{policy_model_name}')
+                has_add_perm = request.user.has_perm(f"gallery.add_{policy_model_name}")
+                has_change_perm = request.user.has_perm(
+                    f"gallery.change_{policy_model_name}"
+                )
                 for obj in queryset:
                     try:
                         obj.access_policy
@@ -57,23 +60,27 @@ class SetAccessPolicyMixin:
                         ap = policy_model.objects.create(**{model_name: obj})
                         created += 1
                     form_class(request.POST, instance=ap).save()
-                message = gettext("Successfully created %(created)d and "
-                                  "changed %(changed)d access policies.")
-                message = message % {'created': created, 'changed': changed}
+                message = gettext(
+                    "Successfully created %(created)d and "
+                    "changed %(changed)d access policies."
+                )
+                message = message % {"created": created, "changed": changed}
                 self.message_user(request, message)
-                return HttpResponseRedirect(reverse(f'admin:gallery_{model_name}_changelist'))
+                return HttpResponseRedirect(
+                    reverse(f"admin:gallery_{model_name}_changelist")
+                )
         else:
             form = form_class()
         context = {
-            'action_checkbox_name': ACTION_CHECKBOX_NAME,
-            'opts': self.model._meta,
-            'form': form,
-            'media': self.media + form.media,
-            'photos': Photo.objects.filter(album__in=queryset),
-            'queryset': queryset,
-            'title': gettext("Set access policy"),
+            "action_checkbox_name": ACTION_CHECKBOX_NAME,
+            "opts": self.model._meta,
+            "form": form,
+            "media": self.media + form.media,
+            "photos": Photo.objects.filter(album__in=queryset),
+            "queryset": queryset,
+            "title": gettext("Set access policy"),
         }
-        return render(request, 'admin/gallery/set_access_policy.html', context)
+        return render(request, "admin/gallery/set_access_policy.html", context)
 
     set_access_policy.short_description = gettext_lazy("Set access policy")
 
@@ -81,10 +88,12 @@ class SetAccessPolicyMixin:
         policy_model = {Album: AlbumAccessPolicy, Photo: PhotoAccessPolicy}[self.model]
         model_name = self.model._meta.model_name
         policy_model_name = policy_model._meta.model_name
-        if request.POST.get('unset_access_policy'):
-            queryset = queryset.select_related('access_policy')
+        if request.POST.get("unset_access_policy"):
+            queryset = queryset.select_related("access_policy")
             # Check permissions
-            has_delete_perm = request.user.has_perm(f'gallery.delete_{policy_model_name}')
+            has_delete_perm = request.user.has_perm(
+                f"gallery.delete_{policy_model_name}"
+            )
             for obj in queryset:
                 try:
                     obj.access_policy
@@ -104,24 +113,26 @@ class SetAccessPolicyMixin:
                     ap.delete()
                     deleted += 1
             message = gettext("Successfully deleted %(deleted)d access policies.")
-            message = message % {'deleted': deleted}
+            message = message % {"deleted": deleted}
             self.message_user(request, message)
-            return HttpResponseRedirect(reverse(f'admin:gallery_{model_name}_changelist'))
+            return HttpResponseRedirect(
+                reverse(f"admin:gallery_{model_name}_changelist")
+            )
 
         context = {
-            'action_checkbox_name': ACTION_CHECKBOX_NAME,
-            'opts': self.model._meta,
-            'photos': Photo.objects.filter(album__in=queryset),
-            'queryset': queryset,
-            'title': gettext("Unset access policy"),
+            "action_checkbox_name": ACTION_CHECKBOX_NAME,
+            "opts": self.model._meta,
+            "photos": Photo.objects.filter(album__in=queryset),
+            "queryset": queryset,
+            "title": gettext("Unset access policy"),
         }
-        return render(request, 'admin/gallery/unset_access_policy.html', context)
+        return render(request, "admin/gallery/unset_access_policy.html", context)
 
     unset_access_policy.short_description = gettext_lazy("Unset access policy")
 
 
 class AccessPolicyInline(admin.StackedInline):
-    filter_horizontal = ('groups', 'users')
+    filter_horizontal = ("groups", "users")
 
 
 class AlbumAccessPolicyInline(AccessPolicyInline):
@@ -129,45 +140,58 @@ class AlbumAccessPolicyInline(AccessPolicyInline):
 
 
 class AlbumAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
-    date_hierarchy = 'date'
+    date_hierarchy = "date"
     inlines = (AlbumAccessPolicyInline,)
-    list_display = ('display_name', 'date', 'category', 'public', 'groups', 'users', 'inherit')
-    list_filter = ('category',)
-    ordering = ('-date', '-name', '-dirpath', '-category')
-    readonly_fields = ('dirpath',)
-    search_fields = ('name', 'dirpath')
+    list_display = (
+        "display_name",
+        "date",
+        "category",
+        "public",
+        "groups",
+        "users",
+        "inherit",
+    )
+    list_filter = ("category",)
+    ordering = ("-date", "-name", "-dirpath", "-category")
+    readonly_fields = ("dirpath",)
+    search_fields = ("name", "dirpath")
 
     def get_queryset(self, request):
-        return (super().get_queryset(request)
-                .prefetch_related('access_policy__users')
-                .prefetch_related('access_policy__groups'))
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related("access_policy__users")
+            .prefetch_related("access_policy__groups")
+        )
 
     def public(self, obj):
         access_policy = obj.get_access_policy()
         if access_policy:
             return access_policy.public
+
     public.boolean = True
 
     def groups(self, obj):
         access_policy = obj.get_access_policy()
         if access_policy:
             groups = access_policy.groups.all()
-            return ', '.join(str(group) for group in groups)
+            return ", ".join(str(group) for group in groups)
         else:
-            return '-'
+            return "-"
 
     def users(self, obj):
         access_policy = obj.get_access_policy()
         if access_policy:
             users = access_policy.users.all()
-            return ', '.join(str(user) for user in users)
+            return ", ".join(str(user) for user in users)
         else:
-            return '-'
+            return "-"
 
     def inherit(self, obj):
         access_policy = obj.get_access_policy()
         if access_policy:
             return access_policy.inherit
+
     inherit.boolean = True
 
 
@@ -179,73 +203,80 @@ class PhotoAccessPolicyInline(AccessPolicyInline):
 
 
 class PhotoAdmin(SetAccessPolicyMixin, admin.ModelAdmin):
-    date_hierarchy = 'date'
+    date_hierarchy = "date"
     inlines = (PhotoAccessPolicyInline,)
-    list_display = ('display_name', 'date', 'preview', 'public', 'groups', 'users')
+    list_display = ("display_name", "date", "preview", "public", "groups", "users")
     # Since date is mandatory on albums, '-album_date' avoids showing photos
     # without date first on some databases (PostgreSQL).
-    ordering = ('-album__date', '-date', '-filename')
-    readonly_fields = ('filename',)
-    search_fields = ('album__name', 'album__dirpath', 'filename')
+    ordering = ("-album__date", "-date", "-filename")
+    readonly_fields = ("filename",)
+    search_fields = ("album__name", "album__dirpath", "filename")
 
     def get_urls(self):
         return [
-            path('scan/', scan_photos, name='gallery_scan_photos'),
+            path("scan/", scan_photos, name="gallery_scan_photos"),
         ] + super().get_urls()
 
     def get_queryset(self, request):
-        return (super().get_queryset(request)
-                .prefetch_related('access_policy__users')
-                .prefetch_related('access_policy__groups')
-                .prefetch_related('album__access_policy__users')
-                .prefetch_related('album__access_policy__groups'))
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related("access_policy__users")
+            .prefetch_related("access_policy__groups")
+            .prefetch_related("album__access_policy__users")
+            .prefetch_related("album__access_policy__groups")
+        )
 
-    preview_template = Template("""
+    preview_template = Template(
+        """
 <a href="{{ photo.get_absolute_url }}">
 <img src="{% url 'gallery:photo-resized' preset='thumb' pk=photo.pk %}"
      width="128" height="128" alt="{{ photo }}" />
-</a>""")
+</a>"""
+    )
 
     def preview(self, obj):
-        return self.preview_template.render(Context({'photo': obj}))
+        return self.preview_template.render(Context({"photo": obj}))
+
     preview.allow_tags = True
 
     def public(self, obj):
         access_policy = obj.get_effective_access_policy()
         if access_policy:
             return access_policy.public
+
     public.boolean = True
 
     def groups(self, obj):
         access_policy = obj.get_effective_access_policy()
         if access_policy:
-            return ', '.join(str(group) for group in access_policy.groups.all())
+            return ", ".join(str(group) for group in access_policy.groups.all())
         else:
-            return '-'
+            return "-"
 
     def users(self, obj):
         access_policy = obj.get_effective_access_policy()
         if access_policy:
-            return ', '.join(str(user) for user in access_policy.users.all())
+            return ", ".join(str(user) for user in access_policy.users.all())
         else:
-            return '-'
+            return "-"
 
 
 admin.site.register(Photo, PhotoAdmin)
 
 
-@permission_required('gallery.scan')
+@permission_required("gallery.scan")
 def scan_photos(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         stdout, stderr = io.StringIO(), io.StringIO()
-        management.call_command('scanphotos', stdout=stdout, stderr=stderr)
+        management.call_command("scanphotos", stdout=stdout, stderr=stderr)
         for line in stdout.getvalue().splitlines():
             messages.info(request, line)
         for line in stderr.getvalue().splitlines():
             messages.error(request, line)
-        return HttpResponseRedirect(reverse('admin:gallery_scan_photos'))
+        return HttpResponseRedirect(reverse("admin:gallery_scan_photos"))
     context = {
-        'app_label': 'gallery',
-        'title': gettext("Scan photos"),
+        "app_label": "gallery",
+        "title": gettext("Scan photos"),
     }
-    return render(request, 'admin/gallery/scan_photos.html', context)
+    return render(request, "admin/gallery/scan_photos.html", context)

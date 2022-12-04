@@ -30,7 +30,6 @@ class AccessPolicy(models.Model):
 
 
 class AlbumManager(models.Manager):
-
     def allowed_for_user(self, user, include_public=True):
         album_cond = Q()
         if include_public:
@@ -50,8 +49,8 @@ class Album(models.Model):
     objects = AlbumManager()
 
     class Meta:
-        ordering = ('date', 'name', 'dirpath', 'category')
-        unique_together = ('dirpath', 'category')
+        ordering = ("date", "name", "dirpath", "category")
+        unique_together = ("dirpath", "category")
         verbose_name = _("album")
         verbose_name_plural = _("albums")
 
@@ -59,11 +58,11 @@ class Album(models.Model):
         return self.dirpath
 
     def get_absolute_url(self):
-        return reverse('gallery:album', args=[self.pk])
+        return reverse("gallery:album", args=[self.pk])
 
     @property
     def display_name(self):
-        return self.name or self.dirpath.replace('/', ' > ')
+        return self.name or self.dirpath.replace("/", " > ")
 
     def get_access_policy(self):
         try:
@@ -77,25 +76,40 @@ class Album(models.Model):
 
     def get_next_in_queryset(self, albums):
         albums = albums.filter(
-            Q(date__gt=self.date) |
-            Q(date=self.date, name__gt=self.name) |
-            Q(date=self.date, name=self.name, dirpath__gt=self.dirpath) |
-            Q(date=self.date, name=self.name, dirpath=self.dirpath, category__gt=self.category))
-        return albums.order_by('date', 'name', 'dirpath', 'category')[:1].get()
+            Q(date__gt=self.date)
+            | Q(date=self.date, name__gt=self.name)
+            | Q(date=self.date, name=self.name, dirpath__gt=self.dirpath)
+            | Q(
+                date=self.date,
+                name=self.name,
+                dirpath=self.dirpath,
+                category__gt=self.category,
+            )
+        )
+        return albums.order_by("date", "name", "dirpath", "category")[:1].get()
 
     def get_previous_in_queryset(self, albums):
         albums = albums.filter(
-            Q(date__lt=self.date) |
-            Q(date=self.date, name__lt=self.name) |
-            Q(date=self.date, name=self.name, dirpath__lt=self.dirpath) |
-            Q(date=self.date, name=self.name, dirpath=self.dirpath, category__lt=self.category))
-        return albums.order_by('-date', '-name', '-dirpath', '-category')[:1].get()
+            Q(date__lt=self.date)
+            | Q(date=self.date, name__lt=self.name)
+            | Q(date=self.date, name=self.name, dirpath__lt=self.dirpath)
+            | Q(
+                date=self.date,
+                name=self.name,
+                dirpath=self.dirpath,
+                category__lt=self.category,
+            )
+        )
+        return albums.order_by("-date", "-name", "-dirpath", "-category")[:1].get()
 
 
 class AlbumAccessPolicy(AccessPolicy):
-    album = models.OneToOneField(Album, on_delete=models.CASCADE, related_name='access_policy')
-    inherit = models.BooleanField(blank=True, default=True,
-                                  verbose_name="photos inherit album access policy")
+    album = models.OneToOneField(
+        Album, on_delete=models.CASCADE, related_name="access_policy"
+    )
+    inherit = models.BooleanField(
+        blank=True, default=True, verbose_name="photos inherit album access policy"
+    )
 
     class Meta:
         verbose_name = _("album access policy")
@@ -106,7 +120,6 @@ class AlbumAccessPolicy(AccessPolicy):
 
 
 class PhotoManager(models.Manager):
-
     def allowed_for_user(self, user):
         inherit = Q(access_policy__isnull=True, album__access_policy__inherit=True)
         photo_cond = Q(access_policy__public=True)
@@ -127,12 +140,12 @@ class Photo(models.Model):
     objects = PhotoManager()
 
     class Meta:
-        ordering = ('date', 'filename')
+        ordering = ("date", "filename")
         permissions = (
             ("view", "Can see all photos"),
             ("scan", "Can scan the photos directory"),
         )
-        unique_together = ('album', 'filename')
+        unique_together = ("album", "filename")
         verbose_name = _("photo")
         verbose_name_plural = _("photos")
 
@@ -140,7 +153,7 @@ class Photo(models.Model):
         return self.filename
 
     def get_absolute_url(self):
-        return reverse('gallery:photo', args=[self.pk])
+        return reverse("gallery:photo", args=[self.pk])
 
     @property
     def display_name(self):
@@ -170,24 +183,24 @@ class Photo(models.Model):
     def get_next_in_queryset(self, photos):
         if self.date is None:
             photos = photos.filter(
-                Q(date__isnull=False) |
-                Q(date__isnull=True, filename__gt=self.filename))
+                Q(date__isnull=False) | Q(date__isnull=True, filename__gt=self.filename)
+            )
         else:
             photos = photos.filter(
-                Q(date__gt=self.date) |
-                Q(date=self.date, filename__gt=self.filename))
-        return photos.order_by('date', 'filename')[:1].get()
+                Q(date__gt=self.date) | Q(date=self.date, filename__gt=self.filename)
+            )
+        return photos.order_by("date", "filename")[:1].get()
 
     def get_previous_in_queryset(self, photos):
         if self.date is None:
-            photos = photos.filter(
-                date__isnull=True, filename__lt=self.filename)
+            photos = photos.filter(date__isnull=True, filename__lt=self.filename)
         else:
             photos = photos.filter(
-                Q(date__isnull=True) |
-                Q(date__lt=self.date) |
-                Q(date=self.date, filename__gt=self.filename))
-        return photos.order_by('-date', '-filename')[:1].get()
+                Q(date__isnull=True)
+                | Q(date__lt=self.date)
+                | Q(date=self.date, filename__gt=self.filename)
+            )
+        return photos.order_by("-date", "-filename")[:1].get()
 
     @property
     def image_name(self):
@@ -200,7 +213,9 @@ class Photo(models.Model):
 
 
 class PhotoAccessPolicy(AccessPolicy):
-    photo = models.OneToOneField(Photo, on_delete=models.CASCADE, related_name='access_policy')
+    photo = models.OneToOneField(
+        Photo, on_delete=models.CASCADE, related_name="access_policy"
+    )
 
     class Meta:
         verbose_name = _("photo access policy")

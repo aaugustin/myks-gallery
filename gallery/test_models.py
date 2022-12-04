@@ -7,15 +7,14 @@ from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
 
 
 class AccessPolicyTests(TestCase):
-
     def setUp(self):
         today = datetime.date.today()
-        self.album = Album.objects.create(category='default', dirpath='foo', date=today)
-        self.photo = Photo.objects.create(album=self.album, filename='bar')
-        self.group = Group.objects.create(name='group')
-        self.user = User.objects.create_user('user', 'user@gallery', 'pass')
+        self.album = Album.objects.create(category="default", dirpath="foo", date=today)
+        self.photo = Photo.objects.create(album=self.album, filename="bar")
+        self.group = Group.objects.create(name="group")
+        self.user = User.objects.create_user("user", "user@gallery", "pass")
         self.user.groups.add(self.group)
-        self.other = User.objects.create_user('other', 'other@gallery', 'word')
+        self.other = User.objects.create_user("other", "other@gallery", "word")
 
     def assertAlbumAllowedFor(self, user):
         self.assertTrue(self.album.is_allowed_for_user(user))
@@ -110,7 +109,9 @@ class AccessPolicyTests(TestCase):
         self.assertPhotoAllowedFor(self.user)
 
     def test_user_photo_no_inherit(self):
-        policy = AlbumAccessPolicy.objects.create(album=self.album, inherit=False, public=False)
+        policy = AlbumAccessPolicy.objects.create(
+            album=self.album, inherit=False, public=False
+        )
         policy.users.add(self.user)
         self.assertPhotoNotAllowedFor(self.user)
         self.assertPhotoNotAllowedFor(self.other)
@@ -120,7 +121,9 @@ class AccessPolicyTests(TestCase):
         self.assertPhotoNotAllowedFor(self.other)
 
     def test_group_photo_no_inherit(self):
-        policy = AlbumAccessPolicy.objects.create(album=self.album, inherit=False, public=False)
+        policy = AlbumAccessPolicy.objects.create(
+            album=self.album, inherit=False, public=False
+        )
         policy.groups.add(self.group)
         self.assertPhotoNotAllowedFor(self.user)
         self.assertPhotoNotAllowedFor(self.other)
@@ -136,7 +139,9 @@ class AccessPolicyTests(TestCase):
         self.assertPhotoNotAllowedFor(self.user)
 
     def test_user_photo_counter_inherit(self):
-        policy = AlbumAccessPolicy.objects.create(album=self.album, inherit=True, public=False)
+        policy = AlbumAccessPolicy.objects.create(
+            album=self.album, inherit=True, public=False
+        )
         policy.users.add(self.user)
         self.assertPhotoAllowedFor(self.user)
         self.assertPhotoNotAllowedFor(self.other)
@@ -145,7 +150,9 @@ class AccessPolicyTests(TestCase):
         self.assertPhotoNotAllowedFor(self.other)
 
     def test_group_photo_counter_inherit(self):
-        policy = AlbumAccessPolicy.objects.create(album=self.album, inherit=True, public=False)
+        policy = AlbumAccessPolicy.objects.create(
+            album=self.album, inherit=True, public=False
+        )
         policy.groups.add(self.group)
         self.assertPhotoAllowedFor(self.user)
         self.assertPhotoNotAllowedFor(self.other)

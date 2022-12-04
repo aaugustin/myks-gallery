@@ -11,4 +11,5 @@ clean:
 
 style:
 	isort example gallery
+	black example gallery
 	flake8 example gallery

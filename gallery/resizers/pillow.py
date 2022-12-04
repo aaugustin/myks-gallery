@@ -11,17 +11,17 @@ from ..storages import get_storage
 def resize(photo, width, height, crop=True):
     image_name = photo.image_name
     resized_name = get_resized_name(photo, width, height, crop)
-    photo_storage = get_storage('photo')
-    cache_storage = get_storage('cache')
+    photo_storage = get_storage("photo")
+    cache_storage = get_storage("cache")
     if not cache_storage.exists(resized_name):
-        make_thumbnail(image_name, resized_name,
-                       width, height, crop,
-                       photo_storage, cache_storage)
+        make_thumbnail(
+            image_name, resized_name, width, height, crop, photo_storage, cache_storage
+        )
     return cache_storage.url(resized_name)
 
 
 def get_resized_name(photo, width, height, crop):
-    prefix = photo.album.date.strftime('%y%m')
+    prefix = photo.album.date.strftime("%y%m")
     hsh = hashlib.md5()
     hsh.update(str(settings.SECRET_KEY).encode())
     hsh.update(str(photo.album.pk).encode())
@@ -31,33 +31,43 @@ def get_resized_name(photo, width, height, crop):
     return os.path.join(prefix, hsh.hexdigest() + ext)
 
 
-exif_rotations = [                                          # pragma: no cover
+exif_rotations = [  # pragma: no cover
     None,
     lambda image: image,
     lambda image: image.transpose(Image.FLIP_LEFT_RIGHT),
     lambda image: image.transpose(Image.ROTATE_180),
     # shortcut for image.transpose(Image.ROTATE_180).transpose(FLIP_LEFT_RIGHT)
     lambda image: image.transpose(Image.FLIP_TOP_BOTTOM),
-    lambda image: image.transpose(Image.ROTATE_270).transpose(Image.FLIP_LEFT_RIGHT),   # noqa
+    lambda image: image.transpose(Image.ROTATE_270).transpose(
+        Image.FLIP_LEFT_RIGHT
+    ),  # noqa
     lambda image: image.transpose(Image.ROTATE_270),
-    lambda image: image.transpose(Image.ROTATE_90).transpose(Image.FLIP_LEFT_RIGHT),    # noqa
+    lambda image: image.transpose(Image.ROTATE_90).transpose(
+        Image.FLIP_LEFT_RIGHT
+    ),  # noqa
     lambda image: image.transpose(Image.ROTATE_90),
 ]
 
 
-def make_thumbnail(image_name, resized_name,
-                   thumb_width, thumb_height, crop,
-                   image_storage, thumb_storage):
+def make_thumbnail(
+    image_name,
+    resized_name,
+    thumb_width,
+    thumb_height,
+    crop,
+    image_storage,
+    thumb_storage,
+):
 
-    options = getattr(settings, 'GALLERY_RESIZE_OPTIONS', {})
+    options = getattr(settings, "GALLERY_RESIZE_OPTIONS", {})
 
     # Load the image
     image = Image.open(image_storage.open(image_name))
     format = image.format
 
-    if format == 'JPEG':
+    if format == "JPEG":
         # Auto-rotate JPEG files based on EXIF information
-        try:                                                # pragma: no cover
+        try:  # pragma: no cover
             # Use of an undocumented API — let's catch exceptions liberally
             orientation = image._getexif()[274]
             image = exif_rotations[orientation](image)

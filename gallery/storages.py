@@ -10,7 +10,7 @@ from django.utils.module_loading import import_string
 
 @functools.lru_cache()
 def get_storage(name):
-    storage_setting = f'GALLERY_{name.upper()}_STORAGE'
+    storage_setting = f"GALLERY_{name.upper()}_STORAGE"
     try:
         storage = getattr(settings, storage_setting)
     except AttributeError:
@@ -24,5 +24,5 @@ def get_storage(name):
 
 @receiver(setting_changed)
 def clear_get_storage_cache(**kwargs):
-    if re.match(r'^GALLERY_[A-Z]+_STORAGE$', kwargs['setting']):
+    if re.match(r"^GALLERY_[A-Z]+_STORAGE$", kwargs["setting"]):
         get_storage.cache_clear()

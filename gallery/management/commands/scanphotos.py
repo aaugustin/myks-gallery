@@ -15,20 +15,21 @@ from ...storages import get_storage
 
 
 class Command(base.BaseCommand):
-    help = 'Scan photos and update database.'
+    help = "Scan photos and update database."
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--full',
-            action='store_true',
-            dest='full_sync',
+            "--full",
+            action="store_true",
+            dest="full_sync",
             default=False,
-            help='Perform a full resynchronization')
+            help="Perform a full resynchronization",
+        )
 
     @transaction.atomic
     def handle(self, **options):
-        self.full_sync = options['full_sync']
-        self.verbosity = int(options['verbosity'])
+        self.full_sync = options["full_sync"]
+        self.verbosity = int(options["verbosity"])
 
         t = time.time()
 
@@ -53,14 +54,16 @@ class Command(base.BaseCommand):
             self.stdout.write(message + "\n")
 
 
-ignores = [re.compile(i) for i in getattr(settings, 'GALLERY_IGNORES', ())]
+ignores = [re.compile(i) for i in getattr(settings, "GALLERY_IGNORES", ())]
 
 
 def is_ignored(path):
     return any(pat.match(path) for pat in ignores)
 
 
-patterns = [(cat, re.compile(pat)) for cat, pat in getattr(settings, 'GALLERY_PATTERNS', ())]
+patterns = [
+    (cat, re.compile(pat)) for cat, pat in getattr(settings, "GALLERY_PATTERNS", ())
+]
 
 
 def is_matched(path):
@@ -70,7 +73,7 @@ def is_matched(path):
             return category, match.groupdict()
 
 
-def walk_photo_storage(storage, path=''):
+def walk_photo_storage(storage, path=""):
     """
     Yield (directory path, file names) 2-uples for the photo storage.
 
@@ -91,12 +94,12 @@ def iter_photo_storage(command):
     Yield (relative path, category, regex captures) for each photo.
 
     """
-    photo_storage = get_storage('photo')
+    photo_storage = get_storage("photo")
     for dirpath, filenames in walk_photo_storage(photo_storage):
         for filename in filenames:
             filepath = os.path.join(dirpath, filename)
             # HFS+ stores names in NFD which causes issues with some fonts.
-            filepath = unicodedata.normalize('NFKC', filepath)
+            filepath = unicodedata.normalize("NFKC", filepath)
             if is_ignored(filepath):
                 command.write_out(f"- {filepath}", verbosity=3)
                 continue
@@ -136,18 +139,18 @@ def get_album_info(captures, command):
     """
     date = None
     try:
-        kwargs = {
-            k: int(captures['a_' + k])
-            for k in ('year', 'month', 'day')
-        }
+        kwargs = {k: int(captures["a_" + k]) for k in ("year", "month", "day")}
         date = datetime.date(**kwargs)
     except KeyError:
         pass
     except ValueError as e:
         command.write_err(f"{e} {kwargs}", verbosity=1)
-    name = ' '.join(v for k, v in sorted(captures.items())
-                    if k.startswith('a_name') and v is not None)
-    name = name.replace('/', ' > ')
+    name = " ".join(
+        v
+        for k, v in sorted(captures.items())
+        if k.startswith("a_name") and v is not None
+    )
+    name = name.replace("/", " > ")
     return date, name
 
 
@@ -161,8 +164,8 @@ def get_photo_info(captures, command):
     date = None
     try:
         kwargs = {
-            k: int(captures['p_' + k])
-            for k in ('year', 'month', 'day', 'hour', 'minute', 'second')
+            k: int(captures["p_" + k])
+            for k in ("year", "month", "day", "hour", "minute", "second")
         }
         date = datetime.datetime(**kwargs)
         if settings.USE_TZ:
@@ -207,13 +210,14 @@ def synchronize_photos(albums, command):
         for filename in sorted(new_keys - old_keys):
             date = get_photo_info(albums[category, dirpath][filename], command)
             command.write_out(
-                f"Adding photo {filename} to album {dirpath} ({category})",
-                verbosity=2)
+                f"Adding photo {filename} to album {dirpath} ({category})", verbosity=2
+            )
             photo = Photo.objects.create(album=album, filename=filename, date=date)
         for filename in sorted(old_keys - new_keys):
             command.write_out(
                 f"Removing photo {filename} from album {dirpath} ({category})",
-                verbosity=2)
+                verbosity=2,
+            )
             photo = Photo.objects.get(album=album, filename=filename)
             photo.delete()
         if not command.full_sync:
@@ -223,7 +227,9 @@ def synchronize_photos(albums, command):
             photo = Photo.objects.get(album=album, filename=filename)
             if date != photo.date:
                 command.write_out(
-                    f"Fixing date of photo {filename} from album {dirpath} ({category})",
-                    verbosity=2)
+                    f"Fixing date of photo {filename} "
+                    f"from album {dirpath} ({category})",
+                    verbosity=2,
+                )
                 photo.date = date
                 photo.save()
