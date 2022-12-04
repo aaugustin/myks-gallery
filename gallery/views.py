@@ -207,22 +207,6 @@ def export_album(request, pk):
     zip_name = os.path.join('export', hsh.hexdigest() + '.zip')
 
     if not zip_storage.exists(zip_name):
-
-        # Expire old archives
-        archive_expiry = getattr(settings, 'GALLERY_ARCHIVE_EXPIRY', None)
-        if archive_expiry is not None:
-            cutoff = time.time() - archive_expiry * 86400
-            try:
-                other_zip_names = zip_storage.listdir('export')[1]
-            except Exception:
-                other_zip_names = []
-            for other_zip_name in other_zip_names:
-                if not other_zip_name.endswith('.zip'):
-                    continue
-                other_zip_file = os.path.join('export', other_zip_name)
-                if zip_storage.modified_time(other_zip_file) < cutoff:
-                    zip_storage.delete(other_zip_file)
-
         # Create the archive in a temporary file to avoid holding it in memory
         with tempfile.TemporaryFile(suffix='.zip') as temp_zip:
             with zipfile.ZipFile(temp_zip, 'w') as archive:
