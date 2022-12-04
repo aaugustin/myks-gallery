@@ -209,8 +209,7 @@ def export_album(request, pk):
     if not zip_storage.exists(zip_name):
 
         # Expire old archives
-        default_expiry = 60 if hasattr(settings, 'GALLERY_PHOTO_DIR') else None
-        archive_expiry = getattr(settings, 'GALLERY_ARCHIVE_EXPIRY', default_expiry)
+        archive_expiry = getattr(settings, 'GALLERY_ARCHIVE_EXPIRY', None)
         if archive_expiry is not None:
             cutoff = time.time() - archive_expiry * 86400
             try:

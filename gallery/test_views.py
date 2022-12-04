@@ -1,5 +1,4 @@
 import datetime
-import os
 import shutil
 import tempfile
 import zipfile
@@ -47,15 +46,14 @@ class ViewsTestsMixin:
 
     def test_album_export_view(self):
         with self.settings(
-                GALLERY_PHOTO_DIR=self.tmpdir,
-                GALLERY_CACHE_DIR=self.tmpdir):
+                GALLERY_CACHE_STORAGE='gallery.test_storages.MemoryStorage',
+                GALLERY_PHOTO_STORAGE='gallery.test_storages.MemoryStorage'):
             self.make_image()
             url = reverse('gallery:album-export', args=[self.album.pk])
             response = self.client.get(url)
-            self.assertTrue(response['Location'].startswith('/export/'))
-            export_name = response['Location'][len('/export/'):]
-            export_file = os.path.join(self.tmpdir, 'export', export_name)
-            with zipfile.ZipFile(export_file) as archive:
+            self.assertTrue(response['Location'].startswith('/url/of/export/'))
+            export_file = response['Location'][len('/url/of/'):]
+            with zipfile.ZipFile(get_storage('cache').open(export_file)) as archive:
                 self.assertEqual(archive.namelist(), ['original.jpg'])
 
     def test_photo_resized_view(self):

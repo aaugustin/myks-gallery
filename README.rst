@@ -157,10 +157,6 @@ setting, you'll usullay point it to a factory function that initializes and
 returns a Django storage instance because you won't want to use globally
 configured values for settings such as the S3 bucket name.
 
-For compatibility for versions prior to 0.5, if ``GALLERY_PHOTO_STORAGE``
-isn't defined but ``GALLERY_PHOTO_DIR`` is, the photo storage will be set to
-``FileSystemStorage(location=GALLERY_PHOTO_DIR)``.
-
 ``GALLERY_CACHE_STORAGE``
 .........................
 
@@ -170,10 +166,6 @@ Dotted Python path to the Django storage class for the thumbnails and album
 archives. It must be readable and writable by the application server.
 
 It behaves like ``GALLERY_PHOTO_STORAGE``.
-
-For compatibility for versions prior to 0.5, if ``GALLERY_CACHE_STORAGE``
-isn't defined but ``GALLERY_CACHE_DIR`` is, the photo storage will be set to
-``FileSystemStorage(location=GALLERY_CACHE_DIR)``.
 
 ``GALLERY_PATTERNS``
 ....................
@@ -266,17 +258,13 @@ Number of thumbnails shown in the preview of each album.
 ``GALLERY_ARCHIVE_EXPIRY``
 ..........................
 
-Default: ``None`` or ``60``
+Default: ``None``
 
 Duration in days during which album archives are kept in cache. ``None``
 disables expiration.
 
 When using a remote storage system such as S3, configuring an expiry policy
 for the ``export`` folder directly on the storage system is more efficient.
-
-For compatibility with versions prior to 0.5, if ``GALLERY_CACHE_DIR`` is
-defined, ``GALLERY_ARCHIVE_EXPIRY`` defaults to ``60``.
-
 
 Running the sample application
 ==============================
@@ -330,6 +318,9 @@ Changelog
 ---
 
 *Under development*
+
+Fallback to the ``GALLERY_PHOTO_DIR`` and ``GALLERY_CACHE_DIR`` settings,
+deprecated in version 0.5, is removed.
 
 Support for serving files privately from the local filesystem is removed,
 including the ``GALLERY_SENDFILE_HEADER`` and ``GALLERY_SENDFILE_PREFIX``

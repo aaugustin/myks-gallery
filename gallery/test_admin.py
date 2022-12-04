@@ -7,6 +7,7 @@ import unittest
 
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.auth.models import Permission, User
+from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
 from django.urls import reverse
 
@@ -44,7 +45,7 @@ class AdminTests(TestCase):
         with open(os.path.join(tmpdir, 'test'), 'wb') as handle:
             handle.write(b'test')
         try:
-            with self.settings(GALLERY_PHOTO_DIR=tmpdir):
+            with self.settings(GALLERY_PHOTO_STORAGE=FileSystemStorage(tmpdir)):
                 self.client.post(reverse('admin:gallery_scan_photos'))
         finally:
             shutil.rmtree(tmpdir)

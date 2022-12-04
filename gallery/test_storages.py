@@ -2,7 +2,7 @@ import io
 import urllib.parse
 
 from django.core.exceptions import ImproperlyConfigured
-from django.core.files.storage import FileSystemStorage, Storage
+from django.core.files.storage import Storage
 from django.test import TestCase, override_settings
 
 from .storages import get_storage
@@ -68,12 +68,6 @@ class StoragesTest(TestCase):
         foo_storage_1 = get_storage('foo')
         foo_storage_2 = get_storage('foo')
         self.assertIs(foo_storage_1, foo_storage_2)
-
-    @override_settings(GALLERY_FOO_DIR='/path/to/foo')
-    def test_get_storage_legacy(self):
-        foo_storage = get_storage('foo')
-        self.assertIsInstance(foo_storage, FileSystemStorage)
-        self.assertEqual(foo_storage.location, '/path/to/foo')
 
     def test_get_storage_unconfigured(self):
         with self.assertRaises(ImproperlyConfigured):
