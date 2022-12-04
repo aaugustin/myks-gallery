@@ -32,8 +32,6 @@ packages = [{ include = "gallery"}]
 [tool.poetry.dependencies]
 django = ">=3.2"
 python = "^3.6"
-Pillow = "*"
-
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "*"}
