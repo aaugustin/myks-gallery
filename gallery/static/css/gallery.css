@@ -4,6 +4,18 @@
     text-align: right;
     margin-bottom: 1em;
 }
+.album_filter input {
+    border: 1px solid transparent;
+    border-bottom-color: #ccc;
+}
+.album_filter input[type="submit"] {
+    background-color: #eee;
+    border: 1px solid #eee;
+    padding: 0 1em;
+}
+.album_filter input[type="submit"]:hover {
+    border-color: #ccc;
+}
 .album_year_list,
 .album_page_list,
 .album_export {
