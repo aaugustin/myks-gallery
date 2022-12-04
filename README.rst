@@ -271,41 +271,35 @@ Number of thumbnails shown in the preview of each album.
 Running the sample application
 ==============================
 
-1.  Make sure Django and Pillow are installed
+1.  Make sure Django and Pillow are installed.
 
-2.  Download some pictures (warning: these files are large, total = 50MB; you
-    can use photos of your own instead as long as you respect the format of
-    the directory name: ``YYYY_MM_DD_album name``)::
+2.  Create directories for storing photos and thumbnails::
 
-    $ cd example
-    $ mkdir cache
-    $ mkdir photos
-    $ mkdir "photos/2013_01_01_Featured Pictures"
-    $ cd "photos/2013_01_01_Featured Pictures"
-    $ wget http://upload.wikimedia.org/wikipedia/commons/5/51/2012-11-23_16-05-52-grande-cascade-tendon.jpg
-    $ wget http://upload.wikimedia.org/wikipedia/commons/5/56/Crooked_Beak_of_Heaven_Mask.jpg
-    $ wget http://upload.wikimedia.org/wikipedia/commons/a/a4/Iglesia_de_Nuestra_Se%C3%B1ora_de_La_Blanca%2C_Cardej%C3%B3n%2C_Espa%C3%B1a%2C_2012-09-01%2C_DD_02.   JPG
-    $ wget http://upload.wikimedia.org/wikipedia/commons/1/17/Iglesia_del_Esp%C3%ADritu_Santo%2C_Landshut%2C_Alemania%2C_2012-05-27%2C_DD_02.JPG
-    $ wget http://upload.wikimedia.org/wikipedia/commons/3/33/Viru_Bog%2C_Parque_Nacional_Lahemaa%2C_Estonia%2C_2012-08-12%2C_DD_60.JPG
-    $ wget http://upload.wikimedia.org/wikipedia/commons/d/d7/Castillo_Trausnitz%2C_Landshut%2C_Alemania%2C_2012-05-27%2C_DD_18.JPG
-    $ wget http://upload.wikimedia.org/wikipedia/commons/b/b7/Catedral_de_Alejandro_Nevsky%2C_Tallin%2C_Estonia%2C_2012-08-11%2C_DD_46.JPG
-    $ wget http://upload.wikimedia.org/wikipedia/commons/3/3f/Crassula_arborescens%2C_Jard%C3%ADn_Bot%C3%A1nico%2C_M%C3%BAnich%2C_Alemania_2012-04-21%2C_DD_01.JPG
-    $ wget http://upload.wikimedia.org/wikipedia/commons/8/86/Plaza_del_ayuntamiento%2C_Set%C3%BAbal%2C_Portugal%2C_2012-08-17%2C_DD_01.JPG
-    $ wget http://upload.wikimedia.org/wikipedia/commons/7/71/4_cilindros_y_museo_BMW%2C_M%C3%BAnich%2C_Alemania_2012-04-28%2C_DD_02.JPG
-    $ cd ../..
+        $ cd example
+        $ mkdir media
+        $ mkdir media/cache
+        $ mkdir media/photos
 
-3.  Run the development server::
+3.  Create an album directory, whose name must contain a date, and download
+    images. `Wikipedia's featured pictures`_ are a good choice::
+
+        $ mkdir "media/photos/2023_01_01_Featured Pictures"
+        # ... download pictures to this directory...
+
+    .. _Wikipedia's featured pictures: https://en.wikipedia.org/wiki/Wikipedia:Featured_pictures
+
+4.  Run the development server::
 
     $ ./manage.py migrate
     $ ./manage.py createsuperuser
     $ ./manage.py runserver
 
-4.  Go to http://localhost:8000/admin/gallery/album/ and log in. Click the
+5.  Go to http://localhost:8000/admin/gallery/album/ and log in. Click the
     "Scan photos" link at the top right, and the "Scan photos" button on the
     next page. You should see the following messages:
 
-    * Scanning path/to/myks-gallery/example/photos
-    * Adding album 2013_01_01_Featured Pictures (Photos) as Featured Pictures
+    * Scanning path/to/myks-gallery/example/media/photos
+    * Adding album 2023_01_01_Featured Pictures (Photos) as Featured Pictures
     * Done (0.01s)
 
     Go to http://localhost:8000/ and enjoy!

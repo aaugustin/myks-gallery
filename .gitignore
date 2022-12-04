@@ -5,6 +5,5 @@ dist
 htmlcov
 poetry.lock
 
-example/photos
-example/cache
+example/media
 example/db.sqlite3
