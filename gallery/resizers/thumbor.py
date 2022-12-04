@@ -12,7 +12,10 @@ from django.conf import settings
 
 
 def resize(photo, width, height, crop=True):
-    image_url = urllib.parse.quote(photo.image_name.encode())
+    image_url = urllib.parse.quote(
+        photo.image_name.encode(),
+        safe="~@#$&()*!+=:;,.?/'",
+    )
     url = libthumbor.CryptoURL(key=settings.THUMBOR_SECURITY_KEY).generate(
         image_url=image_url,
         width=width,
