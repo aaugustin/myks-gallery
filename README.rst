@@ -311,10 +311,13 @@ Running the sample application
 Changelog
 =========
 
-0.9
+1.0
 ---
 
 *Under development*
+
+0.9
+---
 
 This version makes it possible to customize image resizing, for example to
 integrate an external service, with the ``GALLERY_RESIZE`` setting. Review
