@@ -76,7 +76,7 @@ website:
 
 1.  Download and install the package from PyPI::
 
-        $ pip install myks-gallery
+        $ pip install myks-gallery Pillow
 
 2.  Add ``gallery.apps.GalleryConfig`` to ``INSTALLED_APPS``::
 
@@ -162,7 +162,7 @@ configured values for settings such as the S3 bucket name.
 
 Default: *not defined*
 
-Dotted Python path to the Django storage class for the thumbnails and album
+Dotted Python path to the Django storage class for resized versions and album
 archives. It must be readable and writable by the application server.
 
 It behaves like ``GALLERY_PHOTO_STORAGE``.
@@ -203,14 +203,27 @@ Default: ``()``
 Tuple of regular expressions matching paths within ``GALLERY_PHOTO_STORAGE``.
 Files matching one of these expressions will be ignored when scanning photos.
 
+``GALLERY_RESIZE``
+..................
+
+Default: ``gallery.resizers.pillow.resize``
+
+Dotted Python path to the callable providing resizing functionality.
+
+``resize(photo, width, height, crop=True)`` receives an instance of the
+``Photo`` model and returns a URL for the resized version. The original image is
+found at ``photo.image_name`` in the photo storage.
+
+The default implementation depends on ``Pillow``.
+
 ``GALLERY_RESIZE_PRESETS``
 ..........................
 
 Default: ``{}``
 
-Dictionary mapping thumbnail presets names to ``(width, height, crop)``. If
+Dictionary mapping resizing presets to ``(width, height, crop)`` tuples. If
 ``crop`` is ``True``, the photo will be cropped and the thumbnail will have
-exactly the requested size. If ``crop`` is ``False``, the thumbnaill will be
+exactly the requested size. If ``crop`` is ``False``, the thumbnail will be
 smaller than the requested size in one dimension to preserve the photo's
 aspect ratio.
 
@@ -237,7 +250,7 @@ Pillow's documentation.
 The following a reasonable value for high-quality thumbnails and previews::
 
     GALLERY_RESIZE_OPTIONS = {
-        'JPEG': {'quality': 95, 'optimize': True},
+        'JPEG': {'quality': 90, 'optimize': True},
     }
 
 ``GALLERY_TITLE``
@@ -308,18 +321,20 @@ Changelog
 
 *Under development*
 
-The ``--resize`` option of ``django-admin scanphotos`` is removed.
+This version makes it possible to customize image resizing, for example to
+integrate an external service, with the ``GALLERY_RESIZE`` setting.
 
-Expiration of album archives with the ``GALLERY_ARCHIVE_EXPIRY`` setting is
-removed. Configure lifecycle for the ``export`` folder on the cloud storage
-service instead.
+Several features designed for storing files in the filesystem are removed:
 
-Fallback to the ``GALLERY_PHOTO_DIR`` and ``GALLERY_CACHE_DIR`` settings,
-deprecated in version 0.5, is removed.
-
-Support for serving files privately from the local filesystem is removed,
-including the ``GALLERY_SENDFILE_HEADER`` and ``GALLERY_SENDFILE_PREFIX``
-settings.
+* The ``--resize`` option of ``django-admin scanphotos`` is removed.
+* Expiration of album archives with the ``GALLERY_ARCHIVE_EXPIRY`` setting is
+  removed. Configure lifecycle for the ``export`` folder on the cloud storage
+  service instead.
+* Fallback to the ``GALLERY_PHOTO_DIR`` and ``GALLERY_CACHE_DIR`` settings,
+  deprecated in version 0.5, is removed.
+* Support for serving files privately from the local filesystem is removed,
+  including the ``GALLERY_SENDFILE_HEADER`` and ``GALLERY_SENDFILE_PREFIX``
+  settings.
 
 It includes smaller changes too.
 

@@ -1,11 +1,10 @@
 import io
 
 from django.test import TestCase
-from django.test.utils import override_settings
 from PIL import Image, ImageDraw
 
-from .imgutil import make_thumbnail
-from .test_storages import MemoryStorage
+from ..test_storages import MemoryStorage
+from .pillow import make_thumbnail
 
 
 def make_image(storage, name, width, height, format='JPEG', mode='RGB'):
@@ -26,10 +25,6 @@ def make_image(storage, name, width, height, format='JPEG', mode='RGB'):
     storage.save(name, im_bytes_io)
 
 
-@override_settings(GALLERY_RESIZE_PRESETS={
-    'thumbnail': (8, 8, True),
-    'preview': (16, 16, False),
-})
 class ThumbnailTests(TestCase):
 
     def setUp(self):
@@ -42,7 +37,12 @@ class ThumbnailTests(TestCase):
 
     def make_thumbnail(self, preset,
                        image_name='original.jpg', thumb_name='thumbnail.jpg'):
-        make_thumbnail(image_name, thumb_name, preset,
+        width, height, crop = {
+            'thumbnail': (8, 8, True),
+            'preview': (16, 16, False),
+        }[preset]
+        make_thumbnail(image_name, thumb_name,
+                       width, height, crop,
                        self.storage, self.storage)
 
     def open_image(self, thumb_name='thumbnail.jpg'):

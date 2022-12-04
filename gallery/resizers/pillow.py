@@ -1,7 +1,35 @@
+import hashlib
 import io
+import os.path
 
 from django.conf import settings
 from PIL import Image, ImageFile
+
+from ..storages import get_storage
+
+
+def resize(photo, width, height, crop=True):
+    image_name = photo.image_name
+    resized_name = get_resized_name(photo, width, height, crop)
+    photo_storage = get_storage('photo')
+    cache_storage = get_storage('cache')
+    if not cache_storage.exists(resized_name):
+        make_thumbnail(image_name, resized_name,
+                       width, height, crop,
+                       photo_storage, cache_storage)
+    return cache_storage.url(resized_name)
+
+
+def get_resized_name(photo, width, height, crop):
+    prefix = photo.album.date.strftime('%y%m')
+    hsh = hashlib.md5()
+    hsh.update(str(settings.SECRET_KEY).encode())
+    hsh.update(str(photo.album.pk).encode())
+    hsh.update(str(photo.pk).encode())
+    hsh.update(str((width, height, crop)).encode())
+    ext = os.path.splitext(photo.filename)[1].lower()
+    return os.path.join(prefix, hsh.hexdigest() + ext)
+
 
 exif_rotations = [                                          # pragma: no cover
     None,
@@ -17,11 +45,11 @@ exif_rotations = [                                          # pragma: no cover
 ]
 
 
-def make_thumbnail(image_name, thumb_name, preset,
+def make_thumbnail(image_name, resized_name,
+                   thumb_width, thumb_height, crop,
                    image_storage, thumb_storage):
 
     options = getattr(settings, 'GALLERY_RESIZE_OPTIONS', {})
-    presets = getattr(settings, 'GALLERY_RESIZE_PRESETS', {})
 
     # Load the image
     image = Image.open(image_storage.open(image_name))
@@ -41,7 +69,6 @@ def make_thumbnail(image_name, thumb_name, preset,
 
     # Pre-crop if requested and the aspect ratios don't match exactly
     image_width, image_height = image.size
-    thumb_width, thumb_height, crop = presets[preset]
     if crop:
         if thumb_width * image_height > image_width * thumb_height:
             target_height = image_width * thumb_height // thumb_width
@@ -59,4 +86,4 @@ def make_thumbnail(image_name, thumb_name, preset,
     thumb_bytes_io = io.BytesIO()
     image.save(thumb_bytes_io, format, **options.get(image.format, {}))
     thumb_bytes_io.seek(0)
-    thumb_storage.save(thumb_name, thumb_bytes_io)
+    thumb_storage.save(resized_name, thumb_bytes_io)

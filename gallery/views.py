@@ -2,7 +2,6 @@ import hashlib
 import os
 import random
 import tempfile
-import time
 import zipfile
 
 from django.conf import settings
@@ -211,7 +210,7 @@ def export_album(request, pk):
         with tempfile.TemporaryFile(suffix='.zip') as temp_zip:
             with zipfile.ZipFile(temp_zip, 'w') as archive:
                 for photo in photos:
-                    data = image_storage.open(photo.image_name()).read()
+                    data = image_storage.open(photo.image_name).read()
                     archive.writestr(photo.filename, data)
             temp_zip.seek(0)
             zip_storage.save(zip_name, temp_zip)
@@ -231,19 +230,13 @@ def _get_photo_if_allowed(request, pk):
 def resized_photo(request, preset, pk):
     """Serve a resized photo."""
     photo = _get_photo_if_allowed(request, int(pk))
-    thumb_storage = get_storage('cache')
-    thumb_name = photo.thumbnail(preset)
-    thumb_url = thumb_storage.url(thumb_name)
-    return HttpResponseRedirect(thumb_url)
+    return HttpResponseRedirect(photo.resized_url(preset))
 
 
 def original_photo(request, pk):
     """Serve an original photo."""
     photo = _get_photo_if_allowed(request, int(pk))
-    photo_storage = get_storage('photo')
-    image_name = photo.image_name()
-    image_url = photo_storage.url(image_name)
-    return HttpResponseRedirect(image_url)
+    return HttpResponseRedirect(get_storage('photo').url(photo.image_name))
 
 
 def latest_album(request):

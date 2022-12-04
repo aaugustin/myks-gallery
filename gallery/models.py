@@ -1,4 +1,3 @@
-import hashlib
 import os
 
 from django.conf import settings
@@ -8,8 +7,7 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from .imgutil import make_thumbnail
-from .storages import get_storage
+from .resizers import get_resize
 
 
 class AccessPolicy(models.Model):
@@ -191,28 +189,14 @@ class Photo(models.Model):
                 Q(date=self.date, filename__gt=self.filename))
         return photos.order_by('-date', '-filename')[:1].get()
 
+    @property
     def image_name(self):
         return os.path.join(self.album.dirpath, self.filename)
 
-    def thumb_name(self, preset):
-        prefix = self.album.date.strftime('%y%m')
-        hsh = hashlib.md5()
-        hsh.update(str(settings.SECRET_KEY).encode())
-        hsh.update(str(self.album.pk).encode())
-        hsh.update(str(self.pk).encode())
-        hsh.update(str(settings.GALLERY_RESIZE_PRESETS[preset]).encode())
-        ext = os.path.splitext(self.filename)[1].lower()
-        return os.path.join(prefix, hsh.hexdigest() + ext)
-
-    def thumbnail(self, preset):
-        image_name = self.image_name()
-        thumb_name = self.thumb_name(preset)
-        photo_storage = get_storage('photo')
-        cache_storage = get_storage('cache')
-        if not cache_storage.exists(thumb_name):
-            make_thumbnail(image_name, thumb_name, preset,
-                           photo_storage, cache_storage)
-        return thumb_name
+    def resized_url(self, preset):
+        resize = get_resize()
+        width, height, crop = settings.GALLERY_RESIZE_PRESETS[preset]
+        return resize(self, width, height, crop)
 
 
 class PhotoAccessPolicy(AccessPolicy):

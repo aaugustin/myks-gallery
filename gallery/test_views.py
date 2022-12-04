@@ -9,8 +9,9 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .models import Album, AlbumAccessPolicy, Photo
+from .resizers.pillow import get_resized_name
+from .resizers.test_pillow import make_image
 from .storages import get_storage
-from .test_imgutil import make_image
 
 
 class ViewsTestsMixin:
@@ -22,7 +23,7 @@ class ViewsTestsMixin:
         self.storage = FileSystemStorage(location=self.tmpdir)
 
     def make_image(self):
-        make_image(get_storage('photo'), self.photo.image_name(), 48, 36)
+        make_image(get_storage('photo'), self.photo.image_name, 48, 36)
 
     def test_index_view(self):
         response = self.client.get(reverse('gallery:index'))
@@ -64,7 +65,8 @@ class ViewsTestsMixin:
             self.make_image()
             url = reverse('gallery:photo-resized', args=['resized', self.photo.pk])
             response = self.client.get(url)
-            self.assertRedirects(response, '/url/of/' + self.photo.thumb_name('resized'),
+            resized_name = get_resized_name(self.photo, 120, 120, False)
+            self.assertRedirects(response, '/url/of/' + resized_name,
                                  fetch_redirect_response=False)
 
     def test_photo_original_view(self):
@@ -73,7 +75,7 @@ class ViewsTestsMixin:
             self.make_image()
             url = reverse('gallery:photo-original', args=[self.photo.pk])
             response = self.client.get(url)
-            self.assertRedirects(response, '/url/of/' + self.photo.image_name(),
+            self.assertRedirects(response, '/url/of/' + self.photo.image_name,
                                  fetch_redirect_response=False)
 
     def test_latest_view(self):
