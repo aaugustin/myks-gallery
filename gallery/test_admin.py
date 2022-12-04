@@ -1,17 +1,15 @@
 import datetime
-import os
-import shutil
+import io
 import sys
-import tempfile
 import unittest
 
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.auth.models import Permission, User
-from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
 from django.urls import reverse
 
 from .models import Album, AlbumAccessPolicy, Photo, PhotoAccessPolicy
+from .storages import get_storage
 
 
 class AdminTests(TestCase):
@@ -41,14 +39,8 @@ class AdminTests(TestCase):
 
     def test_scan_photos(self):
         self.client.get(reverse('admin:gallery_scan_photos'))
-        tmpdir = tempfile.mkdtemp()
-        with open(os.path.join(tmpdir, 'test'), 'wb') as handle:
-            handle.write(b'test')
-        try:
-            with self.settings(GALLERY_PHOTO_STORAGE=FileSystemStorage(tmpdir)):
-                self.client.post(reverse('admin:gallery_scan_photos'))
-        finally:
-            shutil.rmtree(tmpdir)
+        get_storage('photo').save('test', io.BytesIO(b'test'))
+        self.client.post(reverse('admin:gallery_scan_photos'))
 
     def test_set_album_access_policy(self):
         response = self.client.post(reverse('admin:gallery_album_changelist'), {

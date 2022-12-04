@@ -1,13 +1,9 @@
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
 from ..models import Album, Photo
 from .thumbor import resize
 
 
-@override_settings(
-    THUMBOR_SERVER="http://localhost:8888",
-    THUMBOR_SECURITY_KEY="thumbor-security-key",
-)
 class ResizeTests(TestCase):
 
     def setUp(self):

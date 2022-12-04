@@ -1,7 +1,7 @@
 import datetime
 import io
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from PIL import Image, ImageDraw
 
 from ..models import Album, Photo
@@ -28,10 +28,6 @@ def make_image(name, width, height, storage, *, format='JPEG', mode='RGB'):
     storage.save(name, im_bytes_io)
 
 
-@override_settings(
-    GALLERY_PHOTO_STORAGE="gallery.test_storages.MemoryStorage",
-    GALLERY_CACHE_STORAGE="gallery.test_storages.MemoryStorage",
-)
 class ResizeTests(TestCase):
 
     def setUp(self):

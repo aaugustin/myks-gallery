@@ -2,6 +2,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Django
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -69,3 +71,15 @@ TEMPLATES = [
         },
     },
 ]
+
+# libthumbor
+
+THUMBOR_SERVER = "http://localhost:8888"
+
+THUMBOR_SECURITY_KEY = "thumbor-security-key"
+
+# myks-gallery
+
+GALLERY_PHOTO_STORAGE = "gallery.test_storages.MemoryStorage"
+
+GALLERY_CACHE_STORAGE = "gallery.test_storages.MemoryStorage"

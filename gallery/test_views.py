@@ -1,10 +1,7 @@
 import datetime
-import shutil
-import tempfile
 import zipfile
 
 from django.contrib.auth.models import Permission, User
-from django.core.files.storage import FileSystemStorage
 from django.test import TestCase
 from django.urls import reverse
 
@@ -15,12 +12,6 @@ from .storages import get_storage
 
 
 class ViewsTestsMixin:
-
-    def setUp(self):
-        super().setUp()
-        self.tmpdir = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, self.tmpdir)
-        self.storage = FileSystemStorage(location=self.tmpdir)
 
     def make_image(self):
         make_image(self.photo.image_name, 48, 36, get_storage('photo'))
@@ -46,21 +37,16 @@ class ViewsTestsMixin:
         self.assertTemplateUsed(response, 'gallery/photo_detail.html')
 
     def test_album_export_view(self):
-        with self.settings(
-                GALLERY_CACHE_STORAGE='gallery.test_storages.MemoryStorage',
-                GALLERY_PHOTO_STORAGE='gallery.test_storages.MemoryStorage'):
-            self.make_image()
-            url = reverse('gallery:album-export', args=[self.album.pk])
-            response = self.client.get(url)
-            self.assertTrue(response['Location'].startswith('/url/of/export/'))
-            export_file = response['Location'][len('/url/of/'):]
-            with zipfile.ZipFile(get_storage('cache').open(export_file)) as archive:
-                self.assertEqual(archive.namelist(), ['original.jpg'])
+        self.make_image()
+        url = reverse('gallery:album-export', args=[self.album.pk])
+        response = self.client.get(url)
+        self.assertTrue(response['Location'].startswith('/url/of/export/'))
+        export_file = response['Location'][len('/url/of/'):]
+        with zipfile.ZipFile(get_storage('cache').open(export_file)) as archive:
+            self.assertEqual(archive.namelist(), ['original.jpg'])
 
     def test_photo_resized_view(self):
         with self.settings(
-                GALLERY_CACHE_STORAGE='gallery.test_storages.MemoryStorage',
-                GALLERY_PHOTO_STORAGE='gallery.test_storages.MemoryStorage',
                 GALLERY_RESIZE_PRESETS={'resized': (120, 120, False)}):
             self.make_image()
             url = reverse('gallery:photo-resized', args=['resized', self.photo.pk])
@@ -70,13 +56,11 @@ class ViewsTestsMixin:
                                  fetch_redirect_response=False)
 
     def test_photo_original_view(self):
-        with self.settings(
-                GALLERY_PHOTO_STORAGE='gallery.test_storages.MemoryStorage'):
-            self.make_image()
-            url = reverse('gallery:photo-original', args=[self.photo.pk])
-            response = self.client.get(url)
-            self.assertRedirects(response, '/url/of/' + self.photo.image_name,
-                                 fetch_redirect_response=False)
+        self.make_image()
+        url = reverse('gallery:photo-original', args=[self.photo.pk])
+        response = self.client.get(url)
+        self.assertRedirects(response, '/url/of/' + self.photo.image_name,
+                             fetch_redirect_response=False)
 
     def test_latest_view(self):
         response = self.client.get(reverse('gallery:latest'))

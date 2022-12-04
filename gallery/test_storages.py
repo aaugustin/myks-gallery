@@ -3,7 +3,7 @@ import urllib.parse
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.storage import Storage
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
 from .storages import get_storage
 
@@ -58,15 +58,15 @@ class MemoryStorage(Storage):  # pragma: no cover
 
 class StoragesTest(TestCase):
 
-    @override_settings(GALLERY_FOO_STORAGE='gallery.test_storages.MemoryStorage')
     def test_get_storage(self):
-        foo_storage = get_storage('foo')
+        with self.settings(GALLERY_FOO_STORAGE='gallery.test_storages.MemoryStorage'):
+            foo_storage = get_storage('foo')
         self.assertIsInstance(foo_storage, MemoryStorage)
 
-    @override_settings(GALLERY_FOO_STORAGE='gallery.test_storages.MemoryStorage')
     def test_get_storage_caching(self):
-        foo_storage_1 = get_storage('foo')
-        foo_storage_2 = get_storage('foo')
+        with self.settings(GALLERY_FOO_STORAGE='gallery.test_storages.MemoryStorage'):
+            foo_storage_1 = get_storage('foo')
+            foo_storage_2 = get_storage('foo')
         self.assertIs(foo_storage_1, foo_storage_2)
 
     def test_get_storage_unconfigured(self):
