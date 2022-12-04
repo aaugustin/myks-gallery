@@ -1,9 +1,9 @@
 import io
+import urllib.parse
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.storage import FileSystemStorage, Storage
-from django.test import TestCase
-from django.test.utils import override_settings
+from django.test import TestCase, override_settings
 
 from .storages import get_storage
 
@@ -14,6 +14,9 @@ class MemoryStorage(Storage):
 
     This class does the bare minimum for tests to pass. It doesn't implement
     accessed/created/modified_time.
+
+    It doesn't provide a ``path()`` method. Its ``url()`` method returns
+    ``/url/of`` followed by the file name.
 
     """
     def __init__(self, *args, **kwargs):
@@ -49,23 +52,8 @@ class MemoryStorage(Storage):
     def size(self, name):
         return len(self.files[name])
 
-
-class LocalStorage(MemoryStorage):
-    """
-    Emulates a storage class that stores files on disk.
-
-    """
-    def path(self, name):
-        return '/path/to/' + name
-
-
-class RemoteStorage(MemoryStorage):
-    """
-    Emulates a storage class that stores files in memory.
-
-    """
     def url(self, name):
-        return '/url/of/' + name
+        return '/url/of/' + urllib.parse.quote(name)
 
 
 class StoragesTest(TestCase):

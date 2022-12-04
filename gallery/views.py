@@ -1,26 +1,17 @@
 import hashlib
-import mimetypes
 import os
 import random
-import re
-import stat
-import sys
 import tempfile
 import time
-import unicodedata
 import zipfile
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.http import (
-    Http404, HttpResponse, HttpResponseNotModified, HttpResponseRedirect,
-    StreamingHttpResponse)
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.functional import cached_property
-from django.utils.http import http_date
 from django.views.generic import ArchiveIndexView, DetailView, YearArchiveView
-from django.views.static import was_modified_since
 
 from .models import Album, Photo
 from .storages import get_storage
@@ -242,18 +233,8 @@ def export_album(request, pk):
             temp_zip.seek(0)
             zip_storage.save(zip_name, temp_zip)
 
-    try:
-        zip_path = zip_storage.path(zip_name)
-    except NotImplementedError:
-        # Remote storage. Let the storage generate an URL.
-        zip_url = zip_storage.url(zip_name)
-        return HttpResponseRedirect(zip_url)
-    else:
-        # Local storage. Serve the file directly.
-        response = serve_private_media(request, zip_path)
-        ascii_filename = f'{album.date}_{sanitize(album.name)}.zip'
-        response['Content-Disposition'] = f'attachement; filename={ascii_filename}'
-        return response
+    zip_url = zip_storage.url(zip_name)
+    return HttpResponseRedirect(zip_url)
 
 
 def _get_photo_if_allowed(request, pk):
@@ -269,20 +250,8 @@ def resized_photo(request, preset, pk):
     photo = _get_photo_if_allowed(request, int(pk))
     thumb_storage = get_storage('cache')
     thumb_name = photo.thumbnail(preset)
-    try:
-        thumb_path = thumb_storage.path(thumb_name)
-    except NotImplementedError:
-        # Remote storage. Let the storage generate an URL.
-        thumb_url = thumb_storage.url(thumb_name)
-        return HttpResponseRedirect(thumb_url)
-    else:
-        # Local storage. Serve the file directly.
-        response = serve_private_media(request, thumb_path)
-        root, ext = os.path.splitext(sanitize(photo.filename))
-        width, height, _ = settings.GALLERY_RESIZE_PRESETS[preset]
-        ascii_filename = f'{root}_{width}x{height}{ext}'
-        response['Content-Disposition'] = f'inline; filename={ascii_filename}'
-        return response
+    thumb_url = thumb_storage.url(thumb_name)
+    return HttpResponseRedirect(thumb_url)
 
 
 def original_photo(request, pk):
@@ -290,90 +259,8 @@ def original_photo(request, pk):
     photo = _get_photo_if_allowed(request, int(pk))
     photo_storage = get_storage('photo')
     image_name = photo.image_name()
-    try:
-        image_path = photo_storage.path(image_name)
-    except NotImplementedError:
-        # Remote storage. Let the storage generate an URL.
-        image_url = photo_storage.url(image_name)
-        return HttpResponseRedirect(image_url)
-    else:
-        # Local storage. Serve the file directly.
-        response = serve_private_media(request, image_path)
-        ascii_filename = sanitize(photo.filename)
-        response['Content-Disposition'] = f'inline; filename={ascii_filename}'
-        return response
-
-
-def serve_private_media(request, path):
-    """Serve a private media file with the webserver's "sendfile" if possible.
-
-    Here's an example of how to use this function. The 'Document' model tracks
-    files. It provides a 'get_file_path' method returning the absolute path to
-    the actual file. The following view serves file only to users having the
-    'can_download' permission::
-
-        @permission_required('documents.can_download')
-        def download_document(request, document_id):
-            path = Document.objects.get(pk=document_id).get_file_path()
-            return serve_private_media(request, path)
-
-    If ``DEBUG`` is ``False`` and ``settings.GALLERY_SENDFILE_HEADER`` is set,
-    this function sets a header and doesn't send the actual contents of the
-    file. Use ``'X-Accel-Redirect'`` for nginx and ``'X-SendFile'`` for Apache
-    with mod_xsendfile. Otherwise, this function behaves like Django's static
-    serve view.
-
-    ``path`` must be an absolute path. Depending on your webserver's
-    configuration, you might want a full path or a relative path in the
-    header's value. ``settings.GALLERY_SENDFILE_ROOT`` will be stripped from
-    the beginning of the path to create the header's value.
-    """
-
-    if not os.path.exists(path):
-        # Don't reveal the file name on the filesystem.
-        raise Http404("Requested file doesn't exist.")
-
-    # begin copy-paste from django.views.static.serve
-    statobj = os.stat(path)
-    content_type, encoding = mimetypes.guess_type(path)
-    content_type = content_type or 'application/octet-stream'
-    if not was_modified_since(request.META.get('HTTP_IF_MODIFIED_SINCE'),
-                              statobj.st_mtime):   # pragma: no cover
-        return HttpResponseNotModified()
-    # pause copy-paste from django.views.static.serve
-
-    sendfile_header = getattr(settings, 'GALLERY_SENDFILE_HEADER', '')
-    sendfile_root = getattr(settings, 'GALLERY_SENDFILE_ROOT', '')
-
-    if settings.DEBUG or not sendfile_header:
-        response = StreamingHttpResponse(open(path, 'rb'), content_type=content_type)
-    else:
-        response = HttpResponse('', content_type=content_type)
-        if sendfile_root:
-            if not path.startswith(sendfile_root):
-                raise ValueError("Requested file isn't under GALLERY_SENDFILE_ROOT.")
-            path = path[len(sendfile_root):]
-        response[sendfile_header] = path.encode(sys.getfilesystemencoding())
-
-    # resume copy-paste from django.views.static.serve
-    response["Last-Modified"] = http_date(statobj.st_mtime)
-    if stat.S_ISREG(statobj.st_mode):                       # pragma: no cover
-        response["Content-Length"] = statobj.st_size
-    if encoding:                                            # pragma: no cover
-        response["Content-Encoding"] = encoding
-    # end copy-paste from django.views.static.serve
-
-    return response
-
-
-_sanitize_re = re.compile(r'[^0-9A-Za-z_.-]')
-
-
-def sanitize(value):
-    value = unicodedata.normalize('NFKD', str(value))
-    value = value.encode('ascii', 'ignore').decode('ascii')
-    value = _sanitize_re.sub('', value.replace(' ', '_'))
-    return value
+    image_url = photo_storage.url(image_name)
+    return HttpResponseRedirect(image_url)
 
 
 def latest_album(request):

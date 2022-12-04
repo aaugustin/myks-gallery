@@ -54,21 +54,17 @@ Architecture
 myks-gallery requires two storage areas:
 
 - The first one contains the original photos. It's a read-only reference. You
-  can upload photos there with `aws s3 sync`_, `gsutil rsync`_, rsync_, etc.
-  depending on the platform.
-- The second one contains downscaled photos and ZIP archives of album exports.
+  can upload photos with `aws s3 sync`_, `gsutil rsync`_, etc.
+- The second one contains resized versions and ZIP archives of album exports.
   It's a cache. You can set up expiry policies and clear it without affecting
   the gallery, aside from the cost of rescaling images again.
 
 myks-gallery accesses them through Django's `file storage API`_, meaning that
 you can use any storage for which a Django storage backend exists. You should
-use a third-party storage backend if you're storing files in a cloud service
-and Djang's built-in ``FileSystemStorage`` if you're storing them locally on
-the filesystem, typically for local development.
+use a third-party storage backend if you're storing files in a cloud service.
 
-.. _aws s3 sync: http://docs.aws.amazon.com/cli/latest/reference/s3/sync.html
+.. _aws s3 sync: https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html
 .. _gsutil rsync: https://cloud.google.com/storage/docs/gsutil/commands/rsync
-.. _rsync: http://rsync.samba.org/
 .. _file storage API: https://docs.djangoproject.com/en/stable/ref/files/storage/
 
 Installation guide
@@ -98,11 +94,7 @@ website:
 5.  Create a suitable ``base.html`` template. It must provide three blocks:
     ``title``, ``extrahead``, ``content``, as shown in this `example`_.
 
-6.  Optionally, if you're serving files from the local filesystem, enable
-    `X-accel`_ (nginx) or `mod_xsendfile`_ (Apache) for your photo and cache
-    directories.
-
-7.  Scan your photos with the "Scan photos" button in the admin or the
+6.  Scan your photos with the "Scan photos" button in the admin or the
     ``scanphotos`` management command and define access policies.
 
 The source_ contains a sample application in the ``example`` directory. It can
@@ -256,25 +248,6 @@ The following a reasonable value for high-quality thumbnails and previews::
         'JPEG': {'quality': 95, 'optimize': True},
     }
 
-.. _options:
-
-``GALLERY_SENDFILE_HEADER``
-............................
-
-Default: ``''``
-
-Name of the HTTP header that triggers ``sendfile`` on your web server. Use
-``'X-Accel-Redirect'`` for nginx and ``'X-SendFile'`` for Apache.
-
-``GALLERY_SENDFILE_ROOT``
-.........................
-
-Default: ``''``
-
-Part to strip at the beginning of the paths in the ``sendfile`` header. The
-header will contain the absolute path to files, minus this prefix. This is
-generally useful for nginx and not necessary for Apache.
-
 ``GALLERY_TITLE``
 .................
 
@@ -358,6 +331,12 @@ Changelog
 
 *Under development*
 
+Support for serving files privately from the local filesystem is removed,
+including the ``GALLERY_SENDFILE_HEADER`` and ``GALLERY_SENDFILE_PREFIX``
+settings.
+
+It includes smaller changes too.
+
 * Updated for Django 4.0.
 
 0.8
@@ -392,7 +371,7 @@ and ``GALLERY_CACHE_DIR``.
 When upgrading to 0.5 or later, you should clear the cache directory.
 Previously cached thumbnails and exports won't be used by this version.
 
-It also include some smaller changes.
+It includes smaller changes too.
 
 * Switched ordering of albums to always show the most recent albums first.
 * Allowed customizing the number of photos in album previews.
