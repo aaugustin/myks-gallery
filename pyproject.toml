@@ -14,7 +14,7 @@ profile = "black"
 
 [tool.poetry]
 name = "myks-gallery"
-version = "0.9"
+version = "0.9.1"
 description = "Photo gallery with granular access control"
 authors = ["Aymeric Augustin <aymeric.augustin@m4x.org>"]
 license = "BSD-3-Clause"
