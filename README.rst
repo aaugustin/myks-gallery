@@ -322,7 +322,8 @@ Changelog
 *Under development*
 
 This version makes it possible to customize image resizing, for example to
-integrate an external service, with the ``GALLERY_RESIZE`` setting.
+integrate an external service, with the ``GALLERY_RESIZE`` setting. Review
+``gallery.resizers.thumbor.resize`` for an example.
 
 Several features designed for storing files in the filesystem are removed:
 
